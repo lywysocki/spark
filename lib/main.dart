@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:spark/friends_screen.dart';
+import 'package:spark/habits_screen.dart';
+import 'package:spark/home_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -30,7 +33,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
+  int _pageIndex = 0;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -38,9 +41,51 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
       ),
-      body: const Center(
-        child: Text("Hello World!")
-      ),
+      bottomNavigationBar: NavigationBar(
+          selectedIndex: _pageIndex,
+          onDestinationSelected: (index) {
+            setState(() {
+              _pageIndex = index;
+            });
+          },
+          destinations: [
+            for (final destination in _destinations)
+              NavigationDestination(
+                label: destination.title,
+                icon: destination.icon,
+              ),
+          ]),
+      body: _destinations[_pageIndex].builder(context),
     );
   }
+}
+
+final _destinations = <Destination>[
+  Destination(
+    title: 'Home',
+    icon: const Icon(Icons.home_outlined),
+    builder: (context) => const HomeScreen(),
+  ),
+  Destination(
+    title: 'Habits',
+    icon: const Icon(Icons.list),
+    builder: (context) => const HabitsScreen(),
+  ),
+  Destination(
+    title: 'Friends',
+    icon: const Icon(Icons.people),
+    builder: (context) => const FriendsScreen(),
+  ),
+];
+
+class Destination {
+  const Destination({
+    required this.title,
+    required this.icon,
+    required this.builder,
+  });
+
+  final String title;
+  final Icon icon;
+  final WidgetBuilder builder;
 }
