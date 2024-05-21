@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:spark/friends_screen.dart';
-import 'package:spark/habits_screen.dart';
+import 'package:spark/friends/friends_screen.dart';
+import 'package:spark/habits/habits_screen.dart';
 import 'package:spark/home_screen.dart';
+import 'package:spark/profile_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -38,23 +39,41 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) {
+                    return Scaffold(
+                      appBar: AppBar(),
+                      body: const UserProfileScreen(),
+                    );
+                  },
+                ),
+              );
+            },
+            icon: const Icon(Icons.person),
+          ),
+        ],
       ),
       bottomNavigationBar: NavigationBar(
-          selectedIndex: _pageIndex,
-          onDestinationSelected: (index) {
-            setState(() {
-              _pageIndex = index;
-            });
-          },
-          destinations: [
-            for (final destination in _destinations)
-              NavigationDestination(
-                label: destination.title,
-                icon: destination.icon,
-              ),
-          ]),
+        selectedIndex: _pageIndex,
+        onDestinationSelected: (index) {
+          setState(() {
+            _pageIndex = index;
+          });
+        },
+        destinations: [
+          for (final destination in _destinations)
+            NavigationDestination(
+              label: destination.title,
+              icon: destination.icon,
+            ),
+        ],
+      ),
       body: _destinations[_pageIndex].builder(context),
     );
   }
