@@ -1,8 +1,10 @@
-import 'package:flutter/material.dart';
 import 'package:spark/friends/friends_screen.dart';
 import 'package:spark/habits/habits_screen.dart';
 import 'package:spark/home_screen.dart';
 import 'package:spark/profile_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:spark/theme.dart';
+import 'package:spark/util.dart';
 
 void main() {
   runApp(const MyApp());
@@ -13,21 +15,26 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    /// (LJ) This will pick their platform brightness. Mine is on dark I'm not really working on the dark theme yet.
+    /// View.of(context).platformDispatcher.platformBrightness;
+    const brightness = Brightness.light;
+
+    TextTheme textTheme = createTextTheme(context, "Lato", "Lato");
+    MaterialTheme theme = MaterialTheme(textTheme);
+
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Spark',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrangeAccent),
-        useMaterial3: true,
-      ),
-      home: const MyHomePage(title: 'SPARK'),
+      theme: brightness == Brightness.light
+          ? theme.lightMediumContrast()
+          : theme.darkMediumContrast(),
+      home: const MyHomePage(),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
+  const MyHomePage({super.key});
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -39,7 +46,10 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(
+          'LOGO',
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
         actions: [
           IconButton(
             onPressed: () {
@@ -60,6 +70,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
       ),
       bottomNavigationBar: NavigationBar(
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
         selectedIndex: _pageIndex,
         onDestinationSelected: (index) {
           setState(() {

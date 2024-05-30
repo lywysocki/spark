@@ -7,13 +7,27 @@ class HabitsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    return ListView(
+      padding: const EdgeInsets.all(8.0),
       children: [
-        Text('Habits'),
-        CommonCardTile(
-          title: 'Habit',
-          destination: ViewHabitScreen(),
-          trailingIcon: Icon(Icons.star),
+        Text(
+          'Habits',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: List.generate(
+            5,
+            (int index) => Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4.0),
+              child: CommonCardTile(
+                category: 'None',
+                title: Text('Habit $index'),
+                destination: const ViewHabitScreen(),
+                trailingWidget: const Icon(Icons.star),
+              ),
+            ),
+          ),
         ),
       ],
     );

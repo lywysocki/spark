@@ -7,15 +7,22 @@ class UserProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        Text('Profile'),
-        CommonCardTile(
-          title: 'View All Achievements',
-          destination: AchievementsScreen(),
-          trailingIcon: Icon(Icons.arrow_forward_ios_rounded),
-        ),
-      ],
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        children: [
+          Text(
+            'Profile',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const CommonCardTile(
+            category: 'None',
+            title: Text('View All Achievements'),
+            destination: AchievementsScreen(),
+            trailingWidget: Icon(Icons.arrow_forward_ios_rounded),
+          ),
+        ],
+      ),
     );
   }
 }

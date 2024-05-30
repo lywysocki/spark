@@ -7,16 +7,33 @@ class FriendsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return ListView(
+      padding: const EdgeInsets.all(8.0),
       children: [
-        const Text('Friends'),
-        CommonCardTile(
-          title: 'Friend1',
-          destination: Scaffold(
-            appBar: AppBar(),
-            body: const UserProfileScreen(),
+        Text(
+          'Friends',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: List.generate(
+            10,
+            (int index) => Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4.0),
+              child: CommonCardTile(
+                category: 'None',
+                title: Text(
+                  'Friend1',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                destination: Scaffold(
+                  appBar: AppBar(),
+                  body: const UserProfileScreen(),
+                ),
+                trailingWidget: const Icon(Icons.star),
+              ),
+            ),
           ),
-          trailingIcon: const Icon(Icons.star),
         ),
       ],
     );
