@@ -13,9 +13,10 @@ class ViewHabitScreen extends StatelessWidget {
         children: [
           Text('View Habit'),
           CommonCardTile(
-            title: 'Achievements',
+            category: 'None',
+            title: Text('Achievements'),
             destination: AchievementsScreen(),
-            trailingIcon: Icon(Icons.arrow_forward_ios_rounded),
+            trailingWidget: Icon(Icons.arrow_forward_ios_rounded),
           ),
         ],
       ),
