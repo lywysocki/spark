@@ -7,26 +7,7 @@ import 'package:spark/theme.dart';
 import 'package:spark/util.dart';
 
 void main() {
-  var connection = PostgreSQLConnection(
-    'localhost', // host //change to 192.168.56.1 (Jill's IP address)
-    5432, // port
-    'spark', // database name
-    username: 'postgres', // username
-    password: 'get$park3d!', // password
-  );
-
-  await connection.open();
-  ///////////  Below is for connection test!  /////////////
-  print('Connected to PostgreSQL!');
-  List<List<dynamic>> results = await connection.query('SELECT * FROM users');
-  for (final row in results) {
-    print(row);
-  }
-  ///////////////////////////////////////////////////////
-
   runApp(const MyApp());
-
-  await connection.close();
 }
 
 class MyApp extends StatelessWidget {
