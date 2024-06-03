@@ -1,42 +1,76 @@
-/*
-users table fields:
-   user_id, username, password, email, first_name, last_name
-goals table fields:
-  goal_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity
-friendships table fields:
-  user1_id, user2_id
-achievements table fields:
-  achievement_id, user_id, goal_id, achievement_type, achievement_description, date, timestamp, quantity
-*/
+/* OPTIONS:
+  boolean createUser(String username, String password, String email, [String first, String last])
+  boolean createFriendship(String user1, String user2)
+  boolean createGoal(String userID, String title, String note, date start, date end, String frequency, Boolean reminders, [String reminderMessage], String targetType, String category, [int quantity])
+  boolean createAchievement(String userID, String goal_id, String achievementType, String achievementDescription, [int quantity])
+
+  List<List<dynamic>> selectUsersByUsername(String username)
+  List<List<dynamic>> selectUsersByEmail(String email)
+  List<List<dynamic>> selectUsersByName(String first, String last)
+  List<List<dynamic>> selectFriendsByUser(String userID)
+  List<List<dynamic>> selectGoalsByUserID(String id)
+  List<List<dynamic>> selectGoalsByTitle(String id, String title)
+  List<List<dynamic>> selectGoalsStarted(String id, date date)
+  List<List<dynamic>> selectGoalsEnded(String id, date date)
+  List<List<dynamic>> selectGoalsByCategory(String id, String cat)
+  List<List<dynamic>> selectAchievements(String id)
+  List<List<dynamic>> selectAchievementsByGoalID(String id, String goal)
+  List<List<dynamic>> selectAchievementsByType(String id, String type)
+  List<List<dynamic>> selectAchievementsByDate(String id, String type)
+  List<List<dynamic>> selectAchievementsByDateRange(String id, String type)
+ */
+
+/* TABLE FIELDS
+users:    user_id, username, password, email, first_name, last_name
+goals:    goal_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity
+friendships:   user1_id, user2_id
+achievements:    achievement_id, user_id, goal_id, achievement_type, achievement_description, date, timestamp, quantity
+ */
 
 //INSERT methods
 boolean createUser(String username, String password, String email, [String first, String last]){
-  var result = await databaseConnection.query(
-      'INSERT INTO users(username, password, email, first_name, last_name) VALUES (@username, @password, @email, @firstname, @lastname)',
-      substitutionValues: {
-        'username': username,
-        'password': password,
-        'email': email,
-        'firstname': first,
-        'lastname': last
-      }
-  );
-  return result;
+  try {
+    await connection.open();
+    var result = await databaseConnection.query(
+        'INSERT INTO users(username, password, email, first_name, last_name) VALUES (@username, @password, @email, @firstname, @lastname)',
+        substitutionValues: {
+          'username': username,
+          'password': password,
+          'email': email,
+          'firstname': first,
+          'lastname': last
+        }
+    );
+    print(result);
+    return true;
+  } on PostgreSQLException catch (e) {
+    print('Error: ${e.toString()}');
+    return false;
+  }
 }
 
 boolean createFriendship(String user1, String user2){
-  var result = await databaseConnection.query(
-      'INSERT INTO friendships (user1_id, user2_id) VALUES (@user1, @user2)',
-      substitutionValues: {
-        'user1': user1,
-        'user2': user2
-      }
-  );
-  return result;
+  try {
+    await connection.open();
+    var result = await databaseConnection.query(
+        'INSERT INTO friendships (user1_id, user2_id) VALUES (@user1, @user2)',
+        substitutionValues: {
+          'user1': user1,
+          'user2': user2
+        }
+    );
+    print(result)
+    return true;
+  } on PostgreSQLException catch (e) {
+    print('Error: ${e.toString()}');
+    return false;
+  }
 }
 
 boolean createGoal(String userID, String title, String note, date start, date end, String frequency, Boolean reminders, [String reminderMessage], String targetType, String category, [int quantity]){
-  var result = await databaseConnection.query(
+  try {
+    await connection.open();
+    var result = await databaseConnection.query(
       'INSERT INTO goals (user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity) '
       'VALUES (@user_id, @title, @note, @start_date, @end_date, @frequency, @reminders, @reminder_message, @target_type, @category, @quantity)',
       substitutionValues: {
@@ -52,32 +86,42 @@ boolean createGoal(String userID, String title, String note, date start, date en
         'category': category,
         'quantity': quantity
       }
-  );
-  return result;
+    );
+    print(results)
+    return true;
+  } on PostgreSQLException catch (e) {
+    print('Error: ${e.toString()}');
+    return false;
+  }
 }
 
 boolean createAchievement(String userID, String goal_id, String achievementType, String achievementDescription, [int quantity]){
-//system date and timestamp
-  DateTime now = DateTime.now()
-  var result = await databaseConnection.query(
-      'INSERT INTO goals (user_id, goal_id, achievement_type, achievement_description, date, timestamp, quantity) '
-      'VALUES (@user_id, @goal_id, @achievement_type, @achievement_description, @date, @timestamp, @quantity)',
-      substitutionValues: {
-        'user_id': userID,
-        'goal_id': goal_id,
-        'achievement_type': achievementType,
-        'achievement_description': achievementDescription,
-        'date': DateFormat('yyyy-MM-dd').format(now),
-        'timestamp': DateFormat('yyyy-MM-dd hh:mm:ss').format(now),
-        'quantity': quantity
-      }
-  );
-  return result;
+  try {
+    await connection.open();
+    DateTime now = DateTime.now() //system date and timestamp
+    var result = await databaseConnection.query(
+        'INSERT INTO goals (user_id, goal_id, achievement_type, achievement_description, date, timestamp, quantity) '
+        'VALUES (@user_id, @goal_id, @achievement_type, @achievement_description, @date, @timestamp, @quantity)',
+        substitutionValues: {
+          'user_id': userID,
+          'goal_id': goal_id,
+          'achievement_type': achievementType,
+          'achievement_description': achievementDescription,
+          'date': DateFormat('yyyy-MM-dd').format(now),
+          'timestamp': DateFormat('yyyy-MM-dd hh:mm:ss').format(now),
+          'quantity': quantity
+        }
+    );
+    print(results)
+    return true;
+  } on PostgreSQLException catch (e) {
+    print('Error: ${e.toString()}');
+    return false;
+  }
 }
 
 //SELECT Functions
 // Users
-
 List<List<dynamic>> selectUsersByUsername(String username){
   List<List<dynamic>> results = await connection.query(
     'SELECT * FROM users WHERE username = @name',
@@ -129,7 +173,6 @@ List<List<dynamic>> selectFriendsByUser(String userID){
 }
 
 // Goals
-
 List<List<dynamic>> selectGoalsByUserID(String id){
   List<List<dynamic>> results = await connection.query(
     'SELECT * FROM goals WHERE user_id = @userID',
@@ -174,7 +217,7 @@ List<List<dynamic>> selectGoalsEnded(String id, date date){
   return results;
 }
 
-List<List<dynamic>> selectGoalsEnded(String id, String cat){
+List<List<dynamic>> selectGoalsByCategory(String id, String cat){
   List<List<dynamic>> results = await connection.query(
     'SELECT * FROM goals WHERE user_id = @userID and category = @category',
     substitutionValues: {
