@@ -548,6 +548,12 @@ Boolean deleteGoalAndAchievements(String goalID) async {
         'id': goalID
       }
     );
+    await connection.query(
+      'DELETE FROM achievements WHERE goal_id = @id',
+      substitutionValues: {
+        'id': goalID
+      }
+    );
     return true;
   } catch (e) {
     print('Error: ${e.toString()}');
