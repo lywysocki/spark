@@ -284,3 +284,241 @@ List<List<dynamic>> selectAchievementsWithinDateRange(String id, Date start, Dat
   return results;
 }
 
+//UPDATE functions
+Boolean updateUserUsername(String userID, String newUsername) async {
+  try {
+    await connection.open();
+    await connection.query(
+      'UPDATE users SET username = @username WHERE user_id = @id',
+      substitutionValues: {
+        'id': userID,
+        'username': newUsername
+      }
+    );
+    return true;
+  } catch (e) {
+    print('Error: ${e.toString()}');
+    return false;
+  }
+}
+
+Boolean updateUserFirstName(String userID, String newName) async {
+  try {
+    await connection.open();
+    await connection.query(
+      'UPDATE users SET first_name = @firstName WHERE user_id = @id',
+      substitutionValues: {
+        'id': userID,
+        'firstName': newName
+      }
+    );
+    return true;
+  } catch (e) {
+    print('Error: ${e.toString()}');
+    return false;
+  }
+}
+
+Boolean updateUserLastName(String userID, String newName) async {
+  try {
+    await connection.open();
+    await connection.query(
+      'UPDATE users SET last_name = @lastName WHERE user_id = @id',
+      substitutionValues: {
+        'id': userID,
+        'lastName': newName
+      }
+    );
+    return true;
+  } catch (e) {
+    print('Error: ${e.toString()}');
+    return false;
+  }
+}
+
+Boolean updateUserPassword(String userID, String newPassword) async {
+  try {
+    await connection.open();
+    await connection.query(
+      'UPDATE users SET password = @password WHERE user_id = @id',
+      substitutionValues: {
+        'id': userID,
+        'password': newPassword
+      }
+    );
+    return true;
+  } catch (e) {
+    print('Error: ${e.toString()}');
+    return false;
+  }
+}
+
+Boolean updateUserEmail(String userID, String newEmail) async {
+  try {
+    await connection.open();
+    await connection.query(
+      'UPDATE users SET email = @email WHERE user_id = @id',
+      substitutionValues: {
+        'id': userID,
+        'email': newEmail
+      }
+    );
+    return true;
+  } catch (e) {
+    print('Error: ${e.toString()}');
+    return false;
+  }
+}
+
+Boolean updateGoalTitle(String goalID, String newTitle) async {
+  try {
+    await connection.open();
+    await connection.query(
+      'UPDATE goals SET title = @title WHERE goal_id = @id',
+      substitutionValues: {
+        'id': goalID,
+        'title': newTitle
+      }
+    );
+    return true;
+  } catch (e) {
+    print('Error: ${e.toString()}');
+    return false;
+  }
+}
+
+Boolean updateGoalNote(String goalID, String newNote) async {
+  try {
+    await connection.open();
+    await connection.query(
+      'UPDATE goals SET note = @note WHERE goal_id = @id',
+      substitutionValues: {
+        'id': goalID,
+        'note': newNote
+      }
+    );
+    return true;
+  } catch (e) {
+    print('Error: ${e.toString()}');
+    return false;
+  }
+}
+
+Boolean updateGoalEnd(String goalID, Date newEnd) async {
+  try {
+    await connection.open();
+    await connection.query(
+      'UPDATE goals SET end_date = @end WHERE goal_id = @id',
+      substitutionValues: {
+        'id': goalID,
+        'end': newEnd
+      }
+    );
+    return true;
+  } catch (e) {
+    print('Error: ${e.toString()}');
+    return false;
+  }
+}
+
+Boolean updateGoalFrequency(String goalID, String newFrequency) async {
+  try {
+    await connection.open();
+    await connection.query(
+      'UPDATE goals SET frequency = @frequency WHERE goal_id = @id',
+      substitutionValues: {
+        'id': goalID,
+        'frequency': newFrequency
+      }
+    );
+    return true;
+  } catch (e) {
+    print('Error: ${e.toString()}');
+    return false;
+  }
+}
+
+Boolean updateGoalReminders(String goalID, Boolean newReminder) async {
+  try {
+    await connection.open();
+    await connection.query(
+      'UPDATE goals SET reminders = @reminder WHERE goal_id = @id',
+      substitutionValues: {
+        'id': goalID,
+        'reminder': newReminder
+      }
+    );
+    return true;
+  } catch (e) {
+    print('Error: ${e.toString()}');
+    return false;
+  }
+}
+
+Boolean updateGoalReminderMessage(String goalID, String newMessage) async {
+  try {
+    await connection.open();
+    await connection.query(
+      'UPDATE goals SET reminder_message = @message WHERE goal_id = @id',
+      substitutionValues: {
+        'id': goalID,
+        'message': newMessage
+      }
+    );
+    return true;
+  } catch (e) {
+    print('Error: ${e.toString()}');
+    return false;
+  }
+}
+
+Boolean updateGoalTargetType(String goalID, String newType) async {
+  try {
+    await connection.open();
+    await connection.query(
+      'UPDATE goals SET target_type = @type WHERE goal_id = @id',
+      substitutionValues: {
+        'id': goalID,
+        'type': newType
+      }
+    );
+    return true;
+  } catch (e) {
+    print('Error: ${e.toString()}');
+    return false;
+  }
+}
+
+Boolean updateGoalCategory(String goalID, String newCategory) async {
+  try {
+    await connection.open();
+    await connection.query(
+      'UPDATE goals SET category = @category WHERE goal_id = @id',
+      substitutionValues: {
+        'id': goalID,
+        'category': newCategory
+      }
+    );
+    return true;
+  } catch (e) {
+    print('Error: ${e.toString()}');
+    return false;
+  }
+}
+
+Boolean updateGoalQuantity(String goalID, String newQuantity) async {
+  try {
+    await connection.open();
+    await connection.query(
+      'UPDATE goals SET quantity = @quantity WHERE goal_id = @id',
+      substitutionValues: {
+        'id': goalID,
+        'quantity': newQuantity
+      }
+    );
+    return true;
+  } catch (e) {
+    print('Error: ${e.toString()}');
+    return false;
+  }
+}
