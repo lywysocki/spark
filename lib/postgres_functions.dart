@@ -522,3 +522,55 @@ Boolean updateGoalQuantity(String goalID, String newQuantity) async {
     return false;
   }
 }
+
+Boolean deleteUser(String username) async {
+  try {
+    await connection.open();
+    await connection.query(
+      'DELETE FROM users WHERE username = @username',
+      substitutionValues: {
+        'username': username
+      }
+    );
+    return true;
+  } catch (e) {
+    print('Error: ${e.toString()}');
+    return false;
+  }
+}
+
+Boolean deleteGoalAndAchievements(String goalID) async {
+  try {
+    await connection.open();
+    await connection.query(
+      'DELETE FROM goals WHERE goal_id = @id',
+      substitutionValues: {
+        'id': goalID
+      }
+    );
+    return true;
+  } catch (e) {
+    print('Error: ${e.toString()}');
+    return false;
+  }
+}
+
+Boolean deleteFriendships(String userID1, String userID2) async {
+  try {
+    await connection.open();
+    await connection.query(
+      'DELETE FROM friendships WHERE (user1_id = @id1 and user2_id = @id2) '
+      'or (user2_id = @id1 and user1_id = @id2)',
+      substitutionValues: {
+        'id1': userID1
+        'id2': userID2
+      }
+    );
+    return true;
+  } catch (e) {
+    print('Error: ${e.toString()}');
+    return false;
+  }
+}
+
+
