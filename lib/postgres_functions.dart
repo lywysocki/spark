@@ -28,7 +28,7 @@ achievements:    achievement_id, user_id, goal_id, achievement_type, achievement
  */
 
 //INSERT methods
-boolean createUser(String username, String password, String email, [String first, String last]){
+boolean createUser(String username, String password, String email, [String first, String last]) async {
   try {
     await connection.open();
     var result = await databaseConnection.query(
@@ -49,7 +49,7 @@ boolean createUser(String username, String password, String email, [String first
   }
 }
 
-boolean createFriendship(String user1, String user2){
+boolean createFriendship(String user1, String user2) async {
   try {
     await connection.open();
     var result = await databaseConnection.query(
@@ -67,7 +67,7 @@ boolean createFriendship(String user1, String user2){
   }
 }
 
-boolean createGoal(String userID, String title, String note, date start, date end, String frequency, Boolean reminders, [String reminderMessage], String targetType, String category, [int quantity]){
+boolean createGoal(String userID, String title, String note, date start, date end, String frequency, Boolean reminders, [String reminderMessage], String targetType, String category, [int quantity]) async {
   try {
     await connection.open();
     var result = await databaseConnection.query(
@@ -95,7 +95,7 @@ boolean createGoal(String userID, String title, String note, date start, date en
   }
 }
 
-boolean createAchievement(String userID, String goal_id, String achievementType, String achievementDescription, [int quantity]){
+boolean createAchievement(String userID, String goal_id, String achievementType, String achievementDescription, [int quantity]) async {
   try {
     await connection.open();
     DateTime now = DateTime.now() //system date and timestamp
@@ -283,3 +283,4 @@ List<List<dynamic>> selectAchievementsWithinDateRange(String id, Date start, Dat
   );
   return results;
 }
+
