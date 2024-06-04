@@ -58,7 +58,12 @@ class _MyHomePageState extends State<MyHomePage> {
                 MaterialPageRoute(
                   builder: (context) {
                     return Scaffold(
-                      appBar: AppBar(),
+                      backgroundColor:
+                          Theme.of(context).colorScheme.tertiaryContainer,
+                      appBar: AppBar(
+                        backgroundColor:
+                            Theme.of(context).colorScheme.tertiaryContainer,
+                      ),
                       body: const UserProfileScreen(),
                     );
                   },
