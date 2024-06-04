@@ -20,8 +20,7 @@ class CommonCardTile extends StatelessWidget {
   final String? category;
 
   Widget cardColorWrap(BuildContext context, String category, Widget child) {
-    /// View.of(context).platformDispatcher.platformBrightness;
-    const brightness = Brightness.light;
+    final brightness = Theme.of(context).brightness;
     Color cardColor = const Color.fromARGB(255, 255, 232, 232);
     Color borderColor = const Color(0xffd83831);
     switch (category) {

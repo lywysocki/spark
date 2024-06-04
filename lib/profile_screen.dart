@@ -11,9 +11,11 @@ class UserProfileScreen extends StatelessWidget {
       children: [
         Container(
           margin: const EdgeInsets.only(top: 120),
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.only(
+          decoration: BoxDecoration(
+            color: Theme.of(context).brightness == Brightness.light
+                ? Colors.white
+                : Colors.black,
+            borderRadius: const BorderRadius.only(
               topRight: Radius.circular(190),
               topLeft: Radius.circular(190),
             ),
@@ -52,6 +54,9 @@ class UserProfileScreen extends StatelessWidget {
                       Icon(Icons.star),
                     ],
                   ),
+                ),
+                const SizedBox(
+                  height: 10,
                 ),
                 const CommonCardTile(
                   category: 'None',
