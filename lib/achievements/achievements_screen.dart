@@ -43,6 +43,7 @@ class AchievementsScreen extends StatelessWidget {
                     mainAxisSpacing: 32.0,
                     crossAxisSpacing: 32.0,
                   ),
+                  //TODO(LW): add in specific badge object
                   itemBuilder: (_, index) => Container(
                     padding: const EdgeInsets.all(8),
                     color: Colors.teal[100],
