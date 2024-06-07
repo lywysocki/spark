@@ -75,7 +75,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
       ),
       bottomNavigationBar: NavigationBar(
-        backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+        backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
         selectedIndex: _pageIndex,
         onDestinationSelected: (index) {
           setState(() {
