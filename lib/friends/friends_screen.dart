@@ -1,10 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:spark/common/common_search_bar.dart';
 import 'package:spark/common/common_tile.dart';
 import 'package:spark/profile_screen.dart';
 
-class FriendsScreen extends StatelessWidget {
+final placeholderFriends = List.generate(5, (int index) => 'Friend $index');
+
+class FriendsScreen extends StatefulWidget {
   const FriendsScreen({super.key});
 
+  @override
+  State<FriendsScreen> createState() => _FriendsScreenState();
+}
+
+class _FriendsScreenState extends State<FriendsScreen> {
+  String currentSearch = '';
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -15,61 +24,16 @@ class FriendsScreen extends StatelessWidget {
             'Friends',
             style: Theme.of(context).textTheme.titleMedium,
           ),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: List.generate(
-              5,
-              (int index) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4.0),
-                child: CommonCardTile(
-                  category: 'None',
-                  title: Text(
-                    'Friend1',
-                    style: Theme.of(context).textTheme.titleSmall,
-                  ),
-                  destination: Scaffold(
-                    backgroundColor:
-                        Theme.of(context).colorScheme.tertiaryContainer,
-                    appBar: AppBar(
-                      backgroundColor:
-                          Theme.of(context).colorScheme.tertiaryContainer,
-                    ),
-                    body: const UserProfileScreen(),
-                  ),
-                  trailingWidget: PopupMenuButton(
-                    onSelected: (value) async {
-                      switch (value) {
-                        case 'remove':
-                          return showDialog(
-                            barrierDismissible: false,
-                            context: context,
-                            builder: (context) {
-                              return const _RemoveFriendDialog();
-                            },
-                          );
-                        default:
-                          throw UnimplementedError();
-                      }
-                    },
-                    icon: const Icon(Icons.more_vert),
-                    itemBuilder: (BuildContext context) =>
-                        <PopupMenuEntry<String>>[
-                      const PopupMenuItem<String>(
-                        value: 'remove',
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.person_remove_rounded),
-                            SizedBox(width: 10),
-                            Text('Remove'),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+          CommonSearchBar(
+            hintText: 'Search friends',
+            currentSearch: (e) {
+              setState(() {
+                currentSearch = e;
+              });
+            },
+          ),
+          _FriendTiles(
+            currentSearch: currentSearch,
           ),
           Padding(
             padding:
@@ -89,6 +53,80 @@ class FriendsScreen extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _FriendTiles extends StatefulWidget {
+  const _FriendTiles({required this.currentSearch});
+
+  final String currentSearch;
+
+  @override
+  State<_FriendTiles> createState() => _FriendTilesState();
+}
+
+class _FriendTilesState extends State<_FriendTiles> {
+  @override
+  Widget build(BuildContext context) {
+    final displayFriends = placeholderFriends.where(
+      (element) =>
+          element.toLowerCase().contains(widget.currentSearch.toLowerCase()),
+    );
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (final friend in displayFriends)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4.0),
+            child: CommonCardTile(
+              category: 'None',
+              title: Text(
+                friend,
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+              destination: Scaffold(
+                backgroundColor:
+                    Theme.of(context).colorScheme.tertiaryContainer,
+                appBar: AppBar(
+                  backgroundColor:
+                      Theme.of(context).colorScheme.tertiaryContainer,
+                ),
+                body: const UserProfileScreen(),
+              ),
+              trailingWidget: PopupMenuButton(
+                onSelected: (value) async {
+                  switch (value) {
+                    case 'remove':
+                      return showDialog(
+                        barrierDismissible: false,
+                        context: context,
+                        builder: (context) {
+                          return const _RemoveFriendDialog();
+                        },
+                      );
+                    default:
+                      throw UnimplementedError();
+                  }
+                },
+                icon: const Icon(Icons.more_vert),
+                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                  const PopupMenuItem<String>(
+                    value: 'remove',
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.person_remove_rounded),
+                        SizedBox(width: 10),
+                        Text('Remove'),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
     );
   }
 }
