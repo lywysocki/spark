@@ -385,7 +385,7 @@ class ColorFamily {
   final Color onColorContainer;
 }
 
-const redDark = Color(0xff8c0009);
+const redDark = Color.fromARGB(255, 113, 10, 20);
 const redLight = Color.fromARGB(255, 255, 233, 233);
 
 const orangeDark = Color(0xffd83831);

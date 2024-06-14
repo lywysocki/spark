@@ -49,9 +49,7 @@ class CommonCardTile extends StatelessWidget {
         break;
     }
     if (brightness == Brightness.dark) {
-      final temp = cardColor;
-      cardColor = borderColor;
-      borderColor = temp;
+      cardColor = borderColor?.withAlpha(100);
     }
     return Card(
       color: cardColor,
