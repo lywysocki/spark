@@ -1,5 +1,6 @@
 import 'package:spark/friends/friends_screen.dart';
 import 'package:spark/habits/habits_screen.dart';
+import 'package:spark/habits/new_habit_screen.dart';
 import 'package:spark/home_screen.dart';
 import 'package:spark/profile_screen.dart';
 import 'package:flutter/material.dart';
@@ -45,6 +46,19 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) {
+                return const NewHabitScreen();
+              },
+            ),
+          );
+        },
+        child: const Icon(Icons.add),
+      ),
       appBar: AppBar(
         title: Text(
           'LOGO',
