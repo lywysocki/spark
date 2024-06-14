@@ -74,7 +74,7 @@ class MaterialTheme {
       onSecondaryContainer: Color(0xffffffff),
       tertiary: Color(0xff792801),
       onTertiary: Color(0xffffffff),
-      tertiaryContainer: Color(0xffba572f),
+      tertiaryContainer: Color.fromARGB(255, 223, 101, 53),
       onTertiaryContainer: Color(0xffffffff),
       error: Color(0xff8c0009),
       onError: Color(0xffffffff),

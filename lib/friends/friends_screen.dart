@@ -28,7 +28,12 @@ class FriendsScreen extends StatelessWidget {
                     style: Theme.of(context).textTheme.titleSmall,
                   ),
                   destination: Scaffold(
-                    appBar: AppBar(),
+                    backgroundColor:
+                        Theme.of(context).colorScheme.tertiaryContainer,
+                    appBar: AppBar(
+                      backgroundColor:
+                          Theme.of(context).colorScheme.tertiaryContainer,
+                    ),
                     body: const UserProfileScreen(),
                   ),
                   trailingWidget: const Icon(Icons.star),
