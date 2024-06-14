@@ -35,6 +35,10 @@ class FriendsScreen extends StatelessWidget {
             ),
           ),
         ),
+        FilledButton(
+          onPressed: () {},
+          child: const Text('Add new friend'),
+        ),
       ],
     );
   }
