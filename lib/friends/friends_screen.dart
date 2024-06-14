@@ -18,7 +18,7 @@ class FriendsScreen extends StatelessWidget {
           Column(
             mainAxisSize: MainAxisSize.min,
             children: List.generate(
-              10,
+              5,
               (int index) => Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4.0),
                 child: CommonCardTile(
@@ -40,12 +40,111 @@ class FriendsScreen extends StatelessWidget {
             padding:
                 const EdgeInsets.symmetric(horizontal: 100.0, vertical: 20),
             child: FilledButton(
-              onPressed: () {},
+              onPressed: () {
+                showDialog(
+                  barrierDismissible: false,
+                  context: context,
+                  builder: (context) {
+                    return const _AddNewFriendDialog();
+                  },
+                );
+              },
               child: const Text('Add new friend'),
             ),
           ),
         ],
       ),
+    );
+  }
+}
+
+class _AddNewFriendDialog extends StatefulWidget {
+  const _AddNewFriendDialog();
+
+  @override
+  State<_AddNewFriendDialog> createState() => _AddNewFriendDialogState();
+}
+
+class _AddNewFriendDialogState extends State<_AddNewFriendDialog> {
+  final TextEditingController _textController = TextEditingController();
+  bool canAdd = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _textController.removeListener(() {});
+    _textController.addListener(() {
+      canAdd = _textController.text.isNotEmpty;
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Row(
+        children: [
+          Icon(Icons.person_add_alt_1_outlined),
+          SizedBox(
+            width: 10,
+          ),
+          Text('Add New Friend'),
+        ],
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(
+            height: 10,
+          ),
+          const Text(
+            'Please enter your friend\'s username.',
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          TextFormField(
+            controller: _textController,
+            textInputAction: TextInputAction.send,
+            decoration: InputDecoration(
+              filled: true,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              hintText: 'Username',
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        FilledButton(
+          onPressed: canAdd
+              ? () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      duration: Duration(seconds: 3),
+                      content: Text('Invite sent!'),
+                    ),
+                  );
+                  Navigator.pop(context);
+                }
+              : null,
+          child: const Text('Add'),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: const Text('Close'),
+        ),
+      ],
     );
   }
 }
