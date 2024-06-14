@@ -112,12 +112,12 @@ class _MyHomePageState extends State<MyHomePage> {
 final _destinations = <Destination>[
   Destination(
     title: 'Home',
-    icon: const Icon(Icons.home_outlined),
+    icon: const Icon(Icons.home),
     builder: (context) => const HomeScreen(),
   ),
   Destination(
     title: 'Habits',
-    icon: const Icon(Icons.list),
+    icon: const Icon(Icons.auto_awesome),
     builder: (context) => const HabitsScreen(),
   ),
   Destination(
