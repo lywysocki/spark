@@ -44,7 +44,7 @@ class UserProfileScreen extends StatelessWidget {
                   height: 50,
                 ),
                 const CommonCardTile(
-                  category: 'None',
+                  category: '',
                   title: Text('Highest Streak'),
                   trailingWidget: Row(
                     mainAxisSize: MainAxisSize.min,

@@ -21,8 +21,8 @@ class CommonCardTile extends StatelessWidget {
 
   Widget cardColorWrap(BuildContext context, String category, Widget child) {
     final brightness = Theme.of(context).brightness;
-    Color cardColor = const Color.fromARGB(255, 255, 232, 232);
-    Color borderColor = const Color(0xffd83831);
+    Color? cardColor;
+    Color? borderColor;
     switch (category) {
       case 'education':
         cardColor = redLight;
@@ -42,7 +42,10 @@ class CommonCardTile extends StatelessWidget {
       case 'work':
         cardColor = purpleLight;
         borderColor = purpleDark;
-      case _:
+      case 'common':
+        cardColor = const Color.fromARGB(255, 255, 232, 232);
+        borderColor = const Color(0xffd83831);
+      case '_':
         break;
     }
     if (brightness == Brightness.dark) {
@@ -55,7 +58,9 @@ class CommonCardTile extends StatelessWidget {
       borderOnForeground: true,
       shape: RoundedRectangleBorder(
         borderRadius: const BorderRadius.all(Radius.circular(15)),
-        side: BorderSide(color: borderColor),
+        side: BorderSide(
+          color: borderColor ?? Theme.of(context).colorScheme.outline,
+        ),
       ),
       child: child,
     );
