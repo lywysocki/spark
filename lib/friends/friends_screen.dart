@@ -36,7 +36,37 @@ class FriendsScreen extends StatelessWidget {
                     ),
                     body: const UserProfileScreen(),
                   ),
-                  trailingWidget: const Icon(Icons.star),
+                  trailingWidget: PopupMenuButton(
+                    onSelected: (value) async {
+                      switch (value) {
+                        case 'remove':
+                          return showDialog(
+                            barrierDismissible: false,
+                            context: context,
+                            builder: (context) {
+                              return const _RemoveFriendDialog();
+                            },
+                          );
+                        default:
+                          throw UnimplementedError();
+                      }
+                    },
+                    icon: const Icon(Icons.more_vert),
+                    itemBuilder: (BuildContext context) =>
+                        <PopupMenuEntry<String>>[
+                      const PopupMenuItem<String>(
+                        value: 'remove',
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.person_remove_rounded),
+                            SizedBox(width: 10),
+                            Text('Remove'),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -142,6 +172,47 @@ class _AddNewFriendDialogState extends State<_AddNewFriendDialog> {
                 }
               : null,
           child: const Text('Add'),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: const Text('Close'),
+        ),
+      ],
+    );
+  }
+}
+
+class _RemoveFriendDialog extends StatelessWidget {
+  const _RemoveFriendDialog();
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Row(
+        children: [
+          Icon(Icons.person_remove_rounded),
+          SizedBox(
+            width: 10,
+          ),
+          Text('Remove Friend'),
+        ],
+      ),
+      content:
+          const Text('Are you sure you want to remove {username} as a friend?'),
+      actions: [
+        FilledButton(
+          onPressed: () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                duration: Duration(seconds: 3),
+                content: Text('{username} removed from friends list.'),
+              ),
+            );
+            Navigator.pop(context);
+          },
+          child: const Text('Remove'),
         ),
         TextButton(
           onPressed: () {
