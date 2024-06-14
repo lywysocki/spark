@@ -74,7 +74,7 @@ class MaterialTheme {
       onSecondaryContainer: Color(0xffffffff),
       tertiary: Color(0xff792801),
       onTertiary: Color(0xffffffff),
-      tertiaryContainer: Color(0xffba572f),
+      tertiaryContainer: Color.fromARGB(255, 223, 101, 53),
       onTertiaryContainer: Color(0xffffffff),
       error: Color(0xff8c0009),
       onError: Color(0xffffffff),
@@ -430,7 +430,7 @@ class ColorFamily {
 }
 
 const redDark = Color(0xff8c0009);
-const redLight = Color.fromARGB(255, 241, 217, 218);
+const redLight = Color.fromARGB(255, 255, 233, 233);
 
 const orangeDark = Color(0xffd83831);
 const orangeLight = Color.fromARGB(255, 255, 234, 228);

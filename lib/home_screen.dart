@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:spark/common/common_tile.dart';
-import 'package:spark/habits/new_habit_screen.dart';
 import 'package:spark/habits/view_habit_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -10,19 +9,6 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context).textTheme;
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) {
-                return const NewHabitScreen();
-              },
-            ),
-          );
-        },
-        child: const Icon(Icons.add),
-      ),
       body: ListView(
         padding: const EdgeInsets.all(8.0),
         children: [
@@ -99,6 +85,9 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
             ),
+          ),
+          const SizedBox(
+            height: 75,
           ),
         ],
       ),
