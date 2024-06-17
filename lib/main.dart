@@ -65,26 +65,29 @@ class _MyHomePageState extends State<MyHomePage> {
           style: Theme.of(context).textTheme.titleLarge,
         ),
         actions: [
-          IconButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) {
-                    return Scaffold(
-                      backgroundColor:
-                          Theme.of(context).colorScheme.tertiaryContainer,
-                      appBar: AppBar(
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: IconButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) {
+                      return Scaffold(
                         backgroundColor:
                             Theme.of(context).colorScheme.tertiaryContainer,
-                      ),
-                      body: const UserProfileScreen(),
-                    );
-                  },
-                ),
-              );
-            },
-            icon: const Icon(Icons.person),
+                        appBar: AppBar(
+                          backgroundColor:
+                              Theme.of(context).colorScheme.tertiaryContainer,
+                        ),
+                        body: const UserProfileScreen(),
+                      );
+                    },
+                  ),
+                );
+              },
+              icon: const Icon(Icons.account_circle_outlined),
+            ),
           ),
         ],
       ),

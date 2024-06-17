@@ -51,7 +51,7 @@ class UserProfileScreen extends StatelessWidget {
                     children: [
                       Text('10'),
                       SizedBox(width: 8),
-                      Icon(Icons.star),
+                      Icon(Icons.flare_outlined),
                     ],
                   ),
                 ),
