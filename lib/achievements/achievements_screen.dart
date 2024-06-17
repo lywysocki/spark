@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart' hide SearchBar;
 import 'package:spark/common/common_search_bar.dart';
 
-class AchievementsScreen extends StatelessWidget {
+class AchievementsScreen extends StatefulWidget {
   const AchievementsScreen({super.key});
 
+  @override
+  State<AchievementsScreen> createState() => _AchievementsScreenState();
+}
+
+class _AchievementsScreenState extends State<AchievementsScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context).textTheme;
     const num = 7;
+    String currentSearch = '';
 
     return Scaffold(
       appBar: AppBar(),
@@ -19,15 +25,21 @@ class AchievementsScreen extends StatelessWidget {
               'Achievements',
               style: theme.titleLarge,
             ),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.0),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Row(
                 children: [
-                  Expanded(child: SearchBar()),
-                  SizedBox(
+                  Expanded(
+                    child: CommonSearchBar(
+                      currentSearch: (item) =>
+                          setState(() => currentSearch = item),
+                    ),
+                  ),
+                  const SizedBox(
                     width: 8,
                   ),
-                  IconButton(onPressed: null, icon: Icon(Icons.filter_alt)),
+                  const IconButton(
+                      onPressed: null, icon: Icon(Icons.filter_alt)),
                 ],
               ),
             ),

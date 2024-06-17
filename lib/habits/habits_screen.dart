@@ -69,7 +69,7 @@ class _HabitTilesState extends State<_HabitTiles> {
               category: 'None',
               title: Text(habit),
               destination: const ViewHabitScreen(),
-              trailingWidget: const Icon(Icons.star),
+              trailingWidget: const Icon(Icons.flare_outlined),
             ),
           ),
       ],

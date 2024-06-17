@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class CommonSearchBar extends StatefulWidget {
   const CommonSearchBar({
     super.key,
-    required this.hintText,
+    this.hintText = '',
     required this.currentSearch,
   });
 
