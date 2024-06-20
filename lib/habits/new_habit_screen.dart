@@ -9,27 +9,6 @@ class NewHabitScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: null,
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 30.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            FilledButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('Submit'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('Close'),
-            ),
-          ],
-        ),
-      ),
       body: Padding(
         padding: const EdgeInsets.all(15.0),
         child: ListView(
@@ -44,8 +23,25 @@ class NewHabitScreen extends StatelessWidget {
               height: 15,
             ),
             const _NewHabitForm(),
-            const SizedBox(
-              height: 60,
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 40.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  FilledButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text('Submit'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text('Close'),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
