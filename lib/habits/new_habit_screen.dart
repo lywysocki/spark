@@ -95,6 +95,12 @@ class __NewHabitFormState extends State<_NewHabitForm> {
 
   final frequencyDropdownItems = [
     const DropdownMenuItem<String>(
+      value: 'Does not repeat',
+      child: Text(
+        'Does not repeat',
+      ),
+    ),
+    const DropdownMenuItem<String>(
       value: '3x daily',
       child: Text(
         '3x daily',
@@ -198,6 +204,7 @@ class __NewHabitFormState extends State<_NewHabitForm> {
           CommonDropdown(
             hintText: 'Select a frequency',
             dropdownItems: frequencyDropdownItems,
+            hasInitialValue: true,
           ),
           const _HeaderTextWidget(
             text: 'Reminders',

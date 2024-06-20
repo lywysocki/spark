@@ -5,14 +5,17 @@ class CommonDropdown extends StatelessWidget {
     super.key,
     required this.dropdownItems,
     required this.hintText,
+    this.hasInitialValue = false,
   });
 
   final List<DropdownMenuItem<String>> dropdownItems;
   final String hintText;
+  final bool hasInitialValue;
 
   @override
   Widget build(BuildContext context) {
     return DropdownButtonFormField<String>(
+      value: hasInitialValue ? dropdownItems.first.value : null,
       decoration: InputDecoration(
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(20),
