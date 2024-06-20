@@ -266,6 +266,7 @@ class __SetRemindersWidgetsState extends State<_SetRemindersWidgets> {
                       );
                       widget.reminders[index] = editTime;
                     }
+                    setState(() {});
                   },
                   onLongPress: () {
                     showDialog(
