@@ -141,226 +141,354 @@ Future<bool> createActivity(String userID, String habitID, String achievementTit
 //SELECT Functions
 // Users
 Future<List<List<dynamic>>> selectUsersByUsername(String username) async{
-  databaseConnection.open();
-  List<List<dynamic>> results = await databaseConnection.query(
-    'SELECT * FROM users WHERE username = @name',
-    substitutionValues: {
-      'name': username,
-    },
-  );
-  return results;
+  try{
+    databaseConnection.open();
+    List<List<dynamic>> results = await databaseConnection.query(
+      'SELECT * FROM users WHERE username = @name',
+      substitutionValues: {
+        'name': username,
+      },
+    );
+    return results;
+  } catch (e) {
+    debugPrint('Error: ${e.toString()}');
+    return List.empty();
+  } finally {
+    await databaseConnection.close();
+  }
 }
 
 Future<List<List<dynamic>>> selectUsersByEmail(String email) async {
-  databaseConnection.open();
-  List<List<dynamic>> results = await databaseConnection.query(
-    'SELECT * FROM users WHERE email = @email',
-    substitutionValues: {
-      'email': email,
-    },
-  );
-  return results;
+  try{
+    databaseConnection.open();
+    List<List<dynamic>> results = await databaseConnection.query(
+      'SELECT * FROM users WHERE email = @email',
+      substitutionValues: {
+        'email': email,
+      },
+    );
+    return results;
+  } catch (e) {
+    debugPrint('Error: ${e.toString()}');
+    return List.empty();
+  } finally {
+    await databaseConnection.close();
+  }
 }
 
 Future<List<List<dynamic>>> selectUsersByName(String first, String last) async {
-  databaseConnection.open();
-  List<List<dynamic>> results = await databaseConnection.query(
-    'SELECT * FROM users WHERE first_name = @firstname AND last_name = @lastname',
-    substitutionValues: {
-      'firstname': first,
-      'lastname': last,
-    },
-  );
-  return results;
+  try{
+    databaseConnection.open();
+    List<List<dynamic>> results = await databaseConnection.query(
+      'SELECT * FROM users WHERE first_name = @firstname AND last_name = @lastname',
+      substitutionValues: {
+        'firstname': first,
+        'lastname': last,
+      },
+    );
+    return results;
+  } catch (e) {
+    debugPrint('Error: ${e.toString()}');
+    return List.empty();
+  } finally {
+    await databaseConnection.close();
+  }
 }
 
 // Friendships
 Future<List<List<dynamic>>> selectFriendsByUser(String userID) async {
-  databaseConnection.open();
-  List<List<dynamic>> results = await databaseConnection.query(
-    'SELECT user2_id FROM users WHERE user1_id = @id',
-    substitutionValues: {
-      'id': userID,
-    },
-  );
-  List<List<dynamic>> results2 = await databaseConnection.query(
-    'SELECT user1_id FROM users WHERE user2_id = @id',
-    substitutionValues: {
-      'id': userID,
-    },
-  );
+  try{
+    databaseConnection.open();
+    List<List<dynamic>> results = await databaseConnection.query(
+      'SELECT user2_id FROM users WHERE user1_id = @id',
+      substitutionValues: {
+        'id': userID,
+      },
+    );
+    List<List<dynamic>> results2 = await databaseConnection.query(
+      'SELECT user1_id FROM users WHERE user2_id = @id',
+      substitutionValues: {
+        'id': userID,
+      },
+    );
 
-  results.addAll(results2);
-  return results;
+    results.addAll(results2);
+    return results;
+  } catch (e) {
+    debugPrint('Error: ${e.toString()}');
+    return List.empty();
+  } finally {
+    await databaseConnection.close();
+  }
 }
 
 // Habit
 Future<List<List<dynamic>>> selectHabitsByUserID(String id) async {
-  databaseConnection.open();
-  List<List<dynamic>> results = await databaseConnection.query(
-    'SELECT * FROM habits WHERE user_id = @userID',
-    substitutionValues: {
-      'userID': id,
-    },
-  );
-  return results;
+  try{
+    databaseConnection.open();
+    List<List<dynamic>> results = await databaseConnection.query(
+      'SELECT * FROM habits WHERE user_id = @userID',
+      substitutionValues: {
+        'userID': id,
+      },
+    );
+    return results;
+  } catch (e) {
+    debugPrint('Error: ${e.toString()}');
+    return List.empty();
+  } finally {
+    await databaseConnection.close();
+  }
 }
 
 Future<List<List<dynamic>>> selectHabitsByTitle(String id, String title) async {
-  databaseConnection.open();
-  List<List<dynamic>> results = await databaseConnection.query(
-    'SELECT * FROM habits WHERE user_id = @userID and title = @title',
-    substitutionValues: {
-      'userID': id,
-      'title': title,
-    },
-  );
-  return results;
+  try{
+    databaseConnection.open();
+    List<List<dynamic>> results = await databaseConnection.query(
+      'SELECT * FROM habits WHERE user_id = @userID and title = @title',
+      substitutionValues: {
+        'userID': id,
+        'title': title,
+      },
+    );
+    return results;
+  } catch (e) {
+    debugPrint('Error: ${e.toString()}');
+    return List.empty();
+  } finally {
+    await databaseConnection.close();
+  }
 }
 
 Future<List<List<dynamic>>> selectHabitsStarted(String id, DateTime date) async {
-  databaseConnection.open();
-  List<List<dynamic>> results = await databaseConnection.query(
-    'SELECT * FROM habits WHERE user_id = @userID and start_date <= @date '
-        'and (end_date is NULL or end_date >= @date)',
-    substitutionValues: {
-      'userID': id,
-      'date': date,
-    },
-  );
-  return results;
+  try{
+    databaseConnection.open();
+    List<List<dynamic>> results = await databaseConnection.query(
+      'SELECT * FROM habits WHERE user_id = @userID and start_date <= @date '
+          'and (end_date is NULL or end_date >= @date)',
+      substitutionValues: {
+        'userID': id,
+        'date': date,
+      },
+    );
+    return results;
+  } catch (e) {
+    debugPrint('Error: ${e.toString()}');
+    return List.empty();
+  } finally {
+    await databaseConnection.close();
+  }
 }
 
 Future<List<List<dynamic>>> selectHabitsEnded(String id, DateTime date) async {
-  databaseConnection.open();
-  List<List<dynamic>> results = await databaseConnection.query(
-    'SELECT * FROM habits WHERE user_id = @userID and end_date < @date',
-    substitutionValues: {
-      'userID': id,
-      'date': date,
-    },
-  );
-  return results;
+  try{
+    databaseConnection.open();
+    List<List<dynamic>> results = await databaseConnection.query(
+      'SELECT * FROM habits WHERE user_id = @userID and end_date < @date',
+      substitutionValues: {
+        'userID': id,
+        'date': date,
+      },
+    );
+    return results;
+  } catch (e) {
+    debugPrint('Error: ${e.toString()}');
+    return List.empty();
+  } finally {
+    await databaseConnection.close();
+  }
 }
 
 Future<List<List<dynamic>>> selectHabitsByCategory(String id, String cat) async {
-  databaseConnection.open();
-  List<List<dynamic>> results = await databaseConnection.query(
-    'SELECT * FROM habits WHERE user_id = @userID and category = @category',
-    substitutionValues: {
-      'userID': id,
-      'category': cat,
-    },
-  );
-  return results;
+  try{
+    databaseConnection.open();
+    List<List<dynamic>> results = await databaseConnection.query(
+      'SELECT * FROM habits WHERE user_id = @userID and category = @category',
+      substitutionValues: {
+        'userID': id,
+        'category': cat,
+      },
+    );
+    return results;
+  } catch (e) {
+    debugPrint('Error: ${e.toString()}');
+    return List.empty();
+  } finally {
+    await databaseConnection.close();
+  }
 }
 
 // Achievements
 Future<List<List<dynamic>>> selectAchievements(String id) async {
-  databaseConnection.open();
-  List<List<dynamic>> results = await databaseConnection.query(
-    'SELECT * FROM achievements WHERE user_id = @userID',
-    substitutionValues: {
-      'userID': id,
-    },
-  );
-  return results;
+  try{
+    databaseConnection.open();
+    List<List<dynamic>> results = await databaseConnection.query(
+      'SELECT * FROM achievements WHERE user_id = @userID',
+      substitutionValues: {
+        'userID': id,
+      },
+    );
+    return results;
+  } catch (e) {
+    debugPrint('Error: ${e.toString()}');
+    return List.empty();
+  } finally {
+    await databaseConnection.close();
+  }
 }
 
 Future<List<List<dynamic>>> selectAchievementsByHabitID(String id, String habit) async {
-  databaseConnection.open();
-  List<List<dynamic>> results = await databaseConnection.query(
-    'SELECT * FROM achievements WHERE user_id = @userID and habit_id = @habitID',
-    substitutionValues: {
-      'userID': id,
-      'habitID': habit,
-    },
-  );
-  return results;
+  try{
+    databaseConnection.open();
+    List<List<dynamic>> results = await databaseConnection.query(
+      'SELECT * FROM achievements WHERE user_id = @userID and habit_id = @habitID',
+      substitutionValues: {
+        'userID': id,
+        'habitID': habit,
+      },
+    );
+    return results;
+  } catch (e) {
+    debugPrint('Error: ${e.toString()}');
+    return List.empty();
+  } finally {
+    await databaseConnection.close();
+  }
 }
 
 Future<List<List<dynamic>>> selectAchievementsByType(String id, String type) async{
-  databaseConnection.open();
-  List<List<dynamic>> results = await databaseConnection.query(
-    'SELECT * FROM achievements WHERE user_id = @userID and achievement_title = @achievementType',
-    substitutionValues: {
-      'userID': id,
-      'achievementType': type,
-    },
-  );
-  return results;
+  try{
+    databaseConnection.open();
+    List<List<dynamic>> results = await databaseConnection.query(
+      'SELECT * FROM achievements WHERE user_id = @userID and achievement_title = @achievementType',
+      substitutionValues: {
+        'userID': id,
+        'achievementType': type,
+      },
+    );
+    return results;
+  } catch (e) {
+    debugPrint('Error: ${e.toString()}');
+    return List.empty();
+  } finally {
+    await databaseConnection.close();
+  }
 }
 
 Future<List<List<dynamic>>> selectAchievementsByDate(String id, DateTime date) async {
-  List<List<dynamic>> results = await databaseConnection.query(
-    'SELECT * FROM achievements WHERE user_id = @userID and date = @date',
-    substitutionValues: {
-      'userID': id,
-      'date': date,
-    },
-  );
-  return results;
+  try{
+    databaseConnection.open();
+    List<List<dynamic>> results = await databaseConnection.query(
+      'SELECT * FROM achievements WHERE user_id = @userID and date = @date',
+      substitutionValues: {
+        'userID': id,
+        'date': date,
+      },
+    );
+    return results;
+  } catch (e) {
+    debugPrint('Error: ${e.toString()}');
+    return List.empty();
+  } finally {
+    await databaseConnection.close();
+  }
 }
 
 Future<List<List<dynamic>>> selectAchievementsWithinDateRange(String id, DateTime start, DateTime end) async {
-  databaseConnection.open();
-  List<List<dynamic>> results = await databaseConnection.query(
-    'SELECT * FROM achievements WHERE user_id = @userID and date >= @startDate and date <= @endDate',
-    substitutionValues: {
-      'userID': id,
-      'startDate': start,
-      'endDate': end,
-    },
-  );
-  return results;
+  try{
+    databaseConnection.open();
+    List<List<dynamic>> results = await databaseConnection.query(
+      'SELECT * FROM achievements WHERE user_id = @userID and date >= @startDate and date <= @endDate',
+      substitutionValues: {
+        'userID': id,
+        'startDate': start,
+        'endDate': end,
+      },
+    );
+    return results;
+  } catch (e) {
+    debugPrint('Error: ${e.toString()}');
+    return List.empty();
+  } finally {
+    await databaseConnection.close();
+  }
 }
 
 //Activities
 Future<List<List<dynamic>>> selectActivities(String id) async {
-  databaseConnection.open();
-  List<List<dynamic>> results = await databaseConnection.query(
-    'SELECT * FROM activities WHERE user_id = @userID',
-    substitutionValues: {
-      'userID': id,
-    },
-  );
-  return results;
+  try{
+    databaseConnection.open();
+    List<List<dynamic>> results = await databaseConnection.query(
+      'SELECT * FROM activities WHERE user_id = @userID',
+      substitutionValues: {
+        'userID': id,
+      },
+    );
+    return results;
+  } catch (e) {
+    debugPrint('Error: ${e.toString()}');
+    return List.empty();
+  } finally {
+    await databaseConnection.close();
+  }
 }
 
 Future<List<List<dynamic>>> selectActivitiesByHabitID(String id, String habit) async {
-  databaseConnection.open();
-  List<List<dynamic>> results = await databaseConnection.query(
-    'SELECT * FROM activities WHERE user_id = @userID and habit_id = @habitID',
-    substitutionValues: {
-      'userID': id,
-      'habitID': habit,
-    },
-  );
-  return results;
+  try{
+    databaseConnection.open();
+    List<List<dynamic>> results = await databaseConnection.query(
+      'SELECT * FROM activities WHERE user_id = @userID and habit_id = @habitID',
+      substitutionValues: {
+        'userID': id,
+        'habitID': habit,
+      },
+    );
+    return results;
+  } catch (e) {
+    debugPrint('Error: ${e.toString()}');
+    return List.empty();
+  } finally {
+    await databaseConnection.close();
+  }
 }
 
 Future<List<List<dynamic>>> selectActivitiesByDate(String id, DateTime date) async {
-  List<List<dynamic>> results = await databaseConnection.query(
-    'SELECT * FROM activities WHERE user_id = @userID and date = @date',
-    substitutionValues: {
-      'userID': id,
-      'date': date,
-    },
-  );
-  return results;
+  try{
+    databaseConnection.open();
+    List<List<dynamic>> results = await databaseConnection.query(
+      'SELECT * FROM activities WHERE user_id = @userID and date = @date',
+      substitutionValues: {
+        'userID': id,
+        'date': date,
+      },
+    );
+    return results;
+  } catch (e) {
+    debugPrint('Error: ${e.toString()}');
+    return List.empty();
+  } finally {
+    await databaseConnection.close();
+  }
 }
 
 Future<List<List<dynamic>>> selectActivitiesWithinDateRange(String id, DateTime start, DateTime end) async {
-  databaseConnection.open();
-  List<List<dynamic>> results = await databaseConnection.query(
-    'SELECT * FROM activities WHERE user_id = @userID and date >= @startDate and date <= @endDate',
-    substitutionValues: {
-      'userID': id,
-      'startDate': start,
-      'endDate': end,
-    },
-  );
-  return results;
+  try{
+    databaseConnection.open();
+    List<List<dynamic>> results = await databaseConnection.query(
+      'SELECT * FROM activities WHERE user_id = @userID and date >= @startDate and date <= @endDate',
+      substitutionValues: {
+        'userID': id,
+        'startDate': start,
+        'endDate': end,
+      },
+    );
+    return results;
+  } catch (e) {
+    debugPrint('Error: ${e.toString()}');
+    return List.empty();
+  } finally {
+    await databaseConnection.close();
+  }
 }
 
 //UPDATE functions
@@ -378,6 +506,8 @@ Future<bool> updateUserUsername(String userID, String newUsername) async {
   } catch (e) {
     debugPrint('Error: ${e.toString()}');
     return false;
+  } finally {
+    await databaseConnection.close();
   }
 }
 
@@ -395,6 +525,8 @@ Future<bool> updateUserFirstName(String userID, String newName) async {
   } catch (e) {
     debugPrint('Error: ${e.toString()}');
     return false;
+  } finally {
+    await databaseConnection.close();
   }
 }
 
@@ -412,6 +544,8 @@ Future<bool> updateUserLastName(String userID, String newName) async {
   } catch (e) {
     debugPrint('Error: ${e.toString()}');
     return false;
+  } finally {
+    await databaseConnection.close();
   }
 }
 
@@ -429,6 +563,8 @@ Future<bool> updateUserPassword(String userID, String newPassword) async {
   } catch (e) {
     debugPrint('Error: ${e.toString()}');
     return false;
+  } finally {
+    await databaseConnection.close();
   }
 }
 
@@ -446,6 +582,8 @@ Future<bool> updateUserEmail(String userID, String newEmail) async {
   } catch (e) {
     debugPrint('Error: ${e.toString()}');
     return false;
+  } finally {
+    await databaseConnection.close();
   }
 }
 
@@ -463,6 +601,8 @@ Future<bool> updateHabitTitle(String habitID, String newTitle) async {
   } catch (e) {
     debugPrint('Error: ${e.toString()}');
     return false;
+  } finally {
+    await databaseConnection.close();
   }
 }
 
@@ -480,6 +620,8 @@ Future<bool> updateHabitNote(String habitID, String newNote) async {
   } catch (e) {
     debugPrint('Error: ${e.toString()}');
     return false;
+  } finally {
+    await databaseConnection.close();
   }
 }
 
@@ -497,6 +639,8 @@ Future<bool> updateHabitEnd(String habitID, DateTime newEnd) async {
   } catch (e) {
     debugPrint('Error: ${e.toString()}');
     return false;
+  } finally {
+    await databaseConnection.close();
   }
 }
 
@@ -514,6 +658,8 @@ Future<bool> updateHabitFrequency(String habitID, String newFrequency) async {
   } catch (e) {
     debugPrint('Error: ${e.toString()}');
     return false;
+  } finally {
+    await databaseConnection.close();
   }
 }
 
@@ -531,6 +677,8 @@ Future<bool> updateHabitReminders(String habitID, bool newReminder) async {
   } catch (e) {
     debugPrint('Error: ${e.toString()}');
     return false;
+  } finally {
+    await databaseConnection.close();
   }
 }
 
@@ -548,6 +696,8 @@ Future<bool> updateHabitReminderMessage(String habitID, String newMessage) async
   } catch (e) {
     debugPrint('Error: ${e.toString()}');
     return false;
+  } finally {
+    await databaseConnection.close();
   }
 }
 
@@ -565,6 +715,8 @@ Future<bool> updateHabitTargetType(String habitID, String newType) async {
   } catch (e) {
     debugPrint('Error: ${e.toString()}');
     return false;
+  } finally {
+    await databaseConnection.close();
   }
 }
 
@@ -582,6 +734,8 @@ Future<bool> updateHabitCategory(String habitID, String newCategory) async {
   } catch (e) {
     debugPrint('Error: ${e.toString()}');
     return false;
+  } finally {
+    await databaseConnection.close();
   }
 }
 
@@ -599,6 +753,8 @@ Future<bool> updateHabitQuantity(String habitID, String newQuantity) async {
   } catch (e) {
     debugPrint('Error: ${e.toString()}');
     return false;
+  } finally {
+    await databaseConnection.close();
   }
 }
 
@@ -617,6 +773,8 @@ Future<bool> deleteUser(String username) async {
   } catch (e) {
     debugPrint('Error: ${e.toString()}');
     return false;
+  } finally {
+    await databaseConnection.close();
   }
 }
 
@@ -646,6 +804,8 @@ Future<bool> deleteHabitCascade(String habitID) async {
   } catch (e) {
     debugPrint('Error: ${e.toString()}');
     return false;
+  } finally {
+    await databaseConnection.close();
   }
 }
 
@@ -662,6 +822,8 @@ Future<bool> deleteAchievement(String achievementID) async {
   } catch (e) {
     debugPrint('Error: ${e.toString()}');
     return false;
+  } finally {
+    await databaseConnection.close();
   }
 }
 
@@ -678,6 +840,8 @@ Future<bool> deleteActivity(String activityID) async {
   } catch (e) {
     debugPrint('Error: ${e.toString()}');
     return false;
+  } finally {
+    await databaseConnection.close();
   }
 }
 
@@ -696,6 +860,8 @@ Future<bool> deleteFriendships(String userID1, String userID2) async {
   } catch (e) {
     debugPrint('Error: ${e.toString()}');
     return false;
+  } finally {
+    await databaseConnection.close();
   }
 }
 
