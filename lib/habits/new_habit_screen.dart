@@ -278,6 +278,7 @@ class __SetRemindersWidgetsState extends State<_SetRemindersWidgets> {
                             widget.reminders.removeWhere(
                               (element) => element == time,
                             );
+                            setState(() {});
                             Navigator.pop(context);
                           },
                         );
