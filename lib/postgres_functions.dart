@@ -1,8 +1,8 @@
 /* TABLE FIELDS
 users:    user_id, username, password, email, first_name, last_name
-goals:    goal_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity
+habits:    habit_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity
 friendships:   user1_id, user2_id
-achievements:    achievement_id, user_id, goal_id, achievement_type, achievement_description, date, timestamp, quantity
+achievements:    achievement_id, user_id, habit_id, achievement_type, achievement_description, date, timestamp, quantity
  */
 
 
@@ -20,7 +20,7 @@ final databaseConnection = PostgreSQLConnection(
 );
 
 //INSERT methods
-Future<bool> createUser(String username, String password, String email, String? first, String? last) async {
+Future<bool> createUser(String? username, String? password, String? email, String? first, String? last) async {
   try {
     await databaseConnection.open();
     await databaseConnection.query(
@@ -61,11 +61,11 @@ Future<bool> createFriendship(String user1, String user2) async {
   }
 }
 
-Future<bool> createGoal(String userID, String title, String note, DateTime start, DateTime end, String frequency, bool reminders, String? reminderMessage, String targetType, String category, int? quantity) async {
+Future<bool> createHabit(String userID, String title, String note, DateTime start, DateTime end, String frequency, bool reminders, String? reminderMessage, String targetType, String category, int? quantity) async {
   try {
     await databaseConnection.open();
     await databaseConnection.query(
-      'INSERT INTO goals (user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity) '
+      'INSERT INTO habits (user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity) '
       'VALUES (@user_id, @title, @note, @start_date, @end_date, @frequency, @reminders, @reminder_message, @target_type, @category, @quantity)',
       substitutionValues: {
         'user_id': userID,
@@ -90,16 +90,16 @@ Future<bool> createGoal(String userID, String title, String note, DateTime start
   }
 }
 
-Future<bool> createAchievement(String userID, String goalID, String achievementType, String achievementDescription, int? quantity) async {
+Future<bool> createAchievement(String userID, String habitID, String achievementType, String achievementDescription, int? quantity) async {
   try {
     await databaseConnection.open();
     DateTime now = DateTime.now(); //system date and timestamp
     await databaseConnection.query(
-        'INSERT INTO goals (user_id, goal_id, achievement_type, achievement_description, date, timestamp, quantity) '
-        'VALUES (@user_id, @goal_id, @achievement_type, @achievement_description, @date, @timestamp, @quantity)',
+        'INSERT INTO achievements (user_id, habit_id, achievement_type, achievement_description, date, timestamp, quantity) '
+        'VALUES (@user_id, @habit_id, @achievement_type, @achievement_description, @date, @timestamp, @quantity)',
         substitutionValues: {
           'user_id': userID,
-          'goal_id': goalID,
+          'habit_id': habitID,
           'achievement_type': achievementType,
           'achievement_description': achievementDescription,
           'date': DateFormat('yyyy-MM-dd').format(now),
@@ -129,9 +129,9 @@ Future<List<List<dynamic>>> selectUsersByUsername(String username) async{
   return results;
 }
 
-Future<List<List<dynamic>>> selectUsersByEmail(var databaseConnection, String email) async {
+Future<List<List<dynamic>>> selectUsersByEmail(String email) async {
   databaseConnection.open();
-  List<List<dynamic>> results = databaseConnection.query(
+  List<List<dynamic>> results = await databaseConnection.query(
     'SELECT * FROM users WHERE email = @email',
     substitutionValues: {
       'email': email,
@@ -140,9 +140,9 @@ Future<List<List<dynamic>>> selectUsersByEmail(var databaseConnection, String em
   return results;
 }
 
-Future<List<List<dynamic>>> selectUsersByName(var databaseConnection, String first, String last) async {
+Future<List<List<dynamic>>> selectUsersByName(String first, String last) async {
   databaseConnection.open();
-  List<List<dynamic>> results = databaseConnection.query(
+  List<List<dynamic>> results = await databaseConnection.query(
     'SELECT * FROM users WHERE first_name = @firstname AND last_name = @lastname',
     substitutionValues: {
       'firstname': first,
@@ -153,15 +153,15 @@ Future<List<List<dynamic>>> selectUsersByName(var databaseConnection, String fir
 }
 
 // Friendships
-Future<List<List<dynamic>>> selectFriendsByUser(var databaseConnection, String userID) async {
+Future<List<List<dynamic>>> selectFriendsByUser(String userID) async {
   databaseConnection.open();
-  List<List<dynamic>> results = databaseConnection.query(
+  List<List<dynamic>> results = await databaseConnection.query(
     'SELECT user2_id FROM users WHERE user1_id = @id',
     substitutionValues: {
       'id': userID,
     },
   );
-  List<List<dynamic>> results2 = databaseConnection.query(
+  List<List<dynamic>> results2 = await databaseConnection.query(
     'SELECT user1_id FROM users WHERE user2_id = @id',
     substitutionValues: {
       'id': userID,
@@ -172,11 +172,11 @@ Future<List<List<dynamic>>> selectFriendsByUser(var databaseConnection, String u
   return results;
 }
 
-// Goals
-Future<List<List<dynamic>>> selectGoalsByUserID(var databaseConnection, String id) async {
+// Habit
+Future<List<List<dynamic>>> selectHabitsByUserID(String id) async {
   databaseConnection.open();
-  List<List<dynamic>> results = databaseConnection.query(
-    'SELECT * FROM goals WHERE user_id = @userID',
+  List<List<dynamic>> results = await databaseConnection.query(
+    'SELECT * FROM habits WHERE user_id = @userID',
     substitutionValues: {
       'userID': id,
     },
@@ -184,10 +184,10 @@ Future<List<List<dynamic>>> selectGoalsByUserID(var databaseConnection, String i
   return results;
 }
 
-Future<List<List<dynamic>>> selectGoalsByTitle(var databaseConnection, String id, String title) async {
+Future<List<List<dynamic>>> selectHabitsByTitle(String id, String title) async {
   databaseConnection.open();
-  List<List<dynamic>> results = databaseConnection.query(
-    'SELECT * FROM goals WHERE user_id = @userID and title = @title',
+  List<List<dynamic>> results = await databaseConnection.query(
+    'SELECT * FROM habits WHERE user_id = @userID and title = @title',
     substitutionValues: {
       'userID': id,
       'title': title,
@@ -196,10 +196,10 @@ Future<List<List<dynamic>>> selectGoalsByTitle(var databaseConnection, String id
   return results;
 }
 
-Future<List<List<dynamic>>> selectGoalsStarted(var databaseConnection, String id, DateTime date) async {
+Future<List<List<dynamic>>> selectHabitsStarted(String id, DateTime date) async {
   databaseConnection.open();
-  List<List<dynamic>> results = databaseConnection.query(
-    'SELECT * FROM goals WHERE user_id = @userID and start_date <= @date '
+  List<List<dynamic>> results = await databaseConnection.query(
+    'SELECT * FROM habits WHERE user_id = @userID and start_date <= @date '
         'and (end_date is NULL or end_date >= @date)',
     substitutionValues: {
       'userID': id,
@@ -209,10 +209,10 @@ Future<List<List<dynamic>>> selectGoalsStarted(var databaseConnection, String id
   return results;
 }
 
-Future<List<List<dynamic>>> selectGoalsEnded(var databaseConnection, String id, DateTime date) async {
+Future<List<List<dynamic>>> selectHabitsEnded(String id, DateTime date) async {
   databaseConnection.open();
-  List<List<dynamic>> results = databaseConnection.query(
-    'SELECT * FROM goals WHERE user_id = @userID and end_date < @date',
+  List<List<dynamic>> results = await databaseConnection.query(
+    'SELECT * FROM habits WHERE user_id = @userID and end_date < @date',
     substitutionValues: {
       'userID': id,
       'date': date,
@@ -221,10 +221,10 @@ Future<List<List<dynamic>>> selectGoalsEnded(var databaseConnection, String id, 
   return results;
 }
 
-Future<List<List<dynamic>>> selectGoalsByCategory(var databaseConnection, String id, String cat) async {
+Future<List<List<dynamic>>> selectHabitsByCategory(String id, String cat) async {
   databaseConnection.open();
-  List<List<dynamic>> results = databaseConnection.query(
-    'SELECT * FROM goals WHERE user_id = @userID and category = @category',
+  List<List<dynamic>> results = await databaseConnection.query(
+    'SELECT * FROM habits WHERE user_id = @userID and category = @category',
     substitutionValues: {
       'userID': id,
       'category': cat,
@@ -234,9 +234,9 @@ Future<List<List<dynamic>>> selectGoalsByCategory(var databaseConnection, String
 }
 
 // Achievements
-Future<List<List<dynamic>>> selectAchievements(var databaseConnection, String id) async {
+Future<List<List<dynamic>>> selectAchievements(String id) async {
   databaseConnection.open();
-  List<List<dynamic>> results = databaseConnection.query(
+  List<List<dynamic>> results = await databaseConnection.query(
     'SELECT * FROM achievements WHERE user_id = @userID',
     substitutionValues: {
       'userID': id,
@@ -245,21 +245,21 @@ Future<List<List<dynamic>>> selectAchievements(var databaseConnection, String id
   return results;
 }
 
-Future<List<List<dynamic>>> selectAchievementsByGoalID(var databaseConnection, String id, String goal) async {
+Future<List<List<dynamic>>> selectAchievementsByHabitID(String id, String habit) async {
   databaseConnection.open();
-  List<List<dynamic>> results = databaseConnection.query(
-    'SELECT * FROM achievements WHERE user_id = @userID and goal_id = @goalID',
+  List<List<dynamic>> results = await databaseConnection.query(
+    'SELECT * FROM achievements WHERE user_id = @userID and habit_id = @habitID',
     substitutionValues: {
       'userID': id,
-      'goalID': goal,
+      'habitID': habit,
     },
   );
   return results;
 }
 
-Future<List<List<dynamic>>> selectAchievementsByType(var databaseConnection, String id, String type) async{
+Future<List<List<dynamic>>> selectAchievementsByType(String id, String type) async{
   databaseConnection.open();
-  List<List<dynamic>> results = databaseConnection.query(
+  List<List<dynamic>> results = await databaseConnection.query(
     'SELECT * FROM achievements WHERE user_id = @userID and achievement_type = @achievementType',
     substitutionValues: {
       'userID': id,
@@ -269,8 +269,8 @@ Future<List<List<dynamic>>> selectAchievementsByType(var databaseConnection, Str
   return results;
 }
 
-Future<List<List<dynamic>>> selectAchievementsByDate(var databaseConnection, String id, DateTime date) async {
-  List<List<dynamic>> results = databaseConnection.query(
+Future<List<List<dynamic>>> selectAchievementsByDate(String id, DateTime date) async {
+  List<List<dynamic>> results = await databaseConnection.query(
     'SELECT * FROM achievements WHERE user_id = @userID and date = @date',
     substitutionValues: {
       'userID': id,
@@ -280,9 +280,9 @@ Future<List<List<dynamic>>> selectAchievementsByDate(var databaseConnection, Str
   return results;
 }
 
-Future<List<List<dynamic>>> selectAchievementsWithinDateRange(var databaseConnection, String id, DateTime start, DateTime end) async {
+Future<List<List<dynamic>>> selectAchievementsWithinDateRange(String id, DateTime start, DateTime end) async {
   databaseConnection.open();
-  List<List<dynamic>> results = databaseConnection.query(
+  List<List<dynamic>> results = await databaseConnection.query(
     'SELECT * FROM achievements WHERE user_id = @userID and date >= @startDate and date <= @endDate',
     substitutionValues: {
       'userID': id,
@@ -294,7 +294,7 @@ Future<List<List<dynamic>>> selectAchievementsWithinDateRange(var databaseConnec
 }
 
 //UPDATE functions
-Future<bool> updateUserUsername(var databaseConnection, String userID, String newUsername) async {
+Future<bool> updateUserUsername(String userID, String newUsername) async {
   try {
     await databaseConnection.open();
     await databaseConnection.query(
@@ -311,7 +311,7 @@ Future<bool> updateUserUsername(var databaseConnection, String userID, String ne
   }
 }
 
-Future<bool> updateUserFirstName(var databaseConnection, String userID, String newName) async {
+Future<bool> updateUserFirstName(String userID, String newName) async {
   try {
     await databaseConnection.open();
     await databaseConnection.query(
@@ -328,7 +328,7 @@ Future<bool> updateUserFirstName(var databaseConnection, String userID, String n
   }
 }
 
-Future<bool> updateUserLastName(var databaseConnection, String userID, String newName) async {
+Future<bool> updateUserLastName(String userID, String newName) async {
   try {
     await databaseConnection.open();
     await databaseConnection.query(
@@ -345,7 +345,7 @@ Future<bool> updateUserLastName(var databaseConnection, String userID, String ne
   }
 }
 
-Future<bool> updateUserPassword(var databaseConnection, String userID, String newPassword) async {
+Future<bool> updateUserPassword(String userID, String newPassword) async {
   try {
     await databaseConnection.open();
     await databaseConnection.query(
@@ -362,7 +362,7 @@ Future<bool> updateUserPassword(var databaseConnection, String userID, String ne
   }
 }
 
-Future<bool> updateUserEmail(var databaseConnection, String userID, String newEmail) async {
+Future<bool> updateUserEmail(String userID, String newEmail) async {
   try {
     await databaseConnection.open();
     await databaseConnection.query(
@@ -379,13 +379,13 @@ Future<bool> updateUserEmail(var databaseConnection, String userID, String newEm
   }
 }
 
-Future<bool> updateGoalTitle(var databaseConnection, String goalID, String newTitle) async {
+Future<bool> updateHabitTitle(String habitID, String newTitle) async {
   try {
     await databaseConnection.open();
     await databaseConnection.query(
-      'UPDATE goals SET title = @title WHERE goal_id = @id',
+      'UPDATE habits SET title = @title WHERE habit_id = @id',
       substitutionValues: {
-        'id': goalID,
+        'id': habitID,
         'title': newTitle,
       },
     );
@@ -396,13 +396,13 @@ Future<bool> updateGoalTitle(var databaseConnection, String goalID, String newTi
   }
 }
 
-Future<bool> updateGoalNote(var databaseConnection, String goalID, String newNote) async {
+Future<bool> updateHabitNote(String habitID, String newNote) async {
   try {
     await databaseConnection.open();
     await databaseConnection.query(
-      'UPDATE goals SET note = @note WHERE goal_id = @id',
+      'UPDATE habits SET note = @note WHERE habit_id = @id',
       substitutionValues: {
-        'id': goalID,
+        'id': habitID,
         'note': newNote,
       },
     );
@@ -413,13 +413,13 @@ Future<bool> updateGoalNote(var databaseConnection, String goalID, String newNot
   }
 }
 
-Future<bool> updateGoalEnd(var databaseConnection, String goalID, DateTime newEnd) async {
+Future<bool> updateHabitEnd(String habitID, DateTime newEnd) async {
   try {
     await databaseConnection.open();
     await databaseConnection.query(
-      'UPDATE goals SET end_date = @end WHERE goal_id = @id',
+      'UPDATE habits SET end_date = @end WHERE habit_id = @id',
       substitutionValues: {
-        'id': goalID,
+        'id': habitID,
         'end': newEnd,
       },
     );
@@ -430,13 +430,13 @@ Future<bool> updateGoalEnd(var databaseConnection, String goalID, DateTime newEn
   }
 }
 
-Future<bool> updateGoalFrequency(var databaseConnection, String goalID, String newFrequency) async {
+Future<bool> updateHabitFrequency(String habitID, String newFrequency) async {
   try {
     await databaseConnection.open();
     await databaseConnection.query(
-      'UPDATE goals SET frequency = @frequency WHERE goal_id = @id',
+      'UPDATE habits SET frequency = @frequency WHERE habit_id = @id',
       substitutionValues: {
-        'id': goalID,
+        'id': habitID,
         'frequency': newFrequency,
       },
     );
@@ -447,13 +447,13 @@ Future<bool> updateGoalFrequency(var databaseConnection, String goalID, String n
   }
 }
 
-Future<bool> updateGoalReminders(var databaseConnection, String goalID, bool newReminder) async {
+Future<bool> updateHabitReminders(String habitID, bool newReminder) async {
   try {
     await databaseConnection.open();
     await databaseConnection.query(
-      'UPDATE goals SET reminders = @reminder WHERE goal_id = @id',
+      'UPDATE habits SET reminders = @reminder WHERE habit_id = @id',
       substitutionValues: {
-        'id': goalID,
+        'id': habitID,
         'reminder': newReminder,
       },
     );
@@ -464,13 +464,13 @@ Future<bool> updateGoalReminders(var databaseConnection, String goalID, bool new
   }
 }
 
-Future<bool> updateGoalReminderMessage(var databaseConnection, String goalID, String newMessage) async {
+Future<bool> updateHabitReminderMessage(String habitID, String newMessage) async {
   try {
     await databaseConnection.open();
     await databaseConnection.query(
-      'UPDATE goals SET reminder_message = @message WHERE goal_id = @id',
+      'UPDATE habits SET reminder_message = @message WHERE habit_id = @id',
       substitutionValues: {
-        'id': goalID,
+        'id': habitID,
         'message': newMessage,
       },
     );
@@ -481,13 +481,13 @@ Future<bool> updateGoalReminderMessage(var databaseConnection, String goalID, St
   }
 }
 
-Future<bool> updateGoalTargetType(var databaseConnection, String goalID, String newType) async {
+Future<bool> updateHabitTargetType(String habitID, String newType) async {
   try {
     await databaseConnection.open();
     await databaseConnection.query(
-      'UPDATE goals SET target_type = @type WHERE goal_id = @id',
+      'UPDATE habits SET target_type = @type WHERE habit_id = @id',
       substitutionValues: {
-        'id': goalID,
+        'id': habitID,
         'type': newType,
       },
     );
@@ -498,13 +498,13 @@ Future<bool> updateGoalTargetType(var databaseConnection, String goalID, String 
   }
 }
 
-Future<bool> updateGoalCategory(var databaseConnection, String goalID, String newCategory) async {
+Future<bool> updateHabitCategory(String habitID, String newCategory) async {
   try {
     await databaseConnection.open();
     await databaseConnection.query(
-      'UPDATE goals SET category = @category WHERE goal_id = @id',
+      'UPDATE habits SET category = @category WHERE habit_id = @id',
       substitutionValues: {
-        'id': goalID,
+        'id': habitID,
         'category': newCategory,
       },
     );
@@ -515,13 +515,13 @@ Future<bool> updateGoalCategory(var databaseConnection, String goalID, String ne
   }
 }
 
-Future<bool> updateGoalQuantity(var databaseConnection, String goalID, String newQuantity) async {
+Future<bool> updateHabitQuantity(String habitID, String newQuantity) async {
   try {
     await databaseConnection.open();
     await databaseConnection.query(
-      'UPDATE goals SET quantity = @quantity WHERE goal_id = @id',
+      'UPDATE habits SET quantity = @quantity WHERE habit_id = @id',
       substitutionValues: {
-        'id': goalID,
+        'id': habitID,
         'quantity': newQuantity,
       },
     );
@@ -532,7 +532,7 @@ Future<bool> updateGoalQuantity(var databaseConnection, String goalID, String ne
   }
 }
 
-Future<bool> deleteUser(var databaseConnection, String username) async {
+Future<bool> deleteUser(String username) async {
   try {
     await databaseConnection.open();
     await databaseConnection.query(
@@ -548,19 +548,19 @@ Future<bool> deleteUser(var databaseConnection, String username) async {
   }
 }
 
-Future<bool> deleteGoalAndAchievements(var databaseConnection, String goalID) async {
+Future<bool> deleteHabitAndAchievements(String habitID) async {
   try {
     await databaseConnection.open();
     await databaseConnection.query(
-      'DELETE FROM goals WHERE goal_id = @id',
+      'DELETE FROM habits WHERE habit_id = @id',
       substitutionValues: {
-        'id': goalID,
+        'id': habitID,
       },
     );
     await databaseConnection.query(
-      'DELETE FROM achievements WHERE goal_id = @id',
+      'DELETE FROM achievements WHERE habit_id = @id',
       substitutionValues: {
-        'id': goalID,
+        'id': habitID,
       },
     );
     return true;
@@ -570,7 +570,7 @@ Future<bool> deleteGoalAndAchievements(var databaseConnection, String goalID) as
   }
 }
 
-Future<bool> deleteFriendships(var databaseConnection, String userID1, String userID2) async {
+Future<bool> deleteFriendships(String userID1, String userID2) async {
   try {
     await databaseConnection.open();
     await databaseConnection.query(
