@@ -2,7 +2,7 @@
 users:    user_id, username, password, email, first_name, last_name
 habits:    habit_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity
 friendships:   user1_id, user2_id
-achievements:    achievement_id, user_id, habit_id, achievement_type, achievement_description, date, timestamp, quantity
+achievements:    achievement_id, user_id, habit_id, achievement_title, date, timestamp, quantity
  */
 
 
@@ -90,19 +90,41 @@ Future<bool> createHabit(String userID, String title, String note, DateTime star
   }
 }
 
-Future<bool> createAchievement(String userID, String habitID, String achievementType, String achievementDescription, int? quantity) async {
+Future<bool> createAchievement(String userID, String habitID, String achievementTitle, int? quantity) async {
   try {
     await databaseConnection.open();
     DateTime now = DateTime.now(); //system date and timestamp
     await databaseConnection.query(
         'INSERT INTO achievements (user_id, habit_id, achievement_type, achievement_description, date, timestamp, quantity) '
-        'VALUES (@user_id, @habit_id, @achievement_type, @achievement_description, @date, @timestamp, @quantity)',
+        'VALUES (@user_id, @habit_id, @achievement_title, @date, @timestamp, @quantity)',
         substitutionValues: {
           'user_id': userID,
           'habit_id': habitID,
-          'achievement_type': achievementType,
-          'achievement_description': achievementDescription,
+          'achievement_type': achievementTitle,
           'date': DateFormat('yyyy-MM-dd').format(now),
+          'timestamp': DateFormat('yyyy-MM-dd hh:mm:ss').format(now),
+          'quantity': quantity,
+        },
+    );
+    return true;
+  } catch (e) {
+    debugPrint('Error: ${e.toString()}');
+    return false;
+  } finally {
+    databaseConnection.close();
+  }
+}
+
+Future<bool> createActivity(String userID, String habitID, String achievementTitle, int? quantity) async {
+  try {
+    await databaseConnection.open();
+    DateTime now = DateTime.now(); //system date and timestamp
+    await databaseConnection.query(
+        'INSERT INTO activities (user_id, habit_id, timestamp, quantity) '
+        'VALUES (@user_id, @habit_id, @timestamp, @quantity)',
+        substitutionValues: {
+          'user_id': userID,
+          'habit_id': habitID,
           'timestamp': DateFormat('yyyy-MM-dd hh:mm:ss').format(now),
           'quantity': quantity,
         },
@@ -260,7 +282,7 @@ Future<List<List<dynamic>>> selectAchievementsByHabitID(String id, String habit)
 Future<List<List<dynamic>>> selectAchievementsByType(String id, String type) async{
   databaseConnection.open();
   List<List<dynamic>> results = await databaseConnection.query(
-    'SELECT * FROM achievements WHERE user_id = @userID and achievement_type = @achievementType',
+    'SELECT * FROM achievements WHERE user_id = @userID and achievement_title = @achievementType',
     substitutionValues: {
       'userID': id,
       'achievementType': type,
@@ -284,6 +306,54 @@ Future<List<List<dynamic>>> selectAchievementsWithinDateRange(String id, DateTim
   databaseConnection.open();
   List<List<dynamic>> results = await databaseConnection.query(
     'SELECT * FROM achievements WHERE user_id = @userID and date >= @startDate and date <= @endDate',
+    substitutionValues: {
+      'userID': id,
+      'startDate': start,
+      'endDate': end,
+    },
+  );
+  return results;
+}
+
+//Activities
+Future<List<List<dynamic>>> selectActivities(String id) async {
+  databaseConnection.open();
+  List<List<dynamic>> results = await databaseConnection.query(
+    'SELECT * FROM activities WHERE user_id = @userID',
+    substitutionValues: {
+      'userID': id,
+    },
+  );
+  return results;
+}
+
+Future<List<List<dynamic>>> selectActivitiesByHabitID(String id, String habit) async {
+  databaseConnection.open();
+  List<List<dynamic>> results = await databaseConnection.query(
+    'SELECT * FROM activities WHERE user_id = @userID and habit_id = @habitID',
+    substitutionValues: {
+      'userID': id,
+      'habitID': habit,
+    },
+  );
+  return results;
+}
+
+Future<List<List<dynamic>>> selectActivitiesByDate(String id, DateTime date) async {
+  List<List<dynamic>> results = await databaseConnection.query(
+    'SELECT * FROM activities WHERE user_id = @userID and date = @date',
+    substitutionValues: {
+      'userID': id,
+      'date': date,
+    },
+  );
+  return results;
+}
+
+Future<List<List<dynamic>>> selectActivitiesWithinDateRange(String id, DateTime start, DateTime end) async {
+  databaseConnection.open();
+  List<List<dynamic>> results = await databaseConnection.query(
+    'SELECT * FROM activities WHERE user_id = @userID and date >= @startDate and date <= @endDate',
     substitutionValues: {
       'userID': id,
       'startDate': start,
@@ -532,6 +602,8 @@ Future<bool> updateHabitQuantity(String habitID, String newQuantity) async {
   }
 }
 
+//DELETE funcitons
+//User
 Future<bool> deleteUser(String username) async {
   try {
     await databaseConnection.open();
@@ -548,7 +620,8 @@ Future<bool> deleteUser(String username) async {
   }
 }
 
-Future<bool> deleteHabitAndAchievements(String habitID) async {
+//Habit, associated activities and achievements
+Future<bool> deleteHabitCascade(String habitID) async {
   try {
     await databaseConnection.open();
     await databaseConnection.query(
@@ -558,9 +631,47 @@ Future<bool> deleteHabitAndAchievements(String habitID) async {
       },
     );
     await databaseConnection.query(
+      'DELETE FROM activities WHERE habit_id = @id',
+      substitutionValues: {
+        'id': habitID,
+      },
+    );
+    await databaseConnection.query(
       'DELETE FROM achievements WHERE habit_id = @id',
       substitutionValues: {
         'id': habitID,
+      },
+    );
+    return true;
+  } catch (e) {
+    debugPrint('Error: ${e.toString()}');
+    return false;
+  }
+}
+
+Future<bool> deleteAchievement(String achievementID) async {
+  try {
+    await databaseConnection.open();
+    await databaseConnection.query(
+      'DELETE FROM achievements WHERE achievement_id = @id',
+      substitutionValues: {
+        'id': achievementID,
+      },
+    );
+    return true;
+  } catch (e) {
+    debugPrint('Error: ${e.toString()}');
+    return false;
+  }
+}
+
+Future<bool> deleteActivity(String activityID) async {
+  try {
+    await databaseConnection.open();
+    await databaseConnection.query(
+      'DELETE FROM activities WHERE activity_id = @id',
+      substitutionValues: {
+        'id': activityID,
       },
     );
     return true;
