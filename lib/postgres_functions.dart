@@ -1,25 +1,3 @@
-/* OPTIONS:
-  boolean createUser(String username, String password, String email, [String first, String last])
-  boolean createFriendship(String user1, String user2)
-  boolean createGoal(String userID, String title, String note, date start, date end, String frequency, Boolean reminders, [String reminderMessage], String targetType, String category, [int quantity])
-  boolean createAchievement(String userID, String goal_id, String achievementType, String achievementDescription, [int quantity])
-
-  List<List<dynamic>> selectUsersByUsername(String username)
-  List<List<dynamic>> selectUsersByEmail(String email)
-  List<List<dynamic>> selectUsersByName(String first, String last)
-  List<List<dynamic>> selectFriendsByUser(String userID)
-  List<List<dynamic>> selectGoalsByUserID(String id)
-  List<List<dynamic>> selectGoalsByTitle(String id, String title)
-  List<List<dynamic>> selectGoalsStarted(String id, date date)
-  List<List<dynamic>> selectGoalsEnded(String id, date date)
-  List<List<dynamic>> selectGoalsByCategory(String id, String cat)
-  List<List<dynamic>> selectAchievements(String id)
-  List<List<dynamic>> selectAchievementsByGoalID(String id, String goal)
-  List<List<dynamic>> selectAchievementsByType(String id, String type)
-  List<List<dynamic>> selectAchievementsByDate(String id, String type)
-  List<List<dynamic>> selectAchievementsByDateRange(String id, String type)
- */
-
 /* TABLE FIELDS
 users:    user_id, username, password, email, first_name, last_name
 goals:    goal_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity
@@ -27,10 +5,15 @@ friendships:   user1_id, user2_id
 achievements:    achievement_id, user_id, goal_id, achievement_type, achievement_description, date, timestamp, quantity
  */
 
+
+import 'dart:ffi';
+import 'package:flutter/cupertino.dart';
+import 'package:intl/intl.dart';
+
 //INSERT methods
-boolean createUser(String username, String password, String email, [String first, String last]) async {
+Future<bool> createUser(var databaseConnection, String username, String password, String email, String? first, String? last) async {
   try {
-    await connection.open();
+    await databaseConnection.open();
     var result = await databaseConnection.query(
         'INSERT INTO users(username, password, email, first_name, last_name) VALUES (@username, @password, @email, @firstname, @lastname)',
         substitutionValues: {
@@ -43,15 +26,17 @@ boolean createUser(String username, String password, String email, [String first
     );
     print(result);
     return true;
-  } on PostgreSQLException catch (e) {
+  } catch (e) {
     print('Error: ${e.toString()}');
     return false;
+  } finally {
+    await databaseConnection.close();
   }
 }
 
-boolean createFriendship(String user1, String user2) async {
+Future<bool> createFriendship(var databaseConnection, String user1, String user2) async {
   try {
-    await connection.open();
+    await databaseConnection.open();
     var result = await databaseConnection.query(
         'INSERT INTO friendships (user1_id, user2_id) VALUES (@user1, @user2)',
         substitutionValues: {
@@ -59,18 +44,20 @@ boolean createFriendship(String user1, String user2) async {
           'user2': user2
         }
     );
-    print(result)
+    print(result);
     return true;
-  } on PostgreSQLException catch (e) {
+  } catch (e) {
     print('Error: ${e.toString()}');
     return false;
+  } finally {
+    await databaseConnection.close();
   }
 }
 
-boolean createGoal(String userID, String title, String note, date start, date end, String frequency, Boolean reminders, [String reminderMessage], String targetType, String category, [int quantity]) async {
+Future<bool> createGoal(var databaseConnection, String userID, String title, String note, DateTime start, DateTime end, String frequency, bool reminders, String? reminderMessage, String targetType, String category, int? quantity) async {
   try {
-    await connection.open();
-    var result = await databaseConnection.query(
+    await databaseConnection.open();
+    var results = await databaseConnection.query(
       'INSERT INTO goals (user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity) '
       'VALUES (@user_id, @title, @note, @start_date, @end_date, @frequency, @reminders, @reminder_message, @target_type, @category, @quantity)',
       substitutionValues: {
@@ -87,19 +74,21 @@ boolean createGoal(String userID, String title, String note, date start, date en
         'quantity': quantity
       }
     );
-    print(results)
+    print(results);
     return true;
-  } on PostgreSQLException catch (e) {
+  } catch (e) {
     print('Error: ${e.toString()}');
     return false;
+  } finally {
+    databaseConnection.close();
   }
 }
 
-boolean createAchievement(String userID, String goal_id, String achievementType, String achievementDescription, [int quantity]) async {
+Future<bool> createAchievement(var databaseConnection, String userID, String goal_id, String achievementType, String achievementDescription, int? quantity) async {
   try {
-    await connection.open();
-    DateTime now = DateTime.now() //system date and timestamp
-    var result = await databaseConnection.query(
+    await databaseConnection.open();
+    DateTime now = DateTime.now(); //system date and timestamp
+    var results = await databaseConnection.query(
         'INSERT INTO goals (user_id, goal_id, achievement_type, achievement_description, date, timestamp, quantity) '
         'VALUES (@user_id, @goal_id, @achievement_type, @achievement_description, @date, @timestamp, @quantity)',
         substitutionValues: {
@@ -112,18 +101,20 @@ boolean createAchievement(String userID, String goal_id, String achievementType,
           'quantity': quantity
         }
     );
-    print(results)
+    print(results);
     return true;
-  } on PostgreSQLException catch (e) {
+  } catch (e) {
     print('Error: ${e.toString()}');
     return false;
+  } finally {
+    databaseConnection.close();
   }
 }
 
 //SELECT Functions
 // Users
-List<List<dynamic>> selectUsersByUsername(String username){
-  List<List<dynamic>> results = await connection.query(
+List<List<dynamic>> selectUsersByUsername(var databaseConnection, String username){
+  List<List<dynamic>> results = databaseConnection.query(
     'SELECT * FROM users WHERE username = @name',
     substitutionValues: {
       'name': username
@@ -132,8 +123,8 @@ List<List<dynamic>> selectUsersByUsername(String username){
   return results;
 }
 
-List<List<dynamic>> selectUsersByEmail(String email){
-  List<List<dynamic>> results = await connection.query(
+List<List<dynamic>> selectUsersByEmail(var databaseConnection, String email){
+  List<List<dynamic>> results = databaseConnection.query(
     'SELECT * FROM users WHERE email = @email',
     substitutionValues: {
       'email': email
@@ -142,8 +133,8 @@ List<List<dynamic>> selectUsersByEmail(String email){
   return results;
 }
 
-List<List<dynamic>> selectUsersByName(String first, String last){
-  List<List<dynamic>> results = await connection.query(
+List<List<dynamic>> selectUsersByName(var databaseConnection, String first, String last){
+  List<List<dynamic>> results = databaseConnection.query(
     'SELECT * FROM users WHERE first_name = @firstname AND last_name = @lastname',
     substitutionValues: {
       'firstname': first,
@@ -154,14 +145,14 @@ List<List<dynamic>> selectUsersByName(String first, String last){
 }
 
 // Friendships
-List<List<dynamic>> selectFriendsByUser(String userID){
-  List<List<dynamic>> results = await connection.query(
+List<List<dynamic>> selectFriendsByUser(var databaseConnection, String userID){
+  List<List<dynamic>> results = databaseConnection.query(
     'SELECT user2_id FROM users WHERE user1_id = @id',
     substitutionValues: {
       'id': userID
     }
   );
-  List<List<dynamic>> results2 = await connection.query(
+  List<List<dynamic>> results2 = databaseConnection.query(
     'SELECT user1_id FROM users WHERE user2_id = @id',
     substitutionValues: {
       'id': userID
@@ -173,8 +164,8 @@ List<List<dynamic>> selectFriendsByUser(String userID){
 }
 
 // Goals
-List<List<dynamic>> selectGoalsByUserID(String id){
-  List<List<dynamic>> results = await connection.query(
+List<List<dynamic>> selectGoalsByUserID(var databaseConnection, String id){
+  List<List<dynamic>> results = databaseConnection.query(
     'SELECT * FROM goals WHERE user_id = @userID',
     substitutionValues: {
       'userID': id
@@ -183,8 +174,8 @@ List<List<dynamic>> selectGoalsByUserID(String id){
   return results;
 }
 
-List<List<dynamic>> selectGoalsByTitle(String id, String title){
-  List<List<dynamic>> results = await connection.query(
+List<List<dynamic>> selectGoalsByTitle(var databaseConnection, String id, String title){
+  List<List<dynamic>> results = databaseConnection.query(
     'SELECT * FROM goals WHERE user_id = @userID and title = @title',
     substitutionValues: {
       'userID': id,
@@ -194,8 +185,8 @@ List<List<dynamic>> selectGoalsByTitle(String id, String title){
   return results;
 }
 
-List<List<dynamic>> selectGoalsStarted(String id, date date){
-  List<List<dynamic>> results = await connection.query(
+List<List<dynamic>> selectGoalsStarted(var databaseConnection, String id, DateTime date){
+  List<List<dynamic>> results = databaseConnection.query(
     'SELECT * FROM goals WHERE user_id = @userID and start_date <= @date '
         'and (end_date is NULL or end_date >= @date)',
     substitutionValues: {
@@ -206,8 +197,8 @@ List<List<dynamic>> selectGoalsStarted(String id, date date){
   return results;
 }
 
-List<List<dynamic>> selectGoalsEnded(String id, date date){
-  List<List<dynamic>> results = await connection.query(
+List<List<dynamic>> selectGoalsEnded(var databaseConnection, String id, DateTime date){
+  List<List<dynamic>> results = databaseConnection.query(
     'SELECT * FROM goals WHERE user_id = @userID and end_date < @date',
     substitutionValues: {
       'userID': id,
@@ -217,8 +208,8 @@ List<List<dynamic>> selectGoalsEnded(String id, date date){
   return results;
 }
 
-List<List<dynamic>> selectGoalsByCategory(String id, String cat){
-  List<List<dynamic>> results = await connection.query(
+List<List<dynamic>> selectGoalsByCategory(var databaseConnection, String id, String cat){
+  List<List<dynamic>> results = databaseConnection.query(
     'SELECT * FROM goals WHERE user_id = @userID and category = @category',
     substitutionValues: {
       'userID': id,
@@ -229,8 +220,8 @@ List<List<dynamic>> selectGoalsByCategory(String id, String cat){
 }
 
 // Achievements
-List<List<dynamic>> selectAchievements(String id){
-  List<List<dynamic>> results = await connection.query(
+List<List<dynamic>> selectAchievements(var databaseConnection, String id){
+  List<List<dynamic>> results = databaseConnection.query(
     'SELECT * FROM achievements WHERE user_id = @userID',
     substitutionValues: {
       'userID': id
@@ -239,8 +230,8 @@ List<List<dynamic>> selectAchievements(String id){
   return results;
 }
 
-List<List<dynamic>> selectAchievementsByGoalID(String id, String goal){
-  List<List<dynamic>> results = await connection.query(
+List<List<dynamic>> selectAchievementsByGoalID(var databaseConnection, String id, String goal){
+  List<List<dynamic>> results = databaseConnection.query(
     'SELECT * FROM achievements WHERE user_id = @userID and goal_id = @goalID',
     substitutionValues: {
       'userID': id,
@@ -250,8 +241,8 @@ List<List<dynamic>> selectAchievementsByGoalID(String id, String goal){
   return results;
 }
 
-List<List<dynamic>> selectAchievementsByType(String id, String type){
-  List<List<dynamic>> results = await connection.query(
+List<List<dynamic>> selectAchievementsByType(var databaseConnection, String id, String type){
+  List<List<dynamic>> results = databaseConnection.query(
     'SELECT * FROM achievements WHERE user_id = @userID and achievement_type = @achievementType',
     substitutionValues: {
       'userID': id,
@@ -261,8 +252,8 @@ List<List<dynamic>> selectAchievementsByType(String id, String type){
   return results;
 }
 
-List<List<dynamic>> selectAchievementsByDate(String id, Date date){
-  List<List<dynamic>> results = await connection.query(
+List<List<dynamic>> selectAchievementsByDate(var databaseConnection, String id, DateTime date){
+  List<List<dynamic>> results = databaseConnection.query(
     'SELECT * FROM achievements WHERE user_id = @userID and date = @date',
     substitutionValues: {
       'userID': id,
@@ -272,8 +263,8 @@ List<List<dynamic>> selectAchievementsByDate(String id, Date date){
   return results;
 }
 
-List<List<dynamic>> selectAchievementsWithinDateRange(String id, Date start, Date end){
-  List<List<dynamic>> results = await connection.query(
+List<List<dynamic>> selectAchievementsWithinDateRange(var databaseConnection, String id, DateTime start, DateTime end){
+  List<List<dynamic>> results = databaseConnection.query(
     'SELECT * FROM achievements WHERE user_id = @userID and date >= @startDate and date <= @endDate',
     substitutionValues: {
       'userID': id,
@@ -285,10 +276,10 @@ List<List<dynamic>> selectAchievementsWithinDateRange(String id, Date start, Dat
 }
 
 //UPDATE functions
-Boolean updateUserUsername(String userID, String newUsername) async {
+Future<bool> updateUserUsername(var databaseConnection, String userID, String newUsername) async {
   try {
-    await connection.open();
-    await connection.query(
+    await databaseConnection.open();
+    await databaseConnection.query(
       'UPDATE users SET username = @username WHERE user_id = @id',
       substitutionValues: {
         'id': userID,
@@ -302,10 +293,10 @@ Boolean updateUserUsername(String userID, String newUsername) async {
   }
 }
 
-Boolean updateUserFirstName(String userID, String newName) async {
+Future<bool> updateUserFirstName(var databaseConnection, String userID, String newName) async {
   try {
-    await connection.open();
-    await connection.query(
+    await databaseConnection.open();
+    await databaseConnection.query(
       'UPDATE users SET first_name = @firstName WHERE user_id = @id',
       substitutionValues: {
         'id': userID,
@@ -319,10 +310,10 @@ Boolean updateUserFirstName(String userID, String newName) async {
   }
 }
 
-Boolean updateUserLastName(String userID, String newName) async {
+Future<bool> updateUserLastName(var databaseConnection, String userID, String newName) async {
   try {
-    await connection.open();
-    await connection.query(
+    await databaseConnection.open();
+    await databaseConnection.query(
       'UPDATE users SET last_name = @lastName WHERE user_id = @id',
       substitutionValues: {
         'id': userID,
@@ -336,10 +327,10 @@ Boolean updateUserLastName(String userID, String newName) async {
   }
 }
 
-Boolean updateUserPassword(String userID, String newPassword) async {
+Future<bool> updateUserPassword(var databaseConnection, String userID, String newPassword) async {
   try {
-    await connection.open();
-    await connection.query(
+    await databaseConnection.open();
+    await databaseConnection.query(
       'UPDATE users SET password = @password WHERE user_id = @id',
       substitutionValues: {
         'id': userID,
@@ -353,10 +344,10 @@ Boolean updateUserPassword(String userID, String newPassword) async {
   }
 }
 
-Boolean updateUserEmail(String userID, String newEmail) async {
+Future<bool> updateUserEmail(var databaseConnection, String userID, String newEmail) async {
   try {
-    await connection.open();
-    await connection.query(
+    await databaseConnection.open();
+    await databaseConnection.query(
       'UPDATE users SET email = @email WHERE user_id = @id',
       substitutionValues: {
         'id': userID,
@@ -370,10 +361,10 @@ Boolean updateUserEmail(String userID, String newEmail) async {
   }
 }
 
-Boolean updateGoalTitle(String goalID, String newTitle) async {
+Future<bool> updateGoalTitle(var databaseConnection, String goalID, String newTitle) async {
   try {
-    await connection.open();
-    await connection.query(
+    await databaseConnection.open();
+    await databaseConnection.query(
       'UPDATE goals SET title = @title WHERE goal_id = @id',
       substitutionValues: {
         'id': goalID,
@@ -387,10 +378,10 @@ Boolean updateGoalTitle(String goalID, String newTitle) async {
   }
 }
 
-Boolean updateGoalNote(String goalID, String newNote) async {
+Future<bool> updateGoalNote(var databaseConnection, String goalID, String newNote) async {
   try {
-    await connection.open();
-    await connection.query(
+    await databaseConnection.open();
+    await databaseConnection.query(
       'UPDATE goals SET note = @note WHERE goal_id = @id',
       substitutionValues: {
         'id': goalID,
@@ -404,10 +395,10 @@ Boolean updateGoalNote(String goalID, String newNote) async {
   }
 }
 
-Boolean updateGoalEnd(String goalID, Date newEnd) async {
+Future<bool> updateGoalEnd(var databaseConnection, String goalID, DateTime newEnd) async {
   try {
-    await connection.open();
-    await connection.query(
+    await databaseConnection.open();
+    await databaseConnection.query(
       'UPDATE goals SET end_date = @end WHERE goal_id = @id',
       substitutionValues: {
         'id': goalID,
@@ -421,10 +412,10 @@ Boolean updateGoalEnd(String goalID, Date newEnd) async {
   }
 }
 
-Boolean updateGoalFrequency(String goalID, String newFrequency) async {
+Future<bool> updateGoalFrequency(var databaseConnection, String goalID, String newFrequency) async {
   try {
-    await connection.open();
-    await connection.query(
+    await databaseConnection.open();
+    await databaseConnection.query(
       'UPDATE goals SET frequency = @frequency WHERE goal_id = @id',
       substitutionValues: {
         'id': goalID,
@@ -438,10 +429,10 @@ Boolean updateGoalFrequency(String goalID, String newFrequency) async {
   }
 }
 
-Boolean updateGoalReminders(String goalID, Boolean newReminder) async {
+Future<bool> updateGoalReminders(var databaseConnection, String goalID, bool newReminder) async {
   try {
-    await connection.open();
-    await connection.query(
+    await databaseConnection.open();
+    await databaseConnection.query(
       'UPDATE goals SET reminders = @reminder WHERE goal_id = @id',
       substitutionValues: {
         'id': goalID,
@@ -455,10 +446,10 @@ Boolean updateGoalReminders(String goalID, Boolean newReminder) async {
   }
 }
 
-Boolean updateGoalReminderMessage(String goalID, String newMessage) async {
+Future<bool> updateGoalReminderMessage(var databaseConnection, String goalID, String newMessage) async {
   try {
-    await connection.open();
-    await connection.query(
+    await databaseConnection.open();
+    await databaseConnection.query(
       'UPDATE goals SET reminder_message = @message WHERE goal_id = @id',
       substitutionValues: {
         'id': goalID,
@@ -472,10 +463,10 @@ Boolean updateGoalReminderMessage(String goalID, String newMessage) async {
   }
 }
 
-Boolean updateGoalTargetType(String goalID, String newType) async {
+Future<bool> updateGoalTargetType(var databaseConnection, String goalID, String newType) async {
   try {
-    await connection.open();
-    await connection.query(
+    await databaseConnection.open();
+    await databaseConnection.query(
       'UPDATE goals SET target_type = @type WHERE goal_id = @id',
       substitutionValues: {
         'id': goalID,
@@ -489,10 +480,10 @@ Boolean updateGoalTargetType(String goalID, String newType) async {
   }
 }
 
-Boolean updateGoalCategory(String goalID, String newCategory) async {
+Future<bool> updateGoalCategory(var databaseConnection, String goalID, String newCategory) async {
   try {
-    await connection.open();
-    await connection.query(
+    await databaseConnection.open();
+    await databaseConnection.query(
       'UPDATE goals SET category = @category WHERE goal_id = @id',
       substitutionValues: {
         'id': goalID,
@@ -506,10 +497,10 @@ Boolean updateGoalCategory(String goalID, String newCategory) async {
   }
 }
 
-Boolean updateGoalQuantity(String goalID, String newQuantity) async {
+Future<bool> updateGoalQuantity(var databaseConnection, String goalID, String newQuantity) async {
   try {
-    await connection.open();
-    await connection.query(
+    await databaseConnection.open();
+    await databaseConnection.query(
       'UPDATE goals SET quantity = @quantity WHERE goal_id = @id',
       substitutionValues: {
         'id': goalID,
@@ -523,10 +514,10 @@ Boolean updateGoalQuantity(String goalID, String newQuantity) async {
   }
 }
 
-Boolean deleteUser(String username) async {
+Future<bool> deleteUser(var databaseConnection, String username) async {
   try {
-    await connection.open();
-    await connection.query(
+    await databaseConnection.open();
+    await databaseConnection.query(
       'DELETE FROM users WHERE username = @username',
       substitutionValues: {
         'username': username
@@ -539,16 +530,16 @@ Boolean deleteUser(String username) async {
   }
 }
 
-Boolean deleteGoalAndAchievements(String goalID) async {
+Future<bool> deleteGoalAndAchievements(var databaseConnection, String goalID) async {
   try {
-    await connection.open();
-    await connection.query(
+    await databaseConnection.open();
+    await databaseConnection.query(
       'DELETE FROM goals WHERE goal_id = @id',
       substitutionValues: {
         'id': goalID
       }
     );
-    await connection.query(
+    await databaseConnection.query(
       'DELETE FROM achievements WHERE goal_id = @id',
       substitutionValues: {
         'id': goalID
@@ -561,14 +552,14 @@ Boolean deleteGoalAndAchievements(String goalID) async {
   }
 }
 
-Boolean deleteFriendships(String userID1, String userID2) async {
+Future<bool> deleteFriendships(var databaseConnection, String userID1, String userID2) async {
   try {
-    await connection.open();
-    await connection.query(
+    await databaseConnection.open();
+    await databaseConnection.query(
       'DELETE FROM friendships WHERE (user1_id = @id1 and user2_id = @id2) '
       'or (user2_id = @id1 and user1_id = @id2)',
       substitutionValues: {
-        'id1': userID1
+        'id1': userID1,
         'id2': userID2
       }
     );
