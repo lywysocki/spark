@@ -9,9 +9,18 @@ achievements:    achievement_id, user_id, goal_id, achievement_type, achievement
 import 'dart:ffi';
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
+import 'package:postgres/postgres.dart';
+
+final databaseConnection = PostgreSQLConnection(
+  '192.168.56.1', // host //change to 192.168.56.1 (Jill's IP address)
+  5432, // port
+  'spark', // database name
+  username: 'postgres', // username
+  password: 'get\$park3d!', // password
+);
 
 //INSERT methods
-Future<bool> createUser(var databaseConnection, String username, String password, String email, String? first, String? last) async {
+Future<bool> createUser(String username, String password, String email, String? first, String? last) async {
   try {
     await databaseConnection.open();
     var result = await databaseConnection.query(
@@ -34,7 +43,7 @@ Future<bool> createUser(var databaseConnection, String username, String password
   }
 }
 
-Future<bool> createFriendship(var databaseConnection, String user1, String user2) async {
+Future<bool> createFriendship(String user1, String user2) async {
   try {
     await databaseConnection.open();
     var result = await databaseConnection.query(
@@ -54,7 +63,7 @@ Future<bool> createFriendship(var databaseConnection, String user1, String user2
   }
 }
 
-Future<bool> createGoal(var databaseConnection, String userID, String title, String note, DateTime start, DateTime end, String frequency, bool reminders, String? reminderMessage, String targetType, String category, int? quantity) async {
+Future<bool> createGoal(String userID, String title, String note, DateTime start, DateTime end, String frequency, bool reminders, String? reminderMessage, String targetType, String category, int? quantity) async {
   try {
     await databaseConnection.open();
     var results = await databaseConnection.query(
@@ -84,7 +93,7 @@ Future<bool> createGoal(var databaseConnection, String userID, String title, Str
   }
 }
 
-Future<bool> createAchievement(var databaseConnection, String userID, String goal_id, String achievementType, String achievementDescription, int? quantity) async {
+Future<bool> createAchievement(String userID, String goal_id, String achievementType, String achievementDescription, int? quantity) async {
   try {
     await databaseConnection.open();
     DateTime now = DateTime.now(); //system date and timestamp
@@ -113,8 +122,9 @@ Future<bool> createAchievement(var databaseConnection, String userID, String goa
 
 //SELECT Functions
 // Users
-List<List<dynamic>> selectUsersByUsername(var databaseConnection, String username){
-  List<List<dynamic>> results = databaseConnection.query(
+Future<List<List<dynamic>>> selectUsersByUsername(String username) async{
+  databaseConnection.open();
+  List<List<dynamic>> results = await databaseConnection.query(
     'SELECT * FROM users WHERE username = @name',
     substitutionValues: {
       'name': username
@@ -123,7 +133,8 @@ List<List<dynamic>> selectUsersByUsername(var databaseConnection, String usernam
   return results;
 }
 
-List<List<dynamic>> selectUsersByEmail(var databaseConnection, String email){
+Future<List<List<dynamic>>> selectUsersByEmail(var databaseConnection, String email) async {
+  databaseConnection.open();
   List<List<dynamic>> results = databaseConnection.query(
     'SELECT * FROM users WHERE email = @email',
     substitutionValues: {
@@ -133,7 +144,8 @@ List<List<dynamic>> selectUsersByEmail(var databaseConnection, String email){
   return results;
 }
 
-List<List<dynamic>> selectUsersByName(var databaseConnection, String first, String last){
+Future<List<List<dynamic>>> selectUsersByName(var databaseConnection, String first, String last) async {
+  databaseConnection.open();
   List<List<dynamic>> results = databaseConnection.query(
     'SELECT * FROM users WHERE first_name = @firstname AND last_name = @lastname',
     substitutionValues: {
@@ -145,7 +157,8 @@ List<List<dynamic>> selectUsersByName(var databaseConnection, String first, Stri
 }
 
 // Friendships
-List<List<dynamic>> selectFriendsByUser(var databaseConnection, String userID){
+Future<List<List<dynamic>>> selectFriendsByUser(var databaseConnection, String userID) async {
+  databaseConnection.open();
   List<List<dynamic>> results = databaseConnection.query(
     'SELECT user2_id FROM users WHERE user1_id = @id',
     substitutionValues: {
@@ -164,7 +177,8 @@ List<List<dynamic>> selectFriendsByUser(var databaseConnection, String userID){
 }
 
 // Goals
-List<List<dynamic>> selectGoalsByUserID(var databaseConnection, String id){
+Future<List<List<dynamic>>> selectGoalsByUserID(var databaseConnection, String id) async {
+  databaseConnection.open();
   List<List<dynamic>> results = databaseConnection.query(
     'SELECT * FROM goals WHERE user_id = @userID',
     substitutionValues: {
@@ -174,7 +188,8 @@ List<List<dynamic>> selectGoalsByUserID(var databaseConnection, String id){
   return results;
 }
 
-List<List<dynamic>> selectGoalsByTitle(var databaseConnection, String id, String title){
+Future<List<List<dynamic>>> selectGoalsByTitle(var databaseConnection, String id, String title) async {
+  databaseConnection.open();
   List<List<dynamic>> results = databaseConnection.query(
     'SELECT * FROM goals WHERE user_id = @userID and title = @title',
     substitutionValues: {
@@ -185,7 +200,8 @@ List<List<dynamic>> selectGoalsByTitle(var databaseConnection, String id, String
   return results;
 }
 
-List<List<dynamic>> selectGoalsStarted(var databaseConnection, String id, DateTime date){
+Future<List<List<dynamic>>> selectGoalsStarted(var databaseConnection, String id, DateTime date) async {
+  databaseConnection.open();
   List<List<dynamic>> results = databaseConnection.query(
     'SELECT * FROM goals WHERE user_id = @userID and start_date <= @date '
         'and (end_date is NULL or end_date >= @date)',
@@ -197,7 +213,8 @@ List<List<dynamic>> selectGoalsStarted(var databaseConnection, String id, DateTi
   return results;
 }
 
-List<List<dynamic>> selectGoalsEnded(var databaseConnection, String id, DateTime date){
+Future<List<List<dynamic>>> selectGoalsEnded(var databaseConnection, String id, DateTime date) async {
+  databaseConnection.open();
   List<List<dynamic>> results = databaseConnection.query(
     'SELECT * FROM goals WHERE user_id = @userID and end_date < @date',
     substitutionValues: {
@@ -208,7 +225,8 @@ List<List<dynamic>> selectGoalsEnded(var databaseConnection, String id, DateTime
   return results;
 }
 
-List<List<dynamic>> selectGoalsByCategory(var databaseConnection, String id, String cat){
+Future<List<List<dynamic>>> selectGoalsByCategory(var databaseConnection, String id, String cat) async {
+  databaseConnection.open();
   List<List<dynamic>> results = databaseConnection.query(
     'SELECT * FROM goals WHERE user_id = @userID and category = @category',
     substitutionValues: {
@@ -220,7 +238,8 @@ List<List<dynamic>> selectGoalsByCategory(var databaseConnection, String id, Str
 }
 
 // Achievements
-List<List<dynamic>> selectAchievements(var databaseConnection, String id){
+Future<List<List<dynamic>>> selectAchievements(var databaseConnection, String id) async {
+  databaseConnection.open();
   List<List<dynamic>> results = databaseConnection.query(
     'SELECT * FROM achievements WHERE user_id = @userID',
     substitutionValues: {
@@ -230,7 +249,8 @@ List<List<dynamic>> selectAchievements(var databaseConnection, String id){
   return results;
 }
 
-List<List<dynamic>> selectAchievementsByGoalID(var databaseConnection, String id, String goal){
+Future<List<List<dynamic>>> selectAchievementsByGoalID(var databaseConnection, String id, String goal) async {
+  databaseConnection.open();
   List<List<dynamic>> results = databaseConnection.query(
     'SELECT * FROM achievements WHERE user_id = @userID and goal_id = @goalID',
     substitutionValues: {
@@ -241,7 +261,8 @@ List<List<dynamic>> selectAchievementsByGoalID(var databaseConnection, String id
   return results;
 }
 
-List<List<dynamic>> selectAchievementsByType(var databaseConnection, String id, String type){
+Future<List<List<dynamic>>> selectAchievementsByType(var databaseConnection, String id, String type) async{
+  databaseConnection.open();
   List<List<dynamic>> results = databaseConnection.query(
     'SELECT * FROM achievements WHERE user_id = @userID and achievement_type = @achievementType',
     substitutionValues: {
@@ -252,7 +273,7 @@ List<List<dynamic>> selectAchievementsByType(var databaseConnection, String id, 
   return results;
 }
 
-List<List<dynamic>> selectAchievementsByDate(var databaseConnection, String id, DateTime date){
+Future<List<List<dynamic>>> selectAchievementsByDate(var databaseConnection, String id, DateTime date) async {
   List<List<dynamic>> results = databaseConnection.query(
     'SELECT * FROM achievements WHERE user_id = @userID and date = @date',
     substitutionValues: {
@@ -263,7 +284,8 @@ List<List<dynamic>> selectAchievementsByDate(var databaseConnection, String id, 
   return results;
 }
 
-List<List<dynamic>> selectAchievementsWithinDateRange(var databaseConnection, String id, DateTime start, DateTime end){
+Future<List<List<dynamic>>> selectAchievementsWithinDateRange(var databaseConnection, String id, DateTime start, DateTime end) async {
+  databaseConnection.open();
   List<List<dynamic>> results = databaseConnection.query(
     'SELECT * FROM achievements WHERE user_id = @userID and date >= @startDate and date <= @endDate',
     substitutionValues: {
