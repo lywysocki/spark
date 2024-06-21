@@ -141,6 +141,24 @@ Future<bool> createActivity(String userID, String habitID, String achievementTit
 
 //SELECT Functions
 // Users
+Future<List<List<dynamic>>> selectUsersByUserID(String id) async{
+  try{
+    databaseConnection.open();
+    List<List<dynamic>> results = await databaseConnection.query(
+      'SELECT * FROM users WHERE user_id = @id',
+      substitutionValues: {
+        'id': id,
+      },
+    );
+    return results;
+  } catch (e) {
+    debugPrint('Error: ${e.toString()}');
+    return List.empty();
+  } finally {
+    await databaseConnection.close();
+  }
+}
+
 Future<List<List<dynamic>>> selectUsersByUsername(String username) async{
   try{
     databaseConnection.open();
@@ -185,6 +203,26 @@ Future<List<List<dynamic>>> selectUsersByName(String first, String last) async {
       substitutionValues: {
         'firstname': first,
         'lastname': last,
+      },
+    );
+    return results;
+  } catch (e) {
+    debugPrint('Error: ${e.toString()}');
+    return List.empty();
+  } finally {
+    await databaseConnection.close();
+  }
+}
+
+Future<List<List<dynamic>>> selectUsersLogin(String user, String password) async {
+  try{
+    databaseConnection.open();
+    List<List<dynamic>> results = await databaseConnection.query(
+      'SELECT user_id FROM users WHERE (username = @username OR email = @email) AND password = @password',
+      substitutionValues: {
+        'username': user,
+        'email': user,
+        'password': password,
       },
     );
     return results;
