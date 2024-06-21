@@ -3,6 +3,7 @@ users:    user_id, username, password, email, first_name, last_name
 habits:    habit_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity
 friendships:   user1_id, user2_id
 achievements:    achievement_id, user_id, habit_id, achievement_title, date, timestamp, quantity
+activities: user_id, habit_id, timestamp, quanity
  */
 
 
