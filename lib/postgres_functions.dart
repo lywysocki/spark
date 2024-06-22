@@ -261,6 +261,26 @@ Future<List<List<dynamic>>> selectHabitsByTitle(String id, String title) async {
   }
 }
 
+Future<List<List<dynamic>>> selectHabitsByDate(String id, DateTime date) async {
+  try{
+    databaseConnection.open();
+    List<List<dynamic>> results = await databaseConnection.query(
+      'SELECT * FROM habits WHERE user_id = @userID and start_date <= @date '
+          'and (end_date is NULL or end_date >= @date)',
+      substitutionValues: {
+        'userID': id,
+        'date': date,
+      },
+    );
+    return results;
+  } catch (e) {
+    debugPrint('Error: ${e.toString()}');
+    return List.empty();
+  } finally {
+    await databaseConnection.close();
+  }
+}
+
 Future<List<List<dynamic>>> selectHabitsStarted(String id, DateTime date) async {
   try{
     databaseConnection.open();
