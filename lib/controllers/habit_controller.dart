@@ -1,5 +1,5 @@
 import 'dart:ffi';
-
+import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import 'package:spark/postgres_functions.dart';
 
@@ -85,4 +85,18 @@ Future<String> createNewHabit(String userID, String title, String note, DateTime
     return("Complete");
   }
 
+}
+
+//All Habit View
+
+
+//Habit View
+Future<void> deleteHabit(String userID, String title) async {
+  List<List<dynamic>> habits = await selectHabitsByTitle(userID, title);
+
+  if(habits.length==1){
+    deleteHabit(userID, title);
+  } else {
+    debugPrint('Tried to delete habit $title, but there were more than one habits by that name for this user.');
+  }
 }
