@@ -88,9 +88,16 @@ Future<String> createNewHabit(String userID, String title, String note, DateTime
 }
 
 //All Habit View
+Future<List<List<dynamic>>> viewAllHabits(String userID){
+  
+}
 
 
 //Habit View
+Future<List<dynamic>> viewHabit(String userID, String title){
+
+}
+
 Future<void> deleteHabit(String userID, String title) async {
   List<List<dynamic>> habits = await selectHabitsByTitle(userID, title);
 
