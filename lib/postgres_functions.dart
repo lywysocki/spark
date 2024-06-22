@@ -201,13 +201,27 @@ Future<List<List<dynamic>>> selectFriendsByUser(String userID) async {
   try{
     databaseConnection.open();
     List<List<dynamic>> results = await databaseConnection.query(
-      'SELECT user2_id FROM users WHERE user1_id = @id',
+      '''SELECT 
+          friends.user2_id,
+          users.username
+          users.first_name,
+          users.last_name
+        FROM friends
+        JOIN users on friends.user2_id == users.user_id
+        WHERE user1_id = @id ''',
       substitutionValues: {
         'id': userID,
       },
     );
     List<List<dynamic>> results2 = await databaseConnection.query(
-      'SELECT user1_id FROM users WHERE user2_id = @id',
+      '''SELECT
+          friends.user1_id,
+          users.username,
+          users.first_name,
+          users.last_name 
+        FROM friends 
+        JOIN users on friends.user1_id == users.user_id
+        WHERE user2_id = @id''',
       substitutionValues: {
         'id': userID,
       },
