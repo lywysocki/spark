@@ -12,60 +12,59 @@ int fNameIndex = 4;
 int lNameIndex = 5;
 int joinedIndex = 6;
 
-String login(String user, String pass) {
-  selectUsersLogin(user, pass).then((results) {
-    if (results.length==1){
-      currentUser = results[0][idIndex];
-
-    }
-  });
+Future<String> login(String user, String pass) async {
+  List<List<dynamic>> results = await selectUsersLogin(user, pass);
+  if (results.length==1){
+    currentUser = results[0][idIndex];
+    return currentUser;
+  }
+  //check if multiple lines
+  //check in no lines
 
   return "Error";
 }
 
-List<dynamic> profile(String user, String pass) {
+Future<List<dynamic>> profile(String user, String pass) async {
   String name = 'Guest';
   DateTime joined;
   int longestStreak;
 
-  selectUsersByUserID(currentUser).then((results) {
-    if (results.length==1){
-      if (results[0][fNameIndex] == null){
-        if(results[0][usernameIndex]!=null){
-          if (results[0][lNameIndex] == null){
-            name = results[0][fNameIndex];
-          } else {
-            name = results[0][fNameIndex] + (name = results[0][lNameIndex]);
-          }
+  List<List<dynamic>> results = await selectUsersByUserID(currentUser);
+  if (results.length==1){
+    if (results[0][fNameIndex] == null){
+      if(results[0][usernameIndex]!=null){
+        if (results[0][lNameIndex] == null){
+          name = results[0][fNameIndex];
+        } else {
+          name = results[0][fNameIndex] + (name = results[0][lNameIndex]);
         }
       }
-      longestStreak = 0;
-
-      List<dynamic> profileFields = [name, results[0][joinedIndex], longestStreak];
-      return profileFields;
     }
-  });
+    longestStreak = 0;
 
+    List<dynamic> profileFields = [name, results[0][joinedIndex], longestStreak];
+    return profileFields;
+  }
+
+  //check if multiple lines
+  //check if no lines
   List<dynamic> profileFields = [null, null, null];
   return profileFields;
 
 }
 
-String signup(String user, String email, String pass) {
-  selectUsersByUsername(user).then((results) {
-    if (results.length>0){
-      return "An account already exists by this username.";
-    }
-  });
+Future<String> signup(String user, String email, String pass) async {
+  List<List<dynamic>> usernameResults = await selectUsersByUsername(user);
+  if (usernameResults.isNotEmpty){
+    return "An account already exists by this username.";
+  }
 
-  selectUsersByEmail(email).then((results) {
-    if (results.length>0){
-      return "An account exists using this email.";
-    }
-  });
+  List<List<dynamic>> emailResults = await selectUsersByEmail(email);
+  if (emailResults.isNotEmpty){
+    return "An account exists using this email.";
+  }
 
   createUser(user, pass, email, null, null);
-
   return "Account created";
 }
 
