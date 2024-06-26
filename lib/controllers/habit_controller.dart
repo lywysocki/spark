@@ -159,20 +159,26 @@ Future<String> createNewHabit(
 }
 
 //All Habit View
-Future<List<List<dynamic>>> viewAllHabits(String userID) async {
+Future<List<Map<String, dynamic>>> viewAllHabits(String userID) async {
   List<List<dynamic>> allHabitsAllData = await selectHabitsByUserID(userID);
 
   //pull out just the ids, titles, and streaks
-  List<List<dynamic>> allHabitsQuickView = allHabitsAllData.map((innerList) {
-    // Ensure the inner list has at least two elements
-    if (innerList.length >= 2) {
-      return [
-        innerList[habitIdIndex],
-        innerList[habitTitleIndex]
-      ]; //innerList[streakIndex]
-    } else {
-      return [];
-    }
+  List<Map<String, dynamic>> allHabitsQuickView = allHabitsAllData.map((row) {
+    return {
+      'habit_id': row[0],
+      'user_id': row[1],
+      'title': row[2],
+      'note': row[3],
+      'start_date': row[4],
+      'end_date': row[5],
+      'frequency': row[6],
+      'reminders': row[7],
+      'reminder_message': row[8],
+      'target_type': row[9],
+      'category': row[10],
+      'quantity': row[11],
+      'sequential_date_count': row[12],
+    };
   }).toList();
 
   return allHabitsQuickView;
