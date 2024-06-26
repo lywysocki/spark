@@ -14,7 +14,7 @@ int joinedIndex = 6;
 
 Future<String> login(String user, String pass) async {
   List<List<dynamic>> results = await selectUsersLogin(user, pass);
-  if (results.length==1){
+  if (results.length == 1) {
     currentUser = results[0][idIndex];
     return currentUser;
   }
@@ -24,47 +24,52 @@ Future<String> login(String user, String pass) async {
   return "Error";
 }
 
-Future<List<dynamic>> profile(String user, String pass) async {
+Future<Map<String, dynamic>> profile(String pass) async {
   String name = 'Guest';
-  DateTime joined;
-  int longestStreak;
+  String joined = 'Null';
+  int longestStreak = 0;
 
-  List<List<dynamic>> results = await selectUsersByUserID(currentUser);
-  if (results.length==1){
-    if (results[0][fNameIndex] == null){
-      if(results[0][usernameIndex]!=null){
-        if (results[0][lNameIndex] == null){
-          name = results[0][fNameIndex];
+  List<List<dynamic>> userResults = await selectUsersByUserID(currentUser);
+  if (userResults.length == 1) {
+    if (userResults[0][fNameIndex] == null) {
+      if (userResults[0][usernameIndex] != null) {
+        if (userResults[0][lNameIndex] == null) {
+          name = userResults[0][fNameIndex];
         } else {
-          name = results[0][fNameIndex] + (name = results[0][lNameIndex]);
+          name = userResults[0][fNameIndex] + (userResults[0][lNameIndex]);
         }
       }
     }
-    longestStreak = 0;
-
-    List<dynamic> profileFields = [name, results[0][joinedIndex], longestStreak];
-    return profileFields;
+    joined = userResults[0][joinedIndex];
   }
-
   //check if multiple lines
   //check if no lines
-  List<dynamic> profileFields = [null, null, null];
-  return profileFields;
 
+  List<List<dynamic>> streakResults = await selectHabitStreaks(currentUser);
+  if (streakResults.isNotEmpty) {
+    List<dynamic> streaks = streakResults.map((row) => row[3]).toList();
+    longestStreak = streaks.reduce((a, b) => a > b ? a : b);
+  }
+
+  var profileFields = {
+    'name': name,
+    'joined date': joined,
+    'longest streak': longestStreak
+  };
+  return profileFields;
 }
 
 Future<String> signup(String user, String email, String pass) async {
   List<List<dynamic>> usernameResults = await selectUsersByUsername(user);
-  if (usernameResults.isNotEmpty){
+  if (usernameResults.isNotEmpty) {
     return "An account already exists by this username.";
   }
 
   List<List<dynamic>> emailResults = await selectUsersByEmail(email);
-  if (emailResults.isNotEmpty){
+  if (emailResults.isNotEmpty) {
     return "An account exists using this email.";
   }
 
   createUser(user, pass, email, null, null);
   return "Account created";
 }
-
