@@ -240,12 +240,97 @@ Future<List<List<dynamic>>> selectFriendsByUser(String userID) async {
 Future<List<List<dynamic>>> selectHabitsByUserID(String id) async {
   try {
     databaseConnection.open();
-    List<List<dynamic>> results = await databaseConnection.query(
-      'SELECT * FROM habits WHERE user_id = @userID',
-      substitutionValues: {
-        'userID': id,
-      },
-    );
+    const query = '''
+      WITH ranked_activities AS (
+        SELECT
+          a.habit_id,
+          a.user_id,
+          h.title,
+          h.note,
+          h.start_date,
+          h.end_date,
+          h.frequency,
+          h.reminders,
+          h.reminder_message,
+          h.target_type,
+          h.category,
+          h.quantity,
+          a.timestamp,
+          ROW_NUMBER() OVER (PARTITION BY a.habit_id, a.user_id ORDER BY a.timestamp) AS seq
+        FROM
+          activity a
+        JOIN
+          habits h ON a.habit_id = h.habit_id AND a.user_id = h.user_id
+        WHERE
+          a.user_id = @userId
+      ),
+      date_diffs AS (
+        SELECT
+          habit_id,
+          user_id,
+          title,
+          note,
+          start_date,
+          end_date,
+          frequency,
+          reminders,
+          reminder_message,
+          target_type,
+          category,
+          quantity,
+          timestamp,
+          seq,
+          timestamp - INTERVAL '1 day' * (seq - 1) AS date_group
+        FROM
+          ranked_activities
+      ),
+      sequential_dates AS (
+        SELECT
+          habit_id,
+          user_id,
+          title,
+          note,
+          start_date,
+          end_date,
+          frequency,
+          reminders,
+          reminder_message,
+          target_type,
+          category,
+          quantity,
+          MAX(timestamp) AS most_recent_date,
+          COUNT(DISTINCT date_group) AS sequential_date_count
+        FROM
+          date_diffs
+        GROUP BY
+          habit_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity
+      )
+      SELECT
+        habit_id,
+        user_id,
+        title,
+        note,
+        start_date,
+        end_date,
+        frequency,
+        reminders,
+        reminder_message,
+        target_type,
+        category,
+        quantity,
+        sequential_date_count
+      FROM
+        sequential_dates
+      WHERE
+        most_recent_date >= CURRENT_DATE - INTERVAL '1 day'
+      ORDER BY
+        habit_id,
+        user_id;
+    ''';
+    List<List<dynamic>> results =
+        await databaseConnection.query(query, substitutionValues: {
+      'userId': id,
+    });
     return results;
   } catch (e) {
     debugPrint('Error: ${e.toString()}');
