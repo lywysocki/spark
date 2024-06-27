@@ -439,6 +439,26 @@ Future<List<List<dynamic>>> selectHabitsByCategory(
   }
 }
 
+Future<List<List<dynamic>>> selectHabitByID(
+    String userID, String habitID) async {
+  try {
+    databaseConnection.open();
+    List<List<dynamic>> results = await databaseConnection.query(
+      'SELECT * FROM habits WHERE user_id = @user AND habit_id = @habit',
+      substitutionValues: {
+        'user': userID,
+        'habit': habitID,
+      },
+    );
+    return results;
+  } catch (e) {
+    debugPrint('Error: ${e.toString()}');
+    return List.empty();
+  } finally {
+    await databaseConnection.close();
+  }
+}
+
 // Achievements
 Future<List<List<dynamic>>> selectAchievements(String id) async {
   try {
