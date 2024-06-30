@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:spark/common/common_dropdown.dart';
+import 'package:spark/common/common_duration.dart';
+import 'package:spark/common/common_habit_header.dart';
+import 'package:spark/common/common_reminder.dart';
 import 'package:spark/common/common_textfield.dart';
 
 class NewHabitScreen extends StatelessWidget {
@@ -18,9 +21,6 @@ class NewHabitScreen extends StatelessWidget {
                 'New Habit Form',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
-            ),
-            const SizedBox(
-              height: 15,
             ),
             const _NewHabitForm(),
             Padding(
@@ -140,7 +140,7 @@ class __NewHabitFormState extends State<_NewHabitForm> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: [
-          const _HeaderTextWidget(
+          const CommonHabitHeader(
             text: 'Title*',
             bottomPadding: 0,
           ),
@@ -148,7 +148,7 @@ class __NewHabitFormState extends State<_NewHabitForm> {
             hintText: 'Enter a title',
             maxLength: 20,
           ),
-          const _HeaderTextWidget(
+          const CommonHabitHeader(
             text: 'Notes',
             topPadding: 0,
             bottomPadding: 0,
@@ -158,7 +158,7 @@ class __NewHabitFormState extends State<_NewHabitForm> {
             maxLength: 100,
             maxLines: 3,
           ),
-          const _HeaderTextWidget(
+          const CommonHabitHeader(
             text: 'Category*',
             topPadding: 0,
           ),
@@ -194,11 +194,11 @@ class __NewHabitFormState extends State<_NewHabitForm> {
             hintText: 'Select a category',
             dropdownItems: categoryDropdownItems,
           ),
-          const _HeaderTextWidget(
+          const CommonHabitHeader(
             text: 'Duration*',
           ),
           const _SetDurationWidgets(),
-          const _HeaderTextWidget(
+          const CommonHabitHeader(
             text: 'Frequency*',
           ),
           CommonDropdown(
@@ -206,22 +206,12 @@ class __NewHabitFormState extends State<_NewHabitForm> {
             dropdownItems: frequencyDropdownItems,
             hasInitialValue: true,
           ),
-          const _HeaderTextWidget(
+          const CommonHabitHeader(
             text: 'Reminders',
           ),
           _SetRemindersWidgets(
             reminders: reminders,
           ),
-          if (reminders.isNotEmpty)
-            const _HeaderTextWidget(
-              text: 'Reminder note',
-            ),
-          if (reminders.isNotEmpty)
-            const CommonTextfield(
-              hintText: 'Enter optional reminder note',
-              maxLength: 100,
-              maxLines: 3,
-            ),
         ],
       ),
     );
@@ -242,82 +232,72 @@ class _SetRemindersWidgets extends StatefulWidget {
 class __SetRemindersWidgetsState extends State<_SetRemindersWidgets> {
   @override
   Widget build(BuildContext context) {
-    return Wrap(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        for (final time in widget.reminders)
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-            width: 90,
-            height: 33,
-            child: Stack(
-              children: [
-                const CommonTextfield(
-                  isTapped: true,
+        Wrap(
+          children: [
+            for (final time in widget.reminders)
+              CommonReminder(
+                child: Text(
+                  time.format(context),
                 ),
-                TextButton(
-                  child: Center(
-                    child: Text(time.format(context)),
-                  ),
-                  onPressed: () async {
-                    final editTime = (await showTimePicker(
-                      context: context,
-                      initialTime: TimeOfDay.now(),
-                    ));
-                    if (editTime != null) {
-                      final index = widget.reminders.indexWhere(
-                        (element) => element == time,
-                      );
-                      widget.reminders[index] = editTime;
-                    }
-                    setState(() {});
-                  },
-                  onLongPress: () {
-                    showDialog(
-                      barrierDismissible: false,
-                      context: context,
-                      builder: (context) {
-                        return _DeleteReminderDialog(
-                          onDelete: () {
-                            widget.reminders.removeWhere(
-                              (element) => element == time,
-                            );
-                            setState(() {});
-                            Navigator.pop(context);
-                          },
-                        );
-                      },
-                    );
-                    setState(() {});
-                  },
-                ),
-              ],
-            ),
-          ),
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-          width: 90,
-          height: 33,
-          child: Stack(
-            children: [
-              const CommonTextfield(
-                isTapped: true,
-              ),
-              TextButton(
-                child: const Center(
-                  child: Icon(Icons.add),
-                ),
-                onPressed: () async {
-                  final time = (await showTimePicker(
+                onPress: () async {
+                  final editTime = (await showTimePicker(
                     context: context,
                     initialTime: TimeOfDay.now(),
                   ));
-                  if (time != null) widget.reminders.add(time);
+                  if (editTime != null) {
+                    final index = widget.reminders.indexWhere(
+                      (element) => element == time,
+                    );
+                    widget.reminders[index] = editTime;
+                  }
+                  setState(() {});
+                },
+                onLongPress: () {
+                  showDialog(
+                    barrierDismissible: false,
+                    context: context,
+                    builder: (context) {
+                      return _DeleteReminderDialog(
+                        onDelete: () {
+                          widget.reminders.removeWhere(
+                            (element) => element == time,
+                          );
+                          setState(() {});
+                          Navigator.pop(context);
+                        },
+                      );
+                    },
+                  );
                   setState(() {});
                 },
               ),
-            ],
-          ),
+            CommonReminder(
+              onLongPress: null,
+              onPress: () async {
+                final time = (await showTimePicker(
+                  context: context,
+                  initialTime: TimeOfDay.now(),
+                ));
+                if (time != null) widget.reminders.add(time);
+                setState(() {});
+              },
+              child: const Icon(Icons.add),
+            ),
+          ],
         ),
+        if (widget.reminders.isNotEmpty)
+          const CommonHabitHeader(
+            text: 'Reminder note',
+          ),
+        if (widget.reminders.isNotEmpty)
+          const CommonTextfield(
+            hintText: 'Enter optional reminder note',
+            maxLength: 100,
+            maxLines: 3,
+          ),
       ],
     );
   }
@@ -338,109 +318,45 @@ class __SetDurationWidgetsState extends State<_SetDurationWidgets> {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(' Start date'),
-            SizedBox(
-              width: 105,
-              height: 33,
-              child: Stack(
-                children: [
-                  const CommonTextfield(
-                    isTapped: true,
-                  ),
-                  TextButton(
-                    child: Center(
-                      child: Text(startDate.toString().substring(0, 10)),
-                    ),
-                    onPressed: () async {
-                      startDate = (await showDatePicker(
-                            context: context,
-                            initialDate: DateTime.now(),
-                            firstDate: DateTime(1900),
-                            lastDate: DateTime(DateTime.now().year + 100),
-                          )) ??
-                          DateTime.now();
-                      if (endDate != null) {
-                        if (startDate.isAfter(endDate!)) {
-                          endDate = null;
-                        }
-                      }
-                      setState(() {});
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ],
+        CommonDuration(
+          headerText: 'Start date',
+          date: startDate,
+          onTap: () async {
+            startDate = (await showDatePicker(
+                  context: context,
+                  initialDate: DateTime.now(),
+                  firstDate: DateTime(1900),
+                  lastDate: DateTime(DateTime.now().year + 100),
+                )) ??
+                DateTime.now();
+            if (endDate != null) {
+              if (startDate.isAfter(endDate!)) {
+                endDate = null;
+              }
+            }
+            setState(() {});
+          },
         ),
         const Padding(
           padding: EdgeInsets.only(top: 15.0, left: 20, right: 20),
           child: Text('to'),
         ),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(' End date'),
-            SizedBox(
-              width: 105,
-              height: 33,
-              child: Stack(
-                children: [
-                  const CommonTextfield(
-                    isTapped: true,
-                  ),
-                  TextButton(
-                    child: Center(
-                      child: Text(
-                        endDate != null
-                            ? endDate.toString().substring(0, 10)
-                            : 'None',
-                      ),
-                    ),
-                    onPressed: () async {
-                      endDate = await showDatePicker(
-                        context: context,
-                        initialDate: startDate.isAfter(DateTime.now())
-                            ? startDate
-                            : DateTime.now(),
-                        firstDate: startDate,
-                        lastDate: DateTime(DateTime.now().year + 100),
-                      );
-                      setState(() {});
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ],
+        CommonDuration(
+          headerText: 'End date',
+          onTap: () async {
+            endDate = await showDatePicker(
+              context: context,
+              initialDate: startDate.isAfter(DateTime.now())
+                  ? startDate
+                  : DateTime.now(),
+              firstDate: startDate,
+              lastDate: DateTime(DateTime.now().year + 100),
+            );
+            setState(() {});
+          },
+          date: endDate,
         ),
       ],
-    );
-  }
-}
-
-class _HeaderTextWidget extends StatelessWidget {
-  const _HeaderTextWidget({
-    required this.text,
-    this.topPadding,
-    this.bottomPadding,
-  });
-
-  final String text;
-  final double? topPadding;
-  final double? bottomPadding;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding:
-          EdgeInsets.only(top: topPadding ?? 20, bottom: bottomPadding ?? 8),
-      child: Text(
-        text,
-        style: Theme.of(context).textTheme.titleMedium,
-      ),
     );
   }
 }
