@@ -58,7 +58,9 @@ class HomeScreen extends StatelessWidget {
                 child: CommonCardTile(
                   category: 'education',
                   title: Text('Habit $index'),
-                  destination: const ViewHabitScreen(),
+                  destination: ViewHabitScreen(
+                    habit: 'Habit $index',
+                  ),
                   trailingWidget: const Icon(Icons.flare_outlined),
                 ),
               ),
@@ -80,7 +82,9 @@ class HomeScreen extends StatelessWidget {
                 child: CommonCardTile(
                   category: 'mental health',
                   title: Text('Habit $index'),
-                  destination: const ViewHabitScreen(),
+                  destination: ViewHabitScreen(
+                    habit: 'Habit $index',
+                  ),
                   trailingWidget: const Icon(Icons.flare_outlined),
                 ),
               ),
