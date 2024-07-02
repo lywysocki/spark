@@ -61,7 +61,16 @@ class HomeScreen extends StatelessWidget {
                   destination: ViewHabitScreen(
                     habit: 'Habit $index',
                   ),
-                  trailingWidget: const Icon(Icons.flare_outlined),
+                  trailingWidget: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('10'),
+                      SizedBox(
+                        width: 5,
+                      ),
+                      Icon(Icons.flare_outlined),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -85,7 +94,16 @@ class HomeScreen extends StatelessWidget {
                   destination: ViewHabitScreen(
                     habit: 'Habit $index',
                   ),
-                  trailingWidget: const Icon(Icons.flare_outlined),
+                  trailingWidget: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('10'),
+                      SizedBox(
+                        width: 5,
+                      ),
+                      Icon(Icons.flare_outlined),
+                    ],
+                  ),
                 ),
               ),
             ),
