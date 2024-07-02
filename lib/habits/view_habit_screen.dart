@@ -17,7 +17,7 @@ class ViewHabitScreen extends StatefulWidget {
 }
 
 class _ViewHabitScreenState extends State<ViewHabitScreen> {
-  bool editMode = true;
+  bool editMode = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
