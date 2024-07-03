@@ -26,6 +26,8 @@ class _ViewHabitScreenState extends State<ViewHabitScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        scrolledUnderElevation: 0,
+        backgroundColor: Colors.transparent,
         actions: [
           TextButton(
             child: Text(!editMode ? 'Edit' : 'Done'),
@@ -191,18 +193,13 @@ class _CalendarViewState extends State<_CalendarView> {
 
     return Container(
       padding: const EdgeInsets.only(left: 20, right: 20, top: 5),
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: colorScheme.surfaceDim,
-        ),
-        borderRadius: BorderRadius.circular(40),
-      ),
       child: CalendarCarousel<Event>(
+        headerMargin: const EdgeInsets.all(0),
         todayButtonColor: colorScheme.primary,
         todayBorderColor: colorScheme.primary,
         disableDayPressed: true,
         headerTextStyle:
-            textTheme.titleLarge!.copyWith(color: colorScheme.primary),
+            textTheme.titleMedium!.copyWith(color: colorScheme.primary),
         iconColor: colorScheme.primary,
         weekendTextStyle: const TextStyle(
           color: Colors.black,
@@ -238,7 +235,7 @@ class _CalendarViewState extends State<_CalendarView> {
           ),
         ),
         weekFormat: false,
-        height: 395.0,
+        height: 320.0,
         daysHaveCircularBorder: null,
       ),
     );
