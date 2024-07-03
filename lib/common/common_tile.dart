@@ -20,7 +20,7 @@ class CommonCardTile extends StatelessWidget {
   // TODO: pass in habitId and take category, title, and streak from there
   final String? category;
 
-  Widget cardColorWrap(BuildContext context, String category, Widget child) {
+  Widget cardColorWrap(BuildContext context, String? category, Widget child) {
     final brightness = Theme.of(context).brightness;
     Color? cardColor;
     Color? borderColor;
@@ -46,7 +46,7 @@ class CommonCardTile extends StatelessWidget {
       case 'common':
         cardColor = const Color.fromARGB(255, 255, 232, 232);
         borderColor = const Color(0xffd83831);
-      case '_':
+      case '_' || null:
         break;
     }
     if (brightness == Brightness.dark) {
@@ -69,7 +69,7 @@ class CommonCardTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return cardColorWrap(
       context,
-      category ?? '',
+      category,
       ListTile(
         title: title,
         subtitle: subtitle,

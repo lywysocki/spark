@@ -56,7 +56,6 @@ class HomeScreen extends StatelessWidget {
               (int index) => Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4.0),
                 child: CommonCardTile(
-                  category: 'education',
                   title: Text('Habit $index'),
                   destination: ViewHabitScreen(
                     habit: 'Habit $index',
@@ -89,7 +88,6 @@ class HomeScreen extends StatelessWidget {
               (int index) => Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4.0),
                 child: CommonCardTile(
-                  category: 'mental health',
                   title: Text('Habit $index'),
                   destination: ViewHabitScreen(
                     habit: 'Habit $index',

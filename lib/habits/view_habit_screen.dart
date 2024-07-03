@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_calendar_carousel/classes/event.dart';
+import 'package:flutter_calendar_carousel/classes/event_list.dart';
 import 'package:spark/achievements/achievements_screen.dart';
 import 'package:spark/common/common_duration.dart';
 import 'package:spark/common/common_habit_header.dart';
 import 'package:spark/common/common_reminder.dart';
 import 'package:spark/common/common_tile.dart';
 import 'package:spark/common/habit_form.dart';
+import 'package:flutter_calendar_carousel/flutter_calendar_carousel.dart'
+    show CalendarCarousel;
 
 class ViewHabitScreen extends StatefulWidget {
   const ViewHabitScreen({super.key, required this.habit});
@@ -89,10 +93,23 @@ class _HabitInformation extends StatelessWidget {
         const CommonHabitHeader(
           text: 'Duration',
         ),
-        CommonDuration(
-          headerText: 'Start date',
-          onTap: null,
-          date: DateTime.now(),
+        Row(
+          children: [
+            CommonDuration(
+              headerText: 'Start date',
+              onTap: null,
+              date: DateTime.now(),
+            ),
+            const Padding(
+              padding: EdgeInsets.only(top: 15.0, left: 20, right: 20),
+              child: Text('to'),
+            ),
+            CommonDuration(
+              headerText: 'End date',
+              onTap: null,
+              date: DateTime.now(),
+            ),
+          ],
         ),
         const CommonHabitHeader(
           text: 'Frequency',
@@ -106,16 +123,124 @@ class _HabitInformation extends StatelessWidget {
           onPress: null,
           child: Text('10:30 AM'),
         ),
+        const CommonHabitHeader(
+          text: 'Activity Calendar',
+        ),
+        const _CalendarView(),
         const SizedBox(
-          height: 35,
+          height: 20,
         ),
         const CommonCardTile(
-          category: 'None',
+          category: 'common',
           title: Text('Achievements'),
           destination: AchievementsScreen(),
           trailingWidget: Icon(Icons.arrow_forward_ios_rounded),
         ),
+        const SizedBox(
+          height: 25,
+        ),
       ],
+    );
+  }
+}
+
+class _CalendarView extends StatefulWidget {
+  const _CalendarView();
+
+  @override
+  State<_CalendarView> createState() => _CalendarViewState();
+}
+
+class _CalendarViewState extends State<_CalendarView> {
+  /// TODO: replace with real habit start date
+  final DateTime _fakeStartDate = DateTime(2024, 6, 20);
+
+  /// TODO: replace with habit activity for this habit
+  Map<DateTime, List<Event>> habitCompletions = {
+    DateTime(2024, 7, 1): [
+      Event(
+        date: DateTime(2024, 7, 1),
+        title: "Event 1",
+        description: "Description for Event 1",
+        location: "Location 1",
+        icon: null,
+        dot: null,
+        id: 1,
+      ),
+    ],
+    DateTime(2024, 7, 2): [
+      Event(
+        date: DateTime(2024, 7, 1),
+        title: "Event 2",
+        description: "Description for Event 1",
+        location: "Location 1",
+        icon: null,
+        dot: null,
+        id: 2,
+      ),
+    ],
+  };
+  List<DateTime> fakeCompletions = [
+    DateTime(2024, 7, 1),
+    DateTime(2024, 6, 30),
+  ];
+  @override
+  Widget build(BuildContext context) {
+    ColorScheme colorScheme = Theme.of(context).colorScheme;
+    TextTheme textTheme = Theme.of(context).textTheme;
+
+    return Container(
+      padding: const EdgeInsets.only(left: 20, right: 20, top: 5),
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: colorScheme.surfaceDim,
+        ),
+        borderRadius: BorderRadius.circular(40),
+      ),
+      child: CalendarCarousel<Event>(
+        todayButtonColor: colorScheme.primary,
+        todayBorderColor: colorScheme.primary,
+        disableDayPressed: true,
+        headerTextStyle:
+            textTheme.titleLarge!.copyWith(color: colorScheme.primary),
+        iconColor: colorScheme.primary,
+        weekendTextStyle: const TextStyle(
+          color: Colors.black,
+        ),
+        thisMonthDayBorderColor: Colors.grey,
+        customDayBuilder: (
+          bool isSelectable,
+          int index,
+          bool isSelectedDay,
+          bool isToday,
+          bool isPrevMonthDay,
+          TextStyle textStyle,
+          bool isNextMonthDay,
+          bool isThisMonthDay,
+          DateTime day,
+        ) {
+          isSelectable = false;
+          if (day == _fakeStartDate) {
+            return Center(
+              child: Icon(
+                Icons.golf_course_rounded,
+                color: colorScheme.primary,
+              ),
+            );
+          }
+          return null;
+        },
+        markedDatesMap: EventList(events: habitCompletions),
+        markedDateWidget: const Center(
+          child: Icon(
+            Icons.check,
+            color: Colors.green,
+          ),
+        ),
+        weekFormat: false,
+        height: 395.0,
+        daysHaveCircularBorder: null,
+      ),
     );
   }
 }

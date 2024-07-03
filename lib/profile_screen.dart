@@ -12,9 +12,7 @@ class UserProfileScreen extends StatelessWidget {
         Container(
           margin: const EdgeInsets.only(top: 120),
           decoration: BoxDecoration(
-            color: Theme.of(context).brightness == Brightness.light
-                ? Colors.white
-                : Colors.black,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: const BorderRadius.only(
               topRight: Radius.circular(190),
               topLeft: Radius.circular(190),
