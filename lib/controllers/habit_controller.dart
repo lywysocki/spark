@@ -219,7 +219,6 @@ void duplicateHabitIDs(List<List<dynamic>> habits) async {
 
   for (int i = 0; i < habits.length; i++) {
     Map<String, dynamic> result = {
-      //reminders, reminder_message, target_type, category, quantity
       'habit_id': habits[i][0],
       'user_id': habits[i][1],
       'title': habits[i][2],
