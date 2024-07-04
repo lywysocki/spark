@@ -400,7 +400,7 @@ Future<List<List<dynamic>>> selectHabitsByDate(String id, DateTime date) async {
           habit_id,
           user_id,
           MAX(a.timestamp) AS most_recent_activity
-        FROM activity
+        FROM activities
         WHERE user_id = @userID
         GROUP BY habit_id, user_id
       ),
@@ -557,7 +557,8 @@ Future<List<List<dynamic>>> selectHabitByID(
   }
 }
 
-Future<List<List<dynamic>>> selectHabitStreaks(String user_id) async {
+Future<List<List<dynamic>>> selectHabitStreaks(
+    String user_id, List<int> habitIDs) async {
   try {
     await databaseConnection.open();
 
@@ -570,29 +571,30 @@ Future<List<List<dynamic>>> selectHabitStreaks(String user_id) async {
           h.frequency,
           a.timestamp,
           ROW_NUMBER() OVER (PARTITION BY a.habit_id, a.user_id ORDER BY a.timestamp) AS seq
-        FROM
-          activities a
+        FROM activities a
         JOIN
           habits h ON a.habit_id = h.habit_id AND a.user_id = h.user_id
         WHERE
-          a.user_id = @userId
+          a.user_id = @user_id
+          AND a.habit_id = ANY(@habit_ids)
       ),
       date_diffs AS (
-      SELECT
-        habit_id,
-        user_id,
-        title,
-        frequency,
-        timestamp,
-        seq,
-        CASE
-          WHEN frequency = 'daily' THEN timestamp - INTERVAL '1 day' * (seq - 1)
-          WHEN frequency = 'weekly' THEN timestamp - INTERVAL '1 week' * (seq - 1)
-          WHEN frequency = 'biweekly' THEN timestamp - INTERVAL '2 weeks' * (seq - 1)
-          WHEN frequency = 'monthly' THEN timestamp - INTERVAL '1 month' * (seq - 1)
-          ELSE timestamp -- default to daily if frequency is not recognized
-        END AS date_group
-      FROM ranked_activities
+        SELECT
+          habit_id,
+          user_id,
+          title,
+          frequency,
+          timestamp,
+          seq,
+          CASE
+            WHEN frequency = 'daily' THEN timestamp - INTERVAL '1 day' * (seq - 1)
+            WHEN frequency = 'weekly' THEN timestamp - INTERVAL '1 week' * (seq - 1)
+            WHEN frequency = 'biweekly' THEN timestamp - INTERVAL '2 weeks' * (seq - 1)
+            WHEN frequency = 'monthly' THEN timestamp - INTERVAL '1 month' * (seq - 1)
+            ELSE timestamp -- default to daily if frequency is not recognized
+          END AS date_group
+        FROM
+          ranked_activities
       ),
       sequential_dates AS (
         SELECT
@@ -628,8 +630,8 @@ Future<List<List<dynamic>>> selectHabitStreaks(String user_id) async {
         user_id;
     ''';
 
-    List<List<dynamic>> results = await databaseConnection
-        .query(query, substitutionValues: {'user_id': user_id});
+    List<List<dynamic>> results = await databaseConnection.query(query,
+        substitutionValues: {'user_id': user_id, 'habit_ids': habitIDs});
 
     return results;
   } catch (e) {
