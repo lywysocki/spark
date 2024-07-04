@@ -299,83 +299,62 @@ Future<List<List<dynamic>>> selectHabitsByUserID(String id) async {
           a.habit_id,
           a.user_id,
           h.title,
-          h.note,
-          h.start_date,
-          h.end_date,
           h.frequency,
-          h.reminders,
-          h.reminder_message,
-          h.target_type,
-          h.category,
-          h.quantity,
           a.timestamp,
           ROW_NUMBER() OVER (PARTITION BY a.habit_id, a.user_id ORDER BY a.timestamp) AS seq
         FROM
-          activity a
+          activities a
         JOIN
           habits h ON a.habit_id = h.habit_id AND a.user_id = h.user_id
         WHERE
           a.user_id = @userId
       ),
       date_diffs AS (
-        SELECT
-          habit_id,
-          user_id,
-          title,
-          note,
-          start_date,
-          end_date,
-          frequency,
-          reminders,
-          reminder_message,
-          target_type,
-          category,
-          quantity,
-          timestamp,
-          seq,
-          timestamp - INTERVAL '1 day' * (seq - 1) AS date_group
-        FROM
-          ranked_activities
+      SELECT
+        habit_id,
+        user_id,
+        title,
+        frequency,
+        timestamp,
+        seq,
+        CASE
+          WHEN frequency = 'daily' THEN timestamp - INTERVAL '1 day' * (seq - 1)
+          WHEN frequency = 'weekly' THEN timestamp - INTERVAL '1 week' * (seq - 1)
+          WHEN frequency = 'biweekly' THEN timestamp - INTERVAL '2 weeks' * (seq - 1)
+          WHEN frequency = 'monthly' THEN timestamp - INTERVAL '1 month' * (seq - 1)
+          ELSE timestamp -- default to daily if frequency is not recognized
+        END AS date_group
+      FROM ranked_activities
       ),
       sequential_dates AS (
         SELECT
           habit_id,
           user_id,
           title,
-          note,
-          start_date,
-          end_date,
           frequency,
-          reminders,
-          reminder_message,
-          target_type,
-          category,
-          quantity,
           MAX(timestamp) AS most_recent_date,
           COUNT(DISTINCT date_group) AS sequential_date_count
         FROM
           date_diffs
         GROUP BY
-          habit_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity
+          habit_id, user_id, title, frequency
       )
       SELECT
         habit_id,
         user_id,
         title,
-        note,
-        start_date,
-        end_date,
-        frequency,
-        reminders,
-        reminder_message,
-        target_type,
-        category,
-        quantity,
         sequential_date_count
       FROM
         sequential_dates
       WHERE
-        most_recent_date >= CURRENT_DATE - INTERVAL '1 day'
+        most_recent_date >= 
+        CASE
+          WHEN frequency = 'daily' THEN CURRENT_DATE - INTERVAL '1 day'
+          WHEN frequency = 'weekly' THEN CURRENT_DATE - INTERVAL '1 week'
+          WHEN frequency = 'biweekly' THEN CURRENT_DATE - INTERVAL '2 weeks'
+          WHEN frequency = 'monthly' THEN CURRENT_DATE - INTERVAL '1 month'
+          ELSE CURRENT_DATE - INTERVAL '1 day' -- default to daily
+        END
       ORDER BY
         habit_id,
         user_id;
@@ -548,54 +527,69 @@ Future<List<List<dynamic>>> selectHabitStreaks(String user_id) async {
 
     const query = '''
       WITH ranked_activities AS (
-          SELECT
-              a.habit_id,
-              a.user_id,
-              h.title,
-              a.timestamp,
-              ROW_NUMBER() OVER (PARTITION BY a.habit_id, a.user_id ORDER BY a.timestamp) AS seq
-          FROM
-              activity a
-          JOIN
-              habits h ON a.habit_id = h.habit_id AND a.user_id = h.user_id
-          WHERE
-              a.user_id = your_user_id
+        SELECT
+          a.habit_id,
+          a.user_id,
+          h.title,
+          h.frequency,
+          a.timestamp,
+          ROW_NUMBER() OVER (PARTITION BY a.habit_id, a.user_id ORDER BY a.timestamp) AS seq
+        FROM
+          activities a
+        JOIN
+          habits h ON a.habit_id = h.habit_id AND a.user_id = h.user_id
+        WHERE
+          a.user_id = @userId
       ),
       date_diffs AS (
-          SELECT
-              habit_id,
-              user_id,
-              title,
-              timestamp,
-              seq,
-              timestamp - INTERVAL '1 day' * (seq - 1) AS date_group
-          FROM
-              ranked_activities
+      SELECT
+        habit_id,
+        user_id,
+        title,
+        frequency,
+        timestamp,
+        seq,
+        CASE
+          WHEN frequency = 'daily' THEN timestamp - INTERVAL '1 day' * (seq - 1)
+          WHEN frequency = 'weekly' THEN timestamp - INTERVAL '1 week' * (seq - 1)
+          WHEN frequency = 'biweekly' THEN timestamp - INTERVAL '2 weeks' * (seq - 1)
+          WHEN frequency = 'monthly' THEN timestamp - INTERVAL '1 month' * (seq - 1)
+          ELSE timestamp -- default to daily if frequency is not recognized
+        END AS date_group
+      FROM ranked_activities
       ),
       sequential_dates AS (
-          SELECT
-              habit_id,
-              user_id,
-              title,
-              MAX(timestamp) AS most_recent_date,
-              COUNT(DISTINCT date_group) AS sequential_date_count
-          FROM
-              date_diffs
-          GROUP BY
-              habit_id, user_id, title
-      )
-      SELECT
+        SELECT
           habit_id,
           user_id,
           title,
-          sequential_date_count
+          frequency,
+          MAX(timestamp) AS most_recent_date,
+          COUNT(DISTINCT date_group) AS sequential_date_count
+        FROM
+          date_diffs
+        GROUP BY
+          habit_id, user_id, title, frequency
+      )
+      SELECT
+        habit_id,
+        user_id,
+        title,
+        sequential_date_count
       FROM
-          sequential_dates
+        sequential_dates
       WHERE
-          most_recent_date >= CURRENT_DATE - INTERVAL '1 day'
+        most_recent_date >= 
+        CASE
+          WHEN frequency = 'daily' THEN CURRENT_DATE - INTERVAL '1 day'
+          WHEN frequency = 'weekly' THEN CURRENT_DATE - INTERVAL '1 week'
+          WHEN frequency = 'biweekly' THEN CURRENT_DATE - INTERVAL '2 weeks'
+          WHEN frequency = 'monthly' THEN CURRENT_DATE - INTERVAL '1 month'
+          ELSE CURRENT_DATE - INTERVAL '1 day' -- default to daily
+        END
       ORDER BY
-          habit_id,
-          user_id;
+        habit_id,
+        user_id;
     ''';
 
     List<List<dynamic>> results = await databaseConnection
