@@ -216,11 +216,11 @@ Future<List<List<dynamic>>> selectFriendsByUser(String userID) async {
     List<List<dynamic>> results = await databaseConnection.query(
       '''SELECT 
           friendships.user2_id,
-          users.username
+          users.username,
           users.first_name,
           users.last_name
         FROM friendships
-        JOIN users on friendships.user2_id == users.user_id
+        JOIN users on friendships.user2_id = users.user_id
         WHERE user1_id = @id ''',
       substitutionValues: {
         'id': userID,
@@ -233,7 +233,7 @@ Future<List<List<dynamic>>> selectFriendsByUser(String userID) async {
           users.first_name,
           users.last_name 
         FROM friendships 
-        JOIN users on friendships.user1_id == users.user_id
+        JOIN users on friendships.user1_id = users.user_id
         WHERE user2_id = @id''',
       substitutionValues: {
         'id': userID,
@@ -358,9 +358,9 @@ Future<List<List<dynamic>>> selectSharedHabits(String id1, id2) async {
         h1.title
       FROM habits as h1
       JOIN habits as h2
-        on h1.habit_id == h2.habit_id
-      WHERE (h1.user_id == @user1 and h2.user_id == @user2)
-        or (h1.user_id == @user2 and h2.user_id == @user1)
+        on h1.habit_id = h2.habit_id
+      WHERE (h1.user_id = @user1 and h2.user_id = @user2)
+        or (h1.user_id = @user2 and h2.user_id = @user1)
     ''';
     List<List<dynamic>> results = await databaseConnection.query(
       query,
