@@ -172,7 +172,7 @@ class _NewHabitFormState extends State<NewHabitForm> {
                   setState(() {});
                 },
               ),
-              const Text('negative'),
+              const Text('Negative habit'),
             ],
           ),
           const SizedBox(
