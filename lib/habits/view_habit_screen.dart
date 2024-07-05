@@ -31,11 +31,23 @@ class _ViewHabitScreenState extends State<ViewHabitScreen> {
         title: Text(
           widget.habit,
         ),
+        leadingWidth: 68,
+        leading: editMode
+            ? TextButton(
+                child: const Text('Cancel'),
+                onPressed: () {
+                  editMode = !editMode;
+                  setState(() {});
+                },
+              )
+            : null,
         actions: [
           TextButton(
             child: Text(!editMode ? 'Edit' : 'Done'),
             onPressed: () {
               editMode = !editMode;
+
+              /// TODO: Update habit with new form inputs
               setState(() {});
             },
           ),
@@ -43,18 +55,19 @@ class _ViewHabitScreenState extends State<ViewHabitScreen> {
       ),
       body: ListView(
         children: [
-          const Center(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text('10'),
-                SizedBox(
-                  width: 5,
-                ),
-                Icon(Icons.flare_outlined),
-              ],
+          if (!editMode)
+            const Center(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('10'),
+                  SizedBox(
+                    width: 5,
+                  ),
+                  Icon(Icons.flare_outlined),
+                ],
+              ),
             ),
-          ),
           Padding(
             padding: const EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 8.0),
             child: !editMode
