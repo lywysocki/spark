@@ -558,7 +558,7 @@ Future<List<List<dynamic>>> selectHabitByID(
 }
 
 Future<List<List<dynamic>>> selectHabitStreaks(
-    String user_id, List<int> habitIDs) async {
+    String userID, List<dynamic> habitIDs) async {
   try {
     await databaseConnection.open();
 
@@ -631,7 +631,7 @@ Future<List<List<dynamic>>> selectHabitStreaks(
     ''';
 
     List<List<dynamic>> results = await databaseConnection.query(query,
-        substitutionValues: {'user_id': user_id, 'habit_ids': habitIDs});
+        substitutionValues: {'user_id': userID, 'habit_ids': habitIDs});
 
     return results;
   } catch (e) {

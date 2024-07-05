@@ -3,14 +3,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import 'package:spark/postgres_functions.dart';
 
-//habits:    habit_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity
-//user_id, habit_id, timestamp, quanity
-int habitIdIndex = 0;
-int habitTitleIndex = 2;
-//streakIndex;
+//habits: habit_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity
+//activities: user_id, habit_id, timestamp, quanity
 
 //Homepage methods
-Future<List<List<List<dynamic>>>> getUpcomingHabits(String user) async {
+Future<List<List<Map<String, dynamic>>>> getUpcomingHabits(String user) async {
   final dateFormat = DateFormat('yyyy-MM-dd');
   DateTime now = DateTime.now();
   String today = dateFormat.format(now);
@@ -23,83 +20,153 @@ Future<List<List<List<dynamic>>>> getUpcomingHabits(String user) async {
   // Get today's habits
   List<List<dynamic>> todaysHabitsAllData =
       await selectHabitsByDate(user, todayFormatted);
+  /* returned fields:
+      habit_id, 
+      user_id, 
+      title, 
+      note, 
+      start_date, 
+      end_date, 
+      frequency, 
+      reminders, 
+      reminder_message, 
+      target_type, 
+      category, 
+      quantity,
+      most_recent_activity (timestamp),
+      next_due_date (timestamp)
+      */
+  int habitIdIndex = 0;
+  int habitTitleIndex = 2;
+
+  List<dynamic> ids = todaysHabitsAllData.map((row) => row[0]).toList();
+  List<List<dynamic>> habitsStreaks = await selectHabitStreaks(user, ids);
+  /* returned fields:
+      habit_id,
+      user_id,
+      title,
+      sequential_date_count
+      */
+  int habitStreakIndex = 3;
+  Map<dynamic, List<dynamic>> streaksMap = {
+    for (var row in habitsStreaks) row[0]: row[habitStreakIndex]
+  };
+
   //pull out just the ids, titles, and streaks
-  List<List<dynamic>> todaysHabitsQuickView =
-      todaysHabitsAllData.map((innerList) {
-    // Ensure the inner list has at least two elements
-    if (innerList.length >= 2) {
-      return [
-        innerList[habitIdIndex],
-        innerList[habitTitleIndex]
-      ]; //innerList[streakIndex]
-    } else {
-      return [];
-    }
+  List<Map<String, dynamic>> todaysHabitsQuickView =
+      todaysHabitsAllData.map((row) {
+    var habitId = row[habitIdIndex];
+    var streak = streaksMap[habitId];
+
+    return {
+      'id': habitId,
+      'title': row[habitTitleIndex],
+      'streak': streak,
+    };
   }).toList();
 
   // Get tomorrow's habits
   List<List<dynamic>> tomorrowsHabitsAllData =
       await selectHabitsByDate(user, tomorrowFormatted);
+
+  ids = tomorrowsHabitsAllData.map((row) => row[0]).toList();
+  habitsStreaks = await selectHabitStreaks(user, ids);
+  /* returned fields:
+      habit_id,
+      user_id,
+      title,
+      sequential_date_count
+      */
+  streaksMap = {for (var row in habitsStreaks) row[0]: row[habitStreakIndex]};
+
   //pull out just the ids, titles, and streaks
-  List<List<dynamic>> tomorrowsHabitsQuickView =
-      tomorrowsHabitsAllData.map((innerList) {
-    // Ensure the inner list has at least two elements
-    if (innerList.length >= 2) {
-      return [
-        innerList[habitIdIndex],
-        innerList[habitTitleIndex]
-      ]; //innerList[streakIndex]
-    } else {
-      return [];
-    }
+  List<Map<String, dynamic>> tomorrowsHabitsQuickView =
+      tomorrowsHabitsAllData.map((row) {
+    var habitId = row[habitIdIndex];
+    var streak = streaksMap[habitId];
+
+    return {
+      'id': habitId,
+      'title': row[habitTitleIndex],
+      'streak': streak,
+    };
   }).toList();
 
   /* upcomingHabits
    * [x][y][z] where... 
    * x is 0(todays habits) or 1(tomorrows habits),
    * y is the index of the individual habit in that list
-   * z is the variable of the habit 0(habit_id), 1(habit_title), 2(streak)
+   * z is the map of habit id, title, and streak
   */
-  List<List<List<dynamic>>> upcomingHabits = [
-    todaysHabitsAllData,
-    tomorrowsHabitsAllData
+  List<List<Map<String, dynamic>>> upcomingHabits = [
+    todaysHabitsQuickView,
+    tomorrowsHabitsQuickView
   ];
   return upcomingHabits;
 }
 
-Future<List<List<dynamic>>> getTodaysHabits(String user) async {
+Future<List<Map<String, dynamic>>> getTodaysHabits(String user) async {
   final dateFormat = DateFormat('yyyy-MM-dd');
   DateTime now = DateTime.now();
   String today = dateFormat.format(now);
   DateTime todayFormatted = dateFormat.parse(today);
 
-  // Get today's habits
   List<List<dynamic>> todaysHabitsAllData =
       await selectHabitsByDate(user, todayFormatted);
+  /* returned fields:
+      habit_id, 
+      user_id, 
+      title, 
+      note, 
+      start_date, 
+      end_date, 
+      frequency, 
+      reminders, 
+      reminder_message, 
+      target_type, 
+      category, 
+      quantity,
+      most_recent_activity (timestamp),
+      next_due_date (timestamp)
+      */
+  int habitIdIndex = 0;
+  int habitTitleIndex = 2;
+
+  List<dynamic> ids = todaysHabitsAllData.map((row) => row[0]).toList();
+  List<List<dynamic>> habitsStreaks = await selectHabitStreaks(user, ids);
+  /* returned fields:
+      habit_id,
+      user_id,
+      title,
+      sequential_date_count
+      */
+  int habitStreakIndex = 3;
+  Map<dynamic, List<dynamic>> streaksMap = {
+    for (var row in habitsStreaks) row[0]: row[habitStreakIndex]
+  };
 
   //pull out just the ids, titles, and streaks
-  List<List<dynamic>> todaysHabitsQuickView =
-      todaysHabitsAllData.map((innerList) {
-    // Ensure the inner list has at least two elements
-    if (innerList.length >= 2) {
-      return [
-        innerList[habitIdIndex],
-        innerList[habitTitleIndex]
-      ]; //innerList[streakIndex]
-    } else {
-      return [];
-    }
+  List<Map<String, dynamic>> todaysHabitsQuickView =
+      todaysHabitsAllData.map((row) {
+    var habitId = row[habitIdIndex];
+    var streak = streaksMap[habitId];
+
+    return {
+      'id': habitId,
+      'title': row[habitTitleIndex],
+      'streak': streak,
+    };
   }).toList();
 
   /* todaysHabits
    * [x][y] where... 
    * x is the index of the individual habit in that list
-   * y is the variable of the habit 0(habit_id), 1(habit_title), 2(streak)
+   * y is the map of the habit id, title, and streak
   */
-  return todaysHabitsAllData;
+  return todaysHabitsQuickView;
 }
 
-Future<List<List<dynamic>>> getTomorrowsHabits(String user) async {
+Future<List<Map<String, dynamic>>> getTomorrowsHabits(String user) async {
   final dateFormat = DateFormat('yyyy-MM-dd');
   DateTime tom = DateTime.now().add(Duration(days: 1));
   String tomorrow = dateFormat.format(tom);
@@ -108,25 +175,55 @@ Future<List<List<dynamic>>> getTomorrowsHabits(String user) async {
   // Get tomorrow's habits
   List<List<dynamic>> tomorrowsHabitsAllData =
       await selectHabitsByDate(user, tomorrowFormatted);
+  /* returned fields:
+      habit_id, 
+      user_id, 
+      title, 
+      note, 
+      start_date, 
+      end_date, 
+      frequency, 
+      reminders, 
+      reminder_message, 
+      target_type, 
+      category, 
+      quantity,
+      most_recent_activity (timestamp),
+      next_due_date (timestamp)
+      */
+  int habitIdIndex = 0;
+  int habitTitleIndex = 2;
+  int habitStreakIndex = 3;
+
+  List<dynamic> ids = tomorrowsHabitsAllData.map((row) => row[0]).toList();
+  List<List<dynamic>> habitsStreaks = await selectHabitStreaks(user, ids);
+  /* returned fields:
+      habit_id,
+      user_id,
+      title,
+      sequential_date_count
+      */
+  Map<dynamic, List<dynamic>> streaksMap = {
+    for (var row in habitsStreaks) row[0]: row[habitStreakIndex]
+  };
 
   //pull out just the ids, titles, and streaks
-  List<List<dynamic>> tomorrowsHabitsQuickView =
-      tomorrowsHabitsAllData.map((innerList) {
-    // Ensure the inner list has at least two elements
-    if (innerList.length >= 2) {
-      return [
-        innerList[habitIdIndex],
-        innerList[habitTitleIndex]
-      ]; //innerList[streakIndex]
-    } else {
-      return [];
-    }
+  List<Map<String, dynamic>> tomorrowsHabitsQuickView =
+      tomorrowsHabitsAllData.map((row) {
+    var habitId = row[habitIdIndex];
+    var streak = streaksMap[habitId];
+
+    return {
+      'id': habitId,
+      'title': row[habitTitleIndex],
+      'streak': streak,
+    };
   }).toList();
 
   /* tomorrowsHabits
    * [x][y] where... 
    * x is the index of the individual habit in that list
-   * y is the variable of the habit 0(habit_id), 1(habit_title), 2(streak)
+   * y is the map of the habit id, title, and streak
   */
   return tomorrowsHabitsQuickView;
 }
@@ -168,16 +265,7 @@ Future<List<Map<String, dynamic>>> viewAllHabits(String userID) async {
       'habit_id': row[0],
       'user_id': row[1],
       'title': row[2],
-      'note': row[3],
-      'start_date': row[4],
-      'end_date': row[5],
-      'frequency': row[6],
-      'reminders': row[7],
-      'reminder_message': row[8],
-      'target_type': row[9],
-      'category': row[10],
-      'quantity': row[11],
-      'sequential_date_count': row[12],
+      'streak': row[3],
     };
   }).toList();
 
@@ -188,9 +276,7 @@ Future<List<Map<String, dynamic>>> viewAllHabits(String userID) async {
 Future<List<dynamic>> viewHabit(String userID, String habitID) async {
   List<List<dynamic>> habitAllData = await selectHabitByID(userID, habitID);
 
-  if (habitAllData.length == 1) {
-    return habitAllData[0]; //return the one habit in list
-  } else if (habitAllData.length > 1) {
+  if (habitAllData.length > 1) {
     //there are multiple habits with that habit_id
     //this should not happen because postgres generates unique ids for each row
     debugPrint("Database contained multiple habit_id.\n");
@@ -200,7 +286,9 @@ Future<List<dynamic>> viewHabit(String userID, String habitID) async {
     debugPrint('Account does not exist in database.');
   }
 
-  return habitAllData;
+  //if there's only 1 habit by that id, it returns
+  //if there's multiple, it only returns the first
+  return habitAllData[0];
 }
 
 Future<void> deleteHabit(String userID, String title) async {
