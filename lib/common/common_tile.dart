@@ -46,6 +46,8 @@ class CommonCardTile extends StatelessWidget {
       case 'common':
         cardColor = const Color.fromARGB(255, 255, 232, 232);
         borderColor = const Color(0xffd83831);
+      case 'white':
+        cardColor = Colors.white;
       case '_' || null:
         break;
     }
@@ -53,6 +55,7 @@ class CommonCardTile extends StatelessWidget {
       cardColor = borderColor?.withAlpha(100);
     }
     return Card(
+      elevation: 2,
       color: cardColor,
       borderOnForeground: true,
       shape: RoundedRectangleBorder(

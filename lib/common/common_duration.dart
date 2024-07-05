@@ -23,8 +23,12 @@ class _CommonDurationState extends State<CommonDuration> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(' ${widget.headerText}'),
-        SizedBox(
+        Text(
+          ' ${widget.headerText}',
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
           width: 105,
           height: 33,
           child: Stack(
