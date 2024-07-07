@@ -56,10 +56,20 @@ class HomeScreen extends StatelessWidget {
               (int index) => Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4.0),
                 child: CommonCardTile(
-                  category: 'education',
                   title: Text('Habit $index'),
-                  destination: const ViewHabitScreen(),
-                  trailingWidget: const Icon(Icons.flare_outlined),
+                  destination: ViewHabitScreen(
+                    habit: 'Habit $index',
+                  ),
+                  trailingWidget: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('10'),
+                      SizedBox(
+                        width: 5,
+                      ),
+                      Icon(Icons.flare_outlined),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -78,10 +88,20 @@ class HomeScreen extends StatelessWidget {
               (int index) => Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4.0),
                 child: CommonCardTile(
-                  category: 'mental health',
                   title: Text('Habit $index'),
-                  destination: const ViewHabitScreen(),
-                  trailingWidget: const Icon(Icons.flare_outlined),
+                  destination: ViewHabitScreen(
+                    habit: 'Habit $index',
+                  ),
+                  trailingWidget: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('10'),
+                      SizedBox(
+                        width: 5,
+                      ),
+                      Icon(Icons.flare_outlined),
+                    ],
+                  ),
                 ),
               ),
             ),

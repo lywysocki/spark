@@ -18,12 +18,15 @@ class _CommonSearchbarState extends State<CommonSearchBar> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10.0),
-      child: SearchBar(
-        elevation: const WidgetStatePropertyAll(0),
-        onChanged: widget.currentSearch,
-        hintText: widget.hintText,
-        leading: const Icon(Icons.search),
-        trailing: const [],
+      child: SizedBox(
+        height: 40,
+        child: SearchBar(
+          elevation: const WidgetStatePropertyAll(0),
+          onChanged: widget.currentSearch,
+          hintText: widget.hintText,
+          leading: const Icon(Icons.search),
+          trailing: const [],
+        ),
       ),
     );
   }

@@ -68,8 +68,19 @@ class _HabitTilesState extends State<_HabitTiles> {
             child: CommonCardTile(
               category: 'None',
               title: Text(habit),
-              destination: const ViewHabitScreen(),
-              trailingWidget: const Icon(Icons.flare_outlined),
+              destination: ViewHabitScreen(
+                habit: habit,
+              ),
+              trailingWidget: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('10'),
+                  SizedBox(
+                    width: 5,
+                  ),
+                  Icon(Icons.flare_outlined),
+                ],
+              ),
             ),
           ),
       ],
