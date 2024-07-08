@@ -293,6 +293,18 @@ class HabitController extends ChangeNotifier {
     return habitAllData[0];
   }
 
+  Future<void> logActivity(String userID, String habitID, int? quantity) async {
+    List<List<dynamic>> habits = await selectHabitByID(userID, habitID);
+
+    if (habits.length == 1) {
+      createActivity(userID, habitID, quantity);
+    } else {
+      duplicateHabitIDs(habits);
+      debugPrint(
+          'Tried to log activity for habit $habitID, but there was an issue.');
+    }
+  }
+
   Future<void> deleteHabit(String userID, String title) async {
     List<List<dynamic>> habits = await selectHabitsByTitle(userID, title);
 

@@ -128,8 +128,8 @@ Future<bool> createAchievement(String userID, String habitID,
   }
 }
 
-Future<bool> createActivity(String userID, String habitID,
-    String achievementTitle, int? quantity) async {
+Future<bool> createActivity(
+    String userID, String habitID, int? quantity) async {
   try {
     await databaseConnection.open();
     DateTime now = DateTime.now(); //system date and timestamp
