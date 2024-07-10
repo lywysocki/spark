@@ -2,10 +2,19 @@ import 'dart:ffi';
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import 'package:spark/postgres_functions.dart';
+import 'package:spark/habits/habit.dart';
 
 //habits: habit_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity
 //activities: user_id, habit_id, timestamp, quanity
 class HabitController extends ChangeNotifier {
+  HabitController() {
+    _load();
+  }
+
+  List<Habit> allHabits = [];
+
+  Future<void> _load() async {}
+
 //Homepage methods
   Future<List<List<Map<String, dynamic>>>> getUpcomingHabits(
       String user) async {
