@@ -169,8 +169,8 @@ class _HabitInformation extends StatelessWidget {
               height: 20,
             ),
             const CommonCardTile(
-              category: 'common',
-              title: Text('Achievements'),
+              category: 'white',
+              title: Text('View Habit Achievements'),
               destination: AchievementsScreen(),
               trailingWidget: Icon(Icons.arrow_forward_ios_rounded),
             ),
