@@ -63,7 +63,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
                   ),
 
                   /// TODO(LW): add in specific badge object
-                  itemBuilder: (_, index) => const _BadgeIcon(
+                  itemBuilder: (_, index) => _BadgeIcon(
                     /// TODO: fill with real value
                     timesEarned: 10,
 
@@ -71,7 +71,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
                     name: 'Achievement',
 
                     /// TODO: fill with real value or leave null
-                    medalLevel: 'silver',
+                    medalLevel: index % 3 == 0 ? 'silver' : null,
                   ),
 
                   /// TODO: fill with allAchievements.length
@@ -89,18 +89,19 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
 class _BadgeIcon extends StatelessWidget {
   const _BadgeIcon({
     required this.name,
-    required this.medalLevel,
+    this.medalLevel,
     this.timesEarned,
   });
 
   final String name;
   // bronze, silver, (default) gold
-  final String medalLevel;
+  final String? medalLevel;
   // if applicable
   final int? timesEarned;
 
   @override
   Widget build(BuildContext context) {
+    final medal = medalLevel ?? 'gold';
     final theme = Theme.of(context).textTheme;
 
     return Card(
@@ -121,7 +122,7 @@ class _BadgeIcon extends StatelessWidget {
               ),
               Image.asset(
                 scale: 2.5,
-                'assets/images/$medalLevel.png',
+                'assets/images/$medal.png',
               ),
               const SizedBox(
                 height: 5.0,
