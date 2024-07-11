@@ -422,32 +422,81 @@ Future<List<List<dynamic>>> selectHabitsByDate(String id, DateTime date) async {
   try {
     databaseConnection.open();
     String query = '''
-      WITH latest_activities AS (
+      WITH ranked_activities AS (
+        SELECT
+          h.*,
+          a.timestamp,
+          ROW_NUMBER() OVER (PARTITION BY a.habit_id, a.user_id ORDER BY a.timestamp) AS seq
+        FROM
+          activities a
+        JOIN
+          habits h ON a.habit_id = h.habit_id AND a.user_id = h.user_id
+        WHERE
+          a.user_id = @userId
+      ),
+      date_diffs AS (
+        SELECT
+          *,
+          CASE
+            WHEN frequency = 'daily' THEN timestamp - INTERVAL '1 day' * (seq - 1)
+            WHEN frequency = 'weekly' THEN timestamp - INTERVAL '1 week' * (seq - 1)
+            WHEN frequency = 'biweekly' THEN timestamp - INTERVAL '2 weeks' * (seq - 1)
+            WHEN frequency = 'monthly' THEN timestamp - INTERVAL '1 month' * (seq - 1)
+            ELSE timestamp -- default to daily if frequency is not recognized
+          END AS date_group
+        FROM
+          ranked_activities
+      ),
+      sequential_dates AS (
         SELECT
           habit_id,
           user_id,
-          MAX(a.timestamp) AS most_recent_activity
-        FROM activities
-        WHERE user_id = @userID
-        GROUP BY habit_id, user_id
+          title,
+          note,
+          start_date,
+          end_date,
+          frequency,
+          reminders,
+          reminder_message,
+          target_type,
+          category,
+          quantity,
+          MAX(timestamp) AS most_recent_activity,
+          COUNT(DISTINCT date_group) AS sequential_date_count
+        FROM
+          date_diffs
+        GROUP BY
+          habit_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity
       ),
       due_habits AS (
         SELECT
-          h.*,
-          la.most_recent_activity,
+          sequential_dates.*,
           CASE
-            WHEN h.frequency = 'daily' THEN la.most_recent_activity + INTERVAL '1 day'
-            WHEN h.frequency = 'weekly' THEN la.most_recent_activity + INTERVAL '1 week'
-            WHEN h.frequency = 'biweekly' THEN la.most_recent_activity + INTERVAL '2 weeks'
-            WHEN h.frequency = 'monthly' THEN la.most_recent_activity + INTERVAL '1 month'
-            ELSE la.most_recent_activity + INTERVAL '1 day' -- default to daily
+            WHEN frequency = 'daily' THEN most_recent_activity + INTERVAL '1 day'
+            WHEN frequency = 'weekly' THEN most_recent_activity + INTERVAL '1 week'
+            WHEN frequency = 'biweekly' THEN most_recent_activity + INTERVAL '2 weeks'
+            WHEN frequency = 'monthly' THEN most_recent_activity + INTERVAL '1 month'
+            ELSE most_recent_activity + INTERVAL '1 day' -- default to daily
           END AS next_due_date
-        FROM habits h
+        FROM sequential_dates
         LEFT JOIN
           latest_activities la ON h.habit_id = la.habit_id AND h.user_id = la.user_id
       )
       SELECT
-        *
+        habit_id,
+        user_id,
+        title,
+        note,
+        start_date,
+        end_date,
+        frequency,
+        reminders,
+        reminder_message,
+        target_type,
+        category,
+        quantity,
+        sequential_date_count,
+        next_due_date
       FROM
         due_habits
       WHERE
