@@ -1,98 +1,111 @@
-import 'dart:ffi';
+// ignore_for_file: unused_field
 
 import 'package:flutter/material.dart';
 import 'package:spark/postgres_functions.dart';
+import 'package:spark/user/user.dart';
 
 class UserController extends ChangeNotifier {
-  String currentUser = '';
-//users:    user_id, username, password, email, first_name, last_name, date joined
-  int idIndex = 0;
-  int usernameIndex = 1;
-  int passwordIndex = 2;
-  int emailIndex = 3;
-  int fNameIndex = 4;
-  int lNameIndex = 5;
-  int joinedIndex = 6;
+  UserController();
 
-  Future<String> login(String user, String pass) async {
-    if (user.length <= 1 || pass.length <= 1) {
-      return "Username or password invalid";
+  String? currentUserId;
+
+  final int _idIndex = 0;
+  final int _usernameIndex = 1;
+  final int _passwordIndex = 2;
+  final int _emailIndex = 3;
+  final int _fNameIndex = 4;
+  final int _lNameIndex = 5;
+  final int _joinedIndex = 6;
+
+  Future<void> login({required String username, required String pass}) async {
+    if (username.length <= 1 || pass.length <= 1) {
+      throw "Username or password invalid";
     }
 
-    List<List<dynamic>> results = await selectUsersLogin(user, pass);
+    List<List<dynamic>> results = await selectUsersLogin(username, pass);
     //selectUsersLogin queries only user_ids, so it returns should return a list of a list with one element: user_id
     if (results.length == 1) {
-      currentUser = results[0][0];
-      return currentUser;
+      currentUserId = results[0][0];
     } else if (results.length > 1) {
       //there are multiple ids by that login, the system should not have allowed a user to create an account with an existing username
       List<dynamic> multipleIDs = results.map((row) => row[0]).toList();
       debugPrint(
-          "Database contained multiple user_ids with that username/password.\n");
+        "Database contained multiple user_ids with that username/password.\n",
+      );
       duplicateLogins(multipleIDs);
-      return "Error";
+      throw "Error";
     } else {
       //results.length < 1
       debugPrint('Account does not exist in database.');
-      return "Account does not exist.";
+      throw "Account does not exist.";
     }
   }
 
-  Future<Map<String, dynamic>> profile(String pass) async {
-    String name = 'Guest';
-    String joined = 'Null';
+  Future<User> getCurrentUser() async {
+    if (currentUserId == null) {
+      throw 'No logged in user';
+    }
+    String fName = '';
+    String lName = '';
+    String email = 'email';
+    String joined = '';
     int longestStreak = 0;
 
-    List<List<dynamic>> userResults = await selectUsersByUserID(currentUser);
+    List<List<dynamic>> userResults = await selectUsersByUserID(currentUserId!);
     if (userResults.length == 1) {
-      if (userResults[0][fNameIndex] == null) {
-        if (userResults[0][usernameIndex] != null) {
-          if (userResults[0][lNameIndex] == null) {
-            name = userResults[0][fNameIndex];
-          } else {
-            name = userResults[0][fNameIndex] + (userResults[0][lNameIndex]);
+      if (userResults[0][_fNameIndex] == null) {
+        if (userResults[0][_usernameIndex] != null) {
+          fName = userResults[0][_fNameIndex];
+          if (userResults[0][_lNameIndex] != null) {
+            lName = (userResults[0][_lNameIndex]);
           }
         }
       }
-      joined = userResults[0][joinedIndex];
+      joined = userResults[0][_joinedIndex];
+      email = userResults[0][_emailIndex];
     } else if (userResults.length > 1) {
       //there are multiple ids by that login, the system should not have allowed a user to create an account with an existing username
       List<dynamic> multipleIDs = userResults.map((row) => row[0]).toList();
       debugPrint(
-          "Database contained multiple user_ids with that username/password.\n");
+        "Database contained multiple user_ids with that username/password.\n",
+      );
       duplicateLogins(multipleIDs);
     } else {
       //results.length < 1
       debugPrint('Account does not exist in database.');
     }
 
-    List<List<dynamic>> streakResults = await selectHabitStreaks(currentUser);
+    List<List<dynamic>> streakResults =
+        await selectHabitStreaks(currentUserId!);
     if (streakResults.isNotEmpty) {
       List<dynamic> streaks = streakResults.map((row) => row[3]).toList();
       longestStreak = streaks.reduce((a, b) => a > b ? a : b);
     }
+    final user = User(
+      userId: currentUserId!,
+      email: email,
+      fName: fName,
+      lName: lName,
+      joined: joined,
+      longestStreak: longestStreak,
+    );
 
-    var profileFields = {
-      'name': name,
-      'joined date': joined,
-      'longest streak': longestStreak
-    };
-    return profileFields;
+    return user;
   }
 
-  Future<String> signup(String user, String email, String pass) async {
-    List<List<dynamic>> usernameResults = await selectUsersByUsername(user);
+  Future<void> signup(String username, String email, String pass) async {
+    List<List<dynamic>> usernameResults = await selectUsersByUsername(username);
     if (usernameResults.isNotEmpty) {
-      return "An account already exists by this username.";
+      throw "An account already exists by this username.";
     }
 
     List<List<dynamic>> emailResults = await selectUsersByEmail(email);
     if (emailResults.isNotEmpty) {
-      return "An account exists using this email.";
+      throw "An account exists using this email.";
     }
 
-    createUser(user, pass, email, null, null);
-    return "Account created";
+    createUser(username, pass, email, null, null);
+    login(username: username, pass: pass);
   }
 
   void duplicateLogins(List<dynamic> ids) async {
