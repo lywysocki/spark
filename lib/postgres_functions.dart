@@ -311,18 +311,7 @@ Future<List<List<dynamic>>> selectHabitsByUserID(String id) async {
     const query = '''
       WITH ranked_activities AS (
         SELECT
-          a.habit_id,
-          a.user_id,
-          h.title,
-          h.note,
-          h.start_date,
-          h.end_date,
-          h.frequency,
-          h.reminders,
-          h.reminder_message,
-          h.target_type,
-          h.category,
-          h.quantity,
+          h.*,
           a.timestamp,
           ROW_NUMBER() OVER (PARTITION BY a.habit_id, a.user_id ORDER BY a.timestamp) AS seq
         FROM
@@ -334,21 +323,14 @@ Future<List<List<dynamic>>> selectHabitsByUserID(String id) async {
       ),
       date_diffs AS (
         SELECT
-          habit_id,
-          user_id,
-          title,
-          note,
-          start_date,
-          end_date,
-          frequency,
-          reminders,
-          reminder_message,
-          target_type,
-          category,
-          quantity,
-          timestamp,
-          seq,
-          timestamp - INTERVAL '1 day' * (seq - 1) AS date_group
+          *,
+          CASE
+            WHEN frequency = 'daily' THEN timestamp - INTERVAL '1 day' * (seq - 1)
+            WHEN frequency = 'weekly' THEN timestamp - INTERVAL '1 week' * (seq - 1)
+            WHEN frequency = 'biweekly' THEN timestamp - INTERVAL '2 weeks' * (seq - 1)
+            WHEN frequency = 'monthly' THEN timestamp - INTERVAL '1 month' * (seq - 1)
+            ELSE timestamp -- default to daily if frequency is not recognized
+          END AS date_group
         FROM
           ranked_activities
       ),
@@ -390,7 +372,14 @@ Future<List<List<dynamic>>> selectHabitsByUserID(String id) async {
       FROM
         sequential_dates
       WHERE
-        most_recent_date >= CURRENT_DATE - INTERVAL '1 day'
+        most_recent_date >= 
+        CASE
+          WHEN frequency = 'daily' THEN CURRENT_DATE - INTERVAL '1 day'
+          WHEN frequency = 'weekly' THEN CURRENT_DATE - INTERVAL '1 week'
+          WHEN frequency = 'biweekly' THEN CURRENT_DATE - INTERVAL '2 weeks'
+          WHEN frequency = 'monthly' THEN CURRENT_DATE - INTERVAL '1 month'
+          ELSE CURRENT_DATE - INTERVAL '1 day' -- default to daily
+        END
       ORDER BY
         habit_id,
         user_id;
