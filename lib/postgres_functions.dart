@@ -6,8 +6,7 @@ achievements:    achievement_id, user_id, habit_id, achievement_title, date, tim
 activities: user_id, habit_id, timestamp, quanity
  */
 
-import 'dart:ffi';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:postgres/postgres.dart';
 
@@ -20,8 +19,13 @@ final databaseConnection = PostgreSQLConnection(
 );
 
 //INSERT methods
-Future<bool> createUser(String? username, String? password, String? email,
-    String? first, String? last) async {
+Future<bool> createUser(
+  String? username,
+  String? password,
+  String? email,
+  String? first,
+  String? last,
+) async {
   try {
     await databaseConnection.open();
     await databaseConnection.query(
@@ -63,17 +67,18 @@ Future<bool> createFriendship(String user1, String user2) async {
 }
 
 Future<bool> createHabit(
-    String userID,
-    String title,
-    String note,
-    DateTime start,
-    DateTime? end,
-    String frequency,
-    bool reminders,
-    String? reminderMessage,
-    String targetType,
-    String category,
-    int? quantity) async {
+  String userID,
+  String title,
+  String note,
+  DateTime start,
+  DateTime end,
+  String frequency,
+  bool reminders,
+  String? reminderMessage,
+  String targetType,
+  String category,
+  int? quantity,
+) async {
   try {
     await databaseConnection.open();
     await databaseConnection.query(
@@ -102,8 +107,12 @@ Future<bool> createHabit(
   }
 }
 
-Future<bool> createAchievement(String userID, String habitID,
-    String achievementTitle, int? quantity) async {
+Future<bool> createAchievement(
+  String userID,
+  String habitID,
+  String achievementTitle,
+  int? quantity,
+) async {
   try {
     await databaseConnection.open();
     DateTime now = DateTime.now(); //system date and timestamp
@@ -129,7 +138,11 @@ Future<bool> createAchievement(String userID, String habitID,
 }
 
 Future<bool> createActivity(
-    String userID, String habitID, int? quantity) async {
+  String userID,
+  String habitID,
+  String achievementTitle,
+  int? quantity,
+) async {
   try {
     await databaseConnection.open();
     DateTime now = DateTime.now(); //system date and timestamp
@@ -228,7 +241,9 @@ Future<List<List<dynamic>>> selectUsersByName(String first, String last) async {
 }
 
 Future<List<List<dynamic>>> selectUsersLogin(
-    String user, String password) async {
+  String user,
+  String password,
+) async {
   try {
     databaseConnection.open();
     List<List<dynamic>> results = await databaseConnection.query(
@@ -299,70 +314,93 @@ Future<List<List<dynamic>>> selectHabitsByUserID(String id) async {
           a.habit_id,
           a.user_id,
           h.title,
+          h.note,
+          h.start_date,
+          h.end_date,
           h.frequency,
+          h.reminders,
+          h.reminder_message,
+          h.target_type,
+          h.category,
+          h.quantity,
           a.timestamp,
           ROW_NUMBER() OVER (PARTITION BY a.habit_id, a.user_id ORDER BY a.timestamp) AS seq
         FROM
-          activities a
+          activity a
         JOIN
           habits h ON a.habit_id = h.habit_id AND a.user_id = h.user_id
         WHERE
           a.user_id = @userId
       ),
       date_diffs AS (
-      SELECT
-        habit_id,
-        user_id,
-        title,
-        frequency,
-        timestamp,
-        seq,
-        CASE
-          WHEN frequency = 'daily' THEN timestamp - INTERVAL '1 day' * (seq - 1)
-          WHEN frequency = 'weekly' THEN timestamp - INTERVAL '1 week' * (seq - 1)
-          WHEN frequency = 'biweekly' THEN timestamp - INTERVAL '2 weeks' * (seq - 1)
-          WHEN frequency = 'monthly' THEN timestamp - INTERVAL '1 month' * (seq - 1)
-          ELSE timestamp -- default to daily if frequency is not recognized
-        END AS date_group
-      FROM ranked_activities
+        SELECT
+          habit_id,
+          user_id,
+          title,
+          note,
+          start_date,
+          end_date,
+          frequency,
+          reminders,
+          reminder_message,
+          target_type,
+          category,
+          quantity,
+          timestamp,
+          seq,
+          timestamp - INTERVAL '1 day' * (seq - 1) AS date_group
+        FROM
+          ranked_activities
       ),
       sequential_dates AS (
         SELECT
           habit_id,
           user_id,
           title,
+          note,
+          start_date,
+          end_date,
           frequency,
+          reminders,
+          reminder_message,
+          target_type,
+          category,
+          quantity,
           MAX(timestamp) AS most_recent_date,
           COUNT(DISTINCT date_group) AS sequential_date_count
         FROM
           date_diffs
         GROUP BY
-          habit_id, user_id, title, frequency
+          habit_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity
       )
       SELECT
         habit_id,
         user_id,
         title,
+        note,
+        start_date,
+        end_date,
+        frequency,
+        reminders,
+        reminder_message,
+        target_type,
+        category,
+        quantity,
         sequential_date_count
       FROM
         sequential_dates
       WHERE
-        most_recent_date >= 
-        CASE
-          WHEN frequency = 'daily' THEN CURRENT_DATE - INTERVAL '1 day'
-          WHEN frequency = 'weekly' THEN CURRENT_DATE - INTERVAL '1 week'
-          WHEN frequency = 'biweekly' THEN CURRENT_DATE - INTERVAL '2 weeks'
-          WHEN frequency = 'monthly' THEN CURRENT_DATE - INTERVAL '1 month'
-          ELSE CURRENT_DATE - INTERVAL '1 day' -- default to daily
-        END
+        most_recent_date >= CURRENT_DATE - INTERVAL '1 day'
       ORDER BY
         habit_id,
         user_id;
     ''';
-    List<List<dynamic>> results =
-        await databaseConnection.query(query, substitutionValues: {
-      'userId': id,
-    });
+    List<List<dynamic>> results = await databaseConnection.query(
+      query,
+      substitutionValues: {
+        'userId': id,
+      },
+    );
     return results;
   } catch (e) {
     debugPrint('Error: ${e.toString()}');
@@ -448,7 +486,9 @@ Future<List<List<dynamic>>> selectHabitsByDate(String id, DateTime date) async {
 }
 
 Future<List<List<dynamic>>> selectHabitsStarted(
-    String id, DateTime date) async {
+  String id,
+  DateTime date,
+) async {
   try {
     databaseConnection.open();
     List<List<dynamic>> results = await databaseConnection.query(
@@ -488,7 +528,9 @@ Future<List<List<dynamic>>> selectHabitsEnded(String id, DateTime date) async {
 }
 
 Future<List<List<dynamic>>> selectHabitsByCategory(
-    String id, String cat) async {
+  String id,
+  String cat,
+) async {
   try {
     databaseConnection.open();
     List<List<dynamic>> results = await databaseConnection.query(
@@ -538,7 +580,9 @@ Future<List<List<dynamic>>> selectSharedHabits(String id1, id2) async {
 }
 
 Future<List<List<dynamic>>> selectHabitByID(
-    String userID, String habitID) async {
+  String userID,
+  String habitID,
+) async {
   try {
     databaseConnection.open();
     List<List<dynamic>> results = await databaseConnection.query(
@@ -557,81 +601,64 @@ Future<List<List<dynamic>>> selectHabitByID(
   }
 }
 
-Future<List<List<dynamic>>> selectHabitStreaks(
-    String userID, List<dynamic> habitIDs) async {
+Future<List<List<dynamic>>> selectHabitStreaks(String userId) async {
   try {
     await databaseConnection.open();
 
     const query = '''
       WITH ranked_activities AS (
-        SELECT
-          a.habit_id,
-          a.user_id,
-          h.title,
-          h.frequency,
-          a.timestamp,
-          ROW_NUMBER() OVER (PARTITION BY a.habit_id, a.user_id ORDER BY a.timestamp) AS seq
-        FROM activities a
-        JOIN
-          habits h ON a.habit_id = h.habit_id AND a.user_id = h.user_id
-        WHERE
-          a.user_id = @user_id
-          AND a.habit_id = ANY(@habit_ids)
+          SELECT
+              a.habit_id,
+              a.user_id,
+              h.title,
+              a.timestamp,
+              ROW_NUMBER() OVER (PARTITION BY a.habit_id, a.user_id ORDER BY a.timestamp) AS seq
+          FROM
+              activity a
+          JOIN
+              habits h ON a.habit_id = h.habit_id AND a.user_id = h.user_id
+          WHERE
+              a.user_id = your_user_id
       ),
       date_diffs AS (
-        SELECT
-          habit_id,
-          user_id,
-          title,
-          frequency,
-          timestamp,
-          seq,
-          CASE
-            WHEN frequency = 'daily' THEN timestamp - INTERVAL '1 day' * (seq - 1)
-            WHEN frequency = 'weekly' THEN timestamp - INTERVAL '1 week' * (seq - 1)
-            WHEN frequency = 'biweekly' THEN timestamp - INTERVAL '2 weeks' * (seq - 1)
-            WHEN frequency = 'monthly' THEN timestamp - INTERVAL '1 month' * (seq - 1)
-            ELSE timestamp -- default to daily if frequency is not recognized
-          END AS date_group
-        FROM
-          ranked_activities
+          SELECT
+              habit_id,
+              user_id,
+              title,
+              timestamp,
+              seq,
+              timestamp - INTERVAL '1 day' * (seq - 1) AS date_group
+          FROM
+              ranked_activities
       ),
       sequential_dates AS (
-        SELECT
+          SELECT
+              habit_id,
+              user_id,
+              title,
+              MAX(timestamp) AS most_recent_date,
+              COUNT(DISTINCT date_group) AS sequential_date_count
+          FROM
+              date_diffs
+          GROUP BY
+              habit_id, user_id, title
+      )
+      SELECT
           habit_id,
           user_id,
           title,
-          frequency,
-          MAX(timestamp) AS most_recent_date,
-          COUNT(DISTINCT date_group) AS sequential_date_count
-        FROM
-          date_diffs
-        GROUP BY
-          habit_id, user_id, title, frequency
-      )
-      SELECT
-        habit_id,
-        user_id,
-        title,
-        sequential_date_count
+          sequential_date_count
       FROM
-        sequential_dates
+          sequential_dates
       WHERE
-        most_recent_date >= 
-        CASE
-          WHEN frequency = 'daily' THEN CURRENT_DATE - INTERVAL '1 day'
-          WHEN frequency = 'weekly' THEN CURRENT_DATE - INTERVAL '1 week'
-          WHEN frequency = 'biweekly' THEN CURRENT_DATE - INTERVAL '2 weeks'
-          WHEN frequency = 'monthly' THEN CURRENT_DATE - INTERVAL '1 month'
-          ELSE CURRENT_DATE - INTERVAL '1 day' -- default to daily
-        END
+          most_recent_date >= CURRENT_DATE - INTERVAL '1 day'
       ORDER BY
-        habit_id,
-        user_id;
+          habit_id,
+          user_id;
     ''';
 
-    List<List<dynamic>> results = await databaseConnection.query(query,
-        substitutionValues: {'user_id': userID, 'habit_ids': habitIDs});
+    List<List<dynamic>> results = await databaseConnection
+        .query(query, substitutionValues: {'user_id': userId});
 
     return results;
   } catch (e) {
@@ -662,7 +689,9 @@ Future<List<List<dynamic>>> selectAchievements(String id) async {
 }
 
 Future<List<List<dynamic>>> selectAchievementsByHabitID(
-    String id, String habit) async {
+  String id,
+  String habit,
+) async {
   try {
     databaseConnection.open();
     List<List<dynamic>> results = await databaseConnection.query(
@@ -682,7 +711,9 @@ Future<List<List<dynamic>>> selectAchievementsByHabitID(
 }
 
 Future<List<List<dynamic>>> selectAchievementsByType(
-    String id, String type) async {
+  String id,
+  String type,
+) async {
   try {
     databaseConnection.open();
     List<List<dynamic>> results = await databaseConnection.query(
@@ -702,7 +733,9 @@ Future<List<List<dynamic>>> selectAchievementsByType(
 }
 
 Future<List<List<dynamic>>> selectAchievementsByDate(
-    String id, DateTime date) async {
+  String id,
+  DateTime date,
+) async {
   try {
     databaseConnection.open();
     List<List<dynamic>> results = await databaseConnection.query(
@@ -722,7 +755,10 @@ Future<List<List<dynamic>>> selectAchievementsByDate(
 }
 
 Future<List<List<dynamic>>> selectAchievementsWithinDateRange(
-    String id, DateTime start, DateTime end) async {
+  String id,
+  DateTime start,
+  DateTime end,
+) async {
   try {
     databaseConnection.open();
     List<List<dynamic>> results = await databaseConnection.query(
@@ -762,7 +798,9 @@ Future<List<List<dynamic>>> selectActivities(String id) async {
 }
 
 Future<List<List<dynamic>>> selectActivitiesByHabitID(
-    String id, String habit) async {
+  String id,
+  String habit,
+) async {
   try {
     databaseConnection.open();
     List<List<dynamic>> results = await databaseConnection.query(
@@ -782,7 +820,9 @@ Future<List<List<dynamic>>> selectActivitiesByHabitID(
 }
 
 Future<List<List<dynamic>>> selectActivitiesByDate(
-    String id, DateTime date) async {
+  String id,
+  DateTime date,
+) async {
   try {
     databaseConnection.open();
     List<List<dynamic>> results = await databaseConnection.query(
@@ -802,7 +842,10 @@ Future<List<List<dynamic>>> selectActivitiesByDate(
 }
 
 Future<List<List<dynamic>>> selectActivitiesWithinDateRange(
-    String id, DateTime start, DateTime end) async {
+  String id,
+  DateTime start,
+  DateTime end,
+) async {
   try {
     databaseConnection.open();
     List<List<dynamic>> results = await databaseConnection.query(
@@ -1014,7 +1057,9 @@ Future<bool> updateHabitReminders(String habitID, bool newReminder) async {
 }
 
 Future<bool> updateHabitReminderMessage(
-    String habitID, String newMessage) async {
+  String habitID,
+  String newMessage,
+) async {
   try {
     await databaseConnection.open();
     await databaseConnection.query(
