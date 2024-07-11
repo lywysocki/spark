@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:spark/common/common_search_bar.dart';
 import 'package:spark/common/common_tile.dart';
-import 'package:spark/user/profile_screen.dart';
+import 'package:spark/profile_screen.dart';
 
 final placeholderFriends = List.generate(5, (int index) => 'Friend $index');
 

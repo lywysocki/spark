@@ -2,7 +2,7 @@ import 'package:spark/friends/friends_screen.dart';
 import 'package:spark/habits/habits_screen.dart';
 import 'package:spark/habits/new_habit_screen.dart';
 import 'package:spark/home_screen.dart';
-import 'package:spark/user/profile_screen.dart';
+import 'package:spark/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:spark/theme.dart';
 import 'package:spark/util.dart';
