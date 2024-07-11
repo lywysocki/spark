@@ -1,8 +1,12 @@
+import 'package:spark/habits/habit.dart';
+
 class Friend {
   final String userId;
   final String username;
   final String firstName;
   final String lastName;
+
+  List<Habit> sharedHabits = [];
 
   Friend({
     required this.userId,
@@ -26,4 +30,10 @@ class Friend {
   String getLastName() {
     return lastName;
   }
+
+  List<Habit> getSharedHabits() {
+    return sharedHabits;
+  }
+
+  void setSharedHabits(List<Habit> sharedHabits) {}
 }

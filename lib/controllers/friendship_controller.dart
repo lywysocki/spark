@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:spark/postgres_functions.dart';
 import 'package:spark/friends/friend.dart';
+import 'package:spark/habits/habit.dart';
 
 //friendships:   user1_id, user2_id
 class FriendshipController extends ChangeNotifier {
@@ -38,26 +39,32 @@ class FriendshipController extends ChangeNotifier {
         firstName: row[friendsFirstIndex],
         lastName: row[friendsLastIndex],
       );
+
+      List<List<dynamic>> sharedHabitsData =
+          await selectSharedHabits(currentUserId, row[friendsIdIndex]);
+      List<Habit> sharedHabits = [];
+
+      Habit h = Habit(
+        habitId: row[0],
+        userId: row[1],
+        title: row[2],
+        note: row[3],
+        startDate: row[4],
+        end: row[5],
+        frequency: row[6],
+        reminders: row[7],
+        msg: row[8],
+        targetType: row[9],
+        category: row[10],
+        quan: row[11],
+        streak: row[12],
+      );
+      sharedHabits.add(h);
+
+      f.setSharedHabits(sharedHabits);
       friends.add(f);
     }
 
     return friends;
-  }
-
-  Future<List<Map<String, dynamic>>> viewSharedHabits(
-    String friendId,
-  ) async {
-    List<List<dynamic>> allSharedHabitData =
-        await selectSharedHabits(currentUserId, friendId);
-
-    List<Map<String, dynamic>> sharedHabitQuickView =
-        allSharedHabitData.map((row) {
-      return {
-        'habit_id': row[0],
-        'title': row[1],
-      };
-    }).toList();
-
-    return sharedHabitQuickView;
   }
 }
