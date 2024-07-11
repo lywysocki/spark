@@ -2,7 +2,7 @@
 users:    user_id, username, password, email, first_name, last_name
 habits:    habit_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity
 friendships:   user1_id, user2_id
-achievements:    achievement_id, user_id, habit_id, achievement_title, date, timestamp, quantity
+achievements:    achievement_id, user_id, habit_id, achievement_title, timestamp, quantity
 activities: user_id, habit_id, timestamp, quanity
  */
 
@@ -117,13 +117,12 @@ Future<bool> createAchievement(
     await databaseConnection.open();
     DateTime now = DateTime.now(); //system date and timestamp
     await databaseConnection.query(
-      'INSERT INTO achievements (user_id, habit_id, achievement_type, achievement_description, date, timestamp, quantity) '
-      'VALUES (@user_id, @habit_id, @achievement_title, @date, @timestamp, @quantity)',
+      'INSERT INTO achievements (user_id, habit_id, achievement_type, achievement_description, timestamp, quantity) '
+      'VALUES (@user_id, @habit_id, @achievement_title, @timestamp, @quantity)',
       substitutionValues: {
         'user_id': userID,
         'habit_id': habitID,
         'achievement_type': achievementTitle,
-        'date': DateFormat('yyyy-MM-dd').format(now),
         'timestamp': DateFormat('yyyy-MM-dd hh:mm:ss').format(now),
         'quantity': quantity,
       },
