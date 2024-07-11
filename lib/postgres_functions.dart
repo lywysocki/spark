@@ -240,7 +240,7 @@ Future<List<List<dynamic>>> selectUsersByName(String first, String last) async {
 }
 
 Future<List<List<dynamic>>> selectUsersLogin(
-  String user,
+  String userInfo,
   String password,
 ) async {
   try {
@@ -248,8 +248,8 @@ Future<List<List<dynamic>>> selectUsersLogin(
     List<List<dynamic>> results = await databaseConnection.query(
       'SELECT user_id FROM users WHERE (username = @username OR email = @email) AND password = @password',
       substitutionValues: {
-        'username': user,
-        'email': user,
+        'username': userInfo,
+        'email': userInfo,
         'password': password,
       },
     );
