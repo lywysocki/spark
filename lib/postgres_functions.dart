@@ -844,7 +844,7 @@ Future<List<List<dynamic>>> selectActivities(String userID) async {
 }
 
 Future<List<List<dynamic>>> selectActivitiesByHabitID(
-  String id,
+  String userID,
   String habit,
 ) async {
   try {
@@ -852,7 +852,7 @@ Future<List<List<dynamic>>> selectActivitiesByHabitID(
     List<List<dynamic>> results = await databaseConnection.query(
       'SELECT * FROM activities WHERE user_id = @userID and habit_id = @habitID',
       substitutionValues: {
-        'userID': id,
+        'userID': userID,
         'habitID': habit,
       },
     );
@@ -866,7 +866,7 @@ Future<List<List<dynamic>>> selectActivitiesByHabitID(
 }
 
 Future<List<List<dynamic>>> selectActivitiesByDate(
-  String id,
+  String userID,
   DateTime date,
 ) async {
   try {
@@ -874,7 +874,7 @@ Future<List<List<dynamic>>> selectActivitiesByDate(
     List<List<dynamic>> results = await databaseConnection.query(
       'SELECT * FROM activities WHERE user_id = @userID and date = @date',
       substitutionValues: {
-        'userID': id,
+        'userID': userID,
         'date': date,
       },
     );
@@ -888,7 +888,7 @@ Future<List<List<dynamic>>> selectActivitiesByDate(
 }
 
 Future<List<List<dynamic>>> selectActivitiesWithinDateRange(
-  String id,
+  String userID,
   DateTime start,
   DateTime end,
 ) async {
@@ -897,7 +897,7 @@ Future<List<List<dynamic>>> selectActivitiesWithinDateRange(
     List<List<dynamic>> results = await databaseConnection.query(
       'SELECT * FROM activities WHERE user_id = @userID and date >= @startDate and date <= @endDate',
       substitutionValues: {
-        'userID': id,
+        'userID': userID,
         'startDate': start,
         'endDate': end,
       },
