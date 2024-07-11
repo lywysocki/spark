@@ -6,6 +6,7 @@ achievements:    achievement_id, user_id, habit_id, achievement_title, date, tim
 activities: user_id, habit_id, timestamp, quanity
  */
 
+import 'dart:ffi';
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import 'package:postgres/postgres.dart';
@@ -153,30 +154,6 @@ Future<bool> createActivity(String userID, String habitID,
 
 //SELECT Functions
 // Users
-
-Future<List<List<dynamic>>> selectUsersLogin(
-  String user,
-  String password,
-) async {
-  try {
-    databaseConnection.open();
-    List<List<dynamic>> results = await databaseConnection.query(
-      'SELECT user_id FROM users WHERE (username = @username OR email = @email) AND password = @password',
-      substitutionValues: {
-        'username': user,
-        'email': user,
-        'password': password,
-      },
-    );
-    return results;
-  } catch (e) {
-    debugPrint('Error: ${e.toString()}');
-    return List.empty();
-  } finally {
-    await databaseConnection.close();
-  }
-}
-
 Future<List<List<dynamic>>> selectUsersByUsername(String username) async {
   try {
     databaseConnection.open();
@@ -237,13 +214,27 @@ Future<List<List<dynamic>>> selectFriendsByUser(String userID) async {
   try {
     databaseConnection.open();
     List<List<dynamic>> results = await databaseConnection.query(
-      'SELECT user2_id FROM users WHERE user1_id = @id',
+      '''SELECT 
+          friendships.user2_id,
+          users.username,
+          users.first_name,
+          users.last_name
+        FROM friendships
+        JOIN users on friendships.user2_id = users.user_id
+        WHERE user1_id = @id ''',
       substitutionValues: {
         'id': userID,
       },
     );
     List<List<dynamic>> results2 = await databaseConnection.query(
-      'SELECT user1_id FROM users WHERE user2_id = @id',
+      '''SELECT
+          friendships.user1_id,
+          users.username,
+          users.first_name,
+          users.last_name 
+        FROM friendships 
+        JOIN users on friendships.user1_id = users.user_id
+        WHERE user2_id = @id''',
       substitutionValues: {
         'id': userID,
       },
@@ -346,6 +337,36 @@ Future<List<List<dynamic>>> selectHabitsByCategory(
       substitutionValues: {
         'userID': id,
         'category': cat,
+      },
+    );
+    return results;
+  } catch (e) {
+    debugPrint('Error: ${e.toString()}');
+    return List.empty();
+  } finally {
+    await databaseConnection.close();
+  }
+}
+
+Future<List<List<dynamic>>> selectSharedHabits(String id1, id2) async {
+  try {
+    databaseConnection.open();
+
+    const query = '''
+      SELECT
+        h1.habit_id,
+        h1.title
+      FROM habits as h1
+      JOIN habits as h2
+        on h1.habit_id = h2.habit_id
+      WHERE (h1.user_id = @user1 and h2.user_id = @user2)
+        or (h1.user_id = @user2 and h2.user_id = @user1)
+    ''';
+    List<List<dynamic>> results = await databaseConnection.query(
+      query,
+      substitutionValues: {
+        'user1': id1,
+        'user2': id2,
       },
     );
     return results;
