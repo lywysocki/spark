@@ -5,7 +5,9 @@ friendships:   user1_id, user2_id
 achievements:    achievement_id, user_id, habit_id, achievement_title, date, timestamp, quantity
 activities: user_id, habit_id, timestamp, quanity
  */
-import 'package:flutter/material.dart';
+
+import 'dart:ffi';
+import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import 'package:postgres/postgres.dart';
 
@@ -18,13 +20,8 @@ final databaseConnection = PostgreSQLConnection(
 );
 
 //INSERT methods
-Future<bool> createUser(
-  String? username,
-  String? password,
-  String? email,
-  String? first,
-  String? last,
-) async {
+Future<bool> createUser(String? username, String? password, String? email,
+    String? first, String? last) async {
   try {
     await databaseConnection.open();
     await databaseConnection.query(
@@ -66,18 +63,17 @@ Future<bool> createFriendship(String user1, String user2) async {
 }
 
 Future<bool> createHabit(
-  String userID,
-  String title,
-  String note,
-  DateTime start,
-  DateTime end,
-  String frequency,
-  bool reminders,
-  String? reminderMessage,
-  String targetType,
-  String category,
-  int? quantity,
-) async {
+    String userID,
+    String title,
+    String note,
+    DateTime start,
+    DateTime end,
+    String frequency,
+    bool reminders,
+    String? reminderMessage,
+    String targetType,
+    String category,
+    int? quantity) async {
   try {
     await databaseConnection.open();
     await databaseConnection.query(
@@ -106,12 +102,8 @@ Future<bool> createHabit(
   }
 }
 
-Future<bool> createAchievement(
-  String userID,
-  String habitID,
-  String achievementTitle,
-  int? quantity,
-) async {
+Future<bool> createAchievement(String userID, String habitID,
+    String achievementTitle, int? quantity) async {
   try {
     await databaseConnection.open();
     DateTime now = DateTime.now(); //system date and timestamp
@@ -136,12 +128,8 @@ Future<bool> createAchievement(
   }
 }
 
-Future<bool> createActivity(
-  String userID,
-  String habitID,
-  String achievementTitle,
-  int? quantity,
-) async {
+Future<bool> createActivity(String userID, String habitID,
+    String achievementTitle, int? quantity) async {
   try {
     await databaseConnection.open();
     DateTime now = DateTime.now(); //system date and timestamp
@@ -166,24 +154,6 @@ Future<bool> createActivity(
 
 //SELECT Functions
 // Users
-Future<List<List<dynamic>>> selectUsersByUserID(String id) async {
-  try {
-    databaseConnection.open();
-    List<List<dynamic>> results = await databaseConnection.query(
-      'SELECT * FROM users WHERE user_id = @id',
-      substitutionValues: {
-        'id': id,
-      },
-    );
-    return results;
-  } catch (e) {
-    debugPrint('Error: ${e.toString()}');
-    return List.empty();
-  } finally {
-    await databaseConnection.close();
-  }
-}
-
 Future<List<List<dynamic>>> selectUsersByUsername(String username) async {
   try {
     databaseConnection.open();
@@ -239,55 +209,18 @@ Future<List<List<dynamic>>> selectUsersByName(String first, String last) async {
   }
 }
 
-Future<List<List<dynamic>>> selectUsersLogin(
-  String user,
-  String password,
-) async {
-  try {
-    databaseConnection.open();
-    List<List<dynamic>> results = await databaseConnection.query(
-      'SELECT user_id FROM users WHERE (username = @username OR email = @email) AND password = @password',
-      substitutionValues: {
-        'username': user,
-        'email': user,
-        'password': password,
-      },
-    );
-    return results;
-  } catch (e) {
-    debugPrint('Error: ${e.toString()}');
-    return List.empty();
-  } finally {
-    await databaseConnection.close();
-  }
-}
-
 // Friendships
 Future<List<List<dynamic>>> selectFriendsByUser(String userID) async {
   try {
     databaseConnection.open();
     List<List<dynamic>> results = await databaseConnection.query(
-      '''SELECT 
-          friendships.user2_id,
-          users.username,
-          users.first_name,
-          users.last_name
-        FROM friendships
-        JOIN users on friendships.user2_id = users.user_id
-        WHERE user1_id = @id ''',
+      'SELECT user2_id FROM users WHERE user1_id = @id',
       substitutionValues: {
         'id': userID,
       },
     );
     List<List<dynamic>> results2 = await databaseConnection.query(
-      '''SELECT
-          friendships.user1_id,
-          users.username,
-          users.first_name,
-          users.last_name 
-        FROM friendships 
-        JOIN users on friendships.user1_id = users.user_id
-        WHERE user2_id = @id''',
+      'SELECT user1_id FROM users WHERE user2_id = @id',
       substitutionValues: {
         'id': userID,
       },
@@ -307,97 +240,10 @@ Future<List<List<dynamic>>> selectFriendsByUser(String userID) async {
 Future<List<List<dynamic>>> selectHabitsByUserID(String id) async {
   try {
     databaseConnection.open();
-    const query = '''
-      WITH ranked_activities AS (
-        SELECT
-          a.habit_id,
-          a.user_id,
-          h.title,
-          h.note,
-          h.start_date,
-          h.end_date,
-          h.frequency,
-          h.reminders,
-          h.reminder_message,
-          h.target_type,
-          h.category,
-          h.quantity,
-          a.timestamp,
-          ROW_NUMBER() OVER (PARTITION BY a.habit_id, a.user_id ORDER BY a.timestamp) AS seq
-        FROM
-          activity a
-        JOIN
-          habits h ON a.habit_id = h.habit_id AND a.user_id = h.user_id
-        WHERE
-          a.user_id = @userId
-      ),
-      date_diffs AS (
-        SELECT
-          habit_id,
-          user_id,
-          title,
-          note,
-          start_date,
-          end_date,
-          frequency,
-          reminders,
-          reminder_message,
-          target_type,
-          category,
-          quantity,
-          timestamp,
-          seq,
-          timestamp - INTERVAL '1 day' * (seq - 1) AS date_group
-        FROM
-          ranked_activities
-      ),
-      sequential_dates AS (
-        SELECT
-          habit_id,
-          user_id,
-          title,
-          note,
-          start_date,
-          end_date,
-          frequency,
-          reminders,
-          reminder_message,
-          target_type,
-          category,
-          quantity,
-          MAX(timestamp) AS most_recent_date,
-          COUNT(DISTINCT date_group) AS sequential_date_count
-        FROM
-          date_diffs
-        GROUP BY
-          habit_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity
-      )
-      SELECT
-        habit_id,
-        user_id,
-        title,
-        note,
-        start_date,
-        end_date,
-        frequency,
-        reminders,
-        reminder_message,
-        target_type,
-        category,
-        quantity,
-        sequential_date_count
-      FROM
-        sequential_dates
-      WHERE
-        most_recent_date >= CURRENT_DATE - INTERVAL '1 day'
-      ORDER BY
-        habit_id,
-        user_id;
-    ''';
     List<List<dynamic>> results = await databaseConnection.query(
-      query,
+      'SELECT * FROM habits WHERE user_id = @userID',
       substitutionValues: {
-        'userId': id,
+        'userID': id,
       },
     );
     return results;
@@ -428,30 +274,8 @@ Future<List<List<dynamic>>> selectHabitsByTitle(String id, String title) async {
   }
 }
 
-Future<List<List<dynamic>>> selectHabitsByDate(String id, DateTime date) async {
-  try {
-    databaseConnection.open();
-    List<List<dynamic>> results = await databaseConnection.query(
-      'SELECT * FROM habits WHERE user_id = @userID and start_date <= @date '
-      'and (end_date is NULL or end_date >= @date)',
-      substitutionValues: {
-        'userID': id,
-        'date': date,
-      },
-    );
-    return results;
-  } catch (e) {
-    debugPrint('Error: ${e.toString()}');
-    return List.empty();
-  } finally {
-    await databaseConnection.close();
-  }
-}
-
 Future<List<List<dynamic>>> selectHabitsStarted(
-  String id,
-  DateTime date,
-) async {
+    String id, DateTime date) async {
   try {
     databaseConnection.open();
     List<List<dynamic>> results = await databaseConnection.query(
@@ -491,9 +315,7 @@ Future<List<List<dynamic>>> selectHabitsEnded(String id, DateTime date) async {
 }
 
 Future<List<List<dynamic>>> selectHabitsByCategory(
-  String id,
-  String cat,
-) async {
+    String id, String cat) async {
   try {
     databaseConnection.open();
     List<List<dynamic>> results = await databaseConnection.query(
@@ -503,126 +325,6 @@ Future<List<List<dynamic>>> selectHabitsByCategory(
         'category': cat,
       },
     );
-    return results;
-  } catch (e) {
-    debugPrint('Error: ${e.toString()}');
-    return List.empty();
-  } finally {
-    await databaseConnection.close();
-  }
-}
-
-Future<List<List<dynamic>>> selectSharedHabits(String id1, id2) async {
-  try {
-    databaseConnection.open();
-
-    const query = '''
-      SELECT
-        h1.habit_id,
-        h1.title
-      FROM habits as h1
-      JOIN habits as h2
-        on h1.habit_id = h2.habit_id
-      WHERE (h1.user_id = @user1 and h2.user_id = @user2)
-        or (h1.user_id = @user2 and h2.user_id = @user1)
-    ''';
-    List<List<dynamic>> results = await databaseConnection.query(
-      query,
-      substitutionValues: {
-        'user1': id1,
-        'user2': id2,
-      },
-    );
-    return results;
-  } catch (e) {
-    debugPrint('Error: ${e.toString()}');
-    return List.empty();
-  } finally {
-    await databaseConnection.close();
-  }
-}
-
-Future<List<List<dynamic>>> selectHabitByID(
-  String userID,
-  String habitID,
-) async {
-  try {
-    databaseConnection.open();
-    List<List<dynamic>> results = await databaseConnection.query(
-      'SELECT * FROM habits WHERE user_id = @user AND habit_id = @habit',
-      substitutionValues: {
-        'user': userID,
-        'habit': habitID,
-      },
-    );
-    return results;
-  } catch (e) {
-    debugPrint('Error: ${e.toString()}');
-    return List.empty();
-  } finally {
-    await databaseConnection.close();
-  }
-}
-
-Future<List<List<dynamic>>> selectHabitStreaks(String userId) async {
-  try {
-    await databaseConnection.open();
-
-    const query = '''
-      WITH ranked_activities AS (
-          SELECT
-              a.habit_id,
-              a.user_id,
-              h.title,
-              a.timestamp,
-              ROW_NUMBER() OVER (PARTITION BY a.habit_id, a.user_id ORDER BY a.timestamp) AS seq
-          FROM
-              activity a
-          JOIN
-              habits h ON a.habit_id = h.habit_id AND a.user_id = h.user_id
-          WHERE
-              a.user_id = your_user_id
-      ),
-      date_diffs AS (
-          SELECT
-              habit_id,
-              user_id,
-              title,
-              timestamp,
-              seq,
-              timestamp - INTERVAL '1 day' * (seq - 1) AS date_group
-          FROM
-              ranked_activities
-      ),
-      sequential_dates AS (
-          SELECT
-              habit_id,
-              user_id,
-              title,
-              MAX(timestamp) AS most_recent_date,
-              COUNT(DISTINCT date_group) AS sequential_date_count
-          FROM
-              date_diffs
-          GROUP BY
-              habit_id, user_id, title
-      )
-      SELECT
-          habit_id,
-          user_id,
-          title,
-          sequential_date_count
-      FROM
-          sequential_dates
-      WHERE
-          most_recent_date >= CURRENT_DATE - INTERVAL '1 day'
-      ORDER BY
-          habit_id,
-          user_id;
-    ''';
-
-    List<List<dynamic>> results = await databaseConnection
-        .query(query, substitutionValues: {'user_id': userId});
-
     return results;
   } catch (e) {
     debugPrint('Error: ${e.toString()}');
@@ -652,9 +354,7 @@ Future<List<List<dynamic>>> selectAchievements(String id) async {
 }
 
 Future<List<List<dynamic>>> selectAchievementsByHabitID(
-  String id,
-  String habit,
-) async {
+    String id, String habit) async {
   try {
     databaseConnection.open();
     List<List<dynamic>> results = await databaseConnection.query(
@@ -674,9 +374,7 @@ Future<List<List<dynamic>>> selectAchievementsByHabitID(
 }
 
 Future<List<List<dynamic>>> selectAchievementsByType(
-  String id,
-  String type,
-) async {
+    String id, String type) async {
   try {
     databaseConnection.open();
     List<List<dynamic>> results = await databaseConnection.query(
@@ -696,9 +394,7 @@ Future<List<List<dynamic>>> selectAchievementsByType(
 }
 
 Future<List<List<dynamic>>> selectAchievementsByDate(
-  String id,
-  DateTime date,
-) async {
+    String id, DateTime date) async {
   try {
     databaseConnection.open();
     List<List<dynamic>> results = await databaseConnection.query(
@@ -718,10 +414,7 @@ Future<List<List<dynamic>>> selectAchievementsByDate(
 }
 
 Future<List<List<dynamic>>> selectAchievementsWithinDateRange(
-  String id,
-  DateTime start,
-  DateTime end,
-) async {
+    String id, DateTime start, DateTime end) async {
   try {
     databaseConnection.open();
     List<List<dynamic>> results = await databaseConnection.query(
@@ -761,9 +454,7 @@ Future<List<List<dynamic>>> selectActivities(String id) async {
 }
 
 Future<List<List<dynamic>>> selectActivitiesByHabitID(
-  String id,
-  String habit,
-) async {
+    String id, String habit) async {
   try {
     databaseConnection.open();
     List<List<dynamic>> results = await databaseConnection.query(
@@ -783,9 +474,7 @@ Future<List<List<dynamic>>> selectActivitiesByHabitID(
 }
 
 Future<List<List<dynamic>>> selectActivitiesByDate(
-  String id,
-  DateTime date,
-) async {
+    String id, DateTime date) async {
   try {
     databaseConnection.open();
     List<List<dynamic>> results = await databaseConnection.query(
@@ -805,10 +494,7 @@ Future<List<List<dynamic>>> selectActivitiesByDate(
 }
 
 Future<List<List<dynamic>>> selectActivitiesWithinDateRange(
-  String id,
-  DateTime start,
-  DateTime end,
-) async {
+    String id, DateTime start, DateTime end) async {
   try {
     databaseConnection.open();
     List<List<dynamic>> results = await databaseConnection.query(
@@ -1020,9 +706,7 @@ Future<bool> updateHabitReminders(String habitID, bool newReminder) async {
 }
 
 Future<bool> updateHabitReminderMessage(
-  String habitID,
-  String newMessage,
-) async {
+    String habitID, String newMessage) async {
   try {
     await databaseConnection.open();
     await databaseConnection.query(
