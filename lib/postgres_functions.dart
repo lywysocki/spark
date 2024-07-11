@@ -315,7 +315,7 @@ Future<List<List<dynamic>>> selectHabitsByUserID(String id) async {
           a.timestamp,
           ROW_NUMBER() OVER (PARTITION BY a.habit_id, a.user_id ORDER BY a.timestamp) AS seq
         FROM
-          activity a
+          activities a
         JOIN
           habits h ON a.habit_id = h.habit_id AND a.user_id = h.user_id
         WHERE
@@ -603,7 +603,7 @@ Future<List<List<dynamic>>> selectHabitStreaks(String userId) async {
               a.timestamp,
               ROW_NUMBER() OVER (PARTITION BY a.habit_id, a.user_id ORDER BY a.timestamp) AS seq
           FROM
-              activity a
+              activities a
           JOIN
               habits h ON a.habit_id = h.habit_id AND a.user_id = h.user_id
           WHERE
