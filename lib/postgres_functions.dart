@@ -5,6 +5,7 @@ friendships:   user1_id, user2_id
 achievements:    achievement_id, user_id, habit_id, achievement_title, date, timestamp, quantity
 activities: user_id, habit_id, timestamp, quanity
  */
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:postgres/postgres.dart';
@@ -431,9 +432,45 @@ Future<List<List<dynamic>>> selectHabitsByTitle(String id, String title) async {
 Future<List<List<dynamic>>> selectHabitsByDate(String id, DateTime date) async {
   try {
     databaseConnection.open();
+    String query = '''
+      WITH latest_activities AS (
+        SELECT
+          habit_id,
+          user_id,
+          MAX(a.timestamp) AS most_recent_activity
+        FROM activities
+        WHERE user_id = @userID
+        GROUP BY habit_id, user_id
+      ),
+      due_habits AS (
+        SELECT
+          h.*,
+          la.most_recent_activity,
+          CASE
+            WHEN h.frequency = 'daily' THEN la.most_recent_activity + INTERVAL '1 day'
+            WHEN h.frequency = 'weekly' THEN la.most_recent_activity + INTERVAL '1 week'
+            WHEN h.frequency = 'biweekly' THEN la.most_recent_activity + INTERVAL '2 weeks'
+            WHEN h.frequency = 'monthly' THEN la.most_recent_activity + INTERVAL '1 month'
+            ELSE la.most_recent_activity + INTERVAL '1 day' -- default to daily
+          END AS next_due_date
+        FROM habits h
+        LEFT JOIN
+          latest_activities la ON h.habit_id = la.habit_id AND h.user_id = la.user_id
+      )
+      SELECT
+        *
+      FROM
+        due_habits
+      WHERE
+        next_due_date = @date
+        OR (next_due_date IS NULL AND h.start_date <= CURRENT_DATE)
+      ORDER BY
+        habit_id,
+        user_id;
+    ''';
+
     List<List<dynamic>> results = await databaseConnection.query(
-      'SELECT * FROM habits WHERE user_id = @userID and start_date <= @date '
-      'and (end_date is NULL or end_date >= @date)',
+      query,
       substitutionValues: {
         'userID': id,
         'date': date,
