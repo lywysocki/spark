@@ -67,7 +67,7 @@ Future<bool> createHabit(
     String title,
     String note,
     DateTime start,
-    DateTime end,
+    DateTime? end,
     String frequency,
     bool reminders,
     String? reminderMessage,
