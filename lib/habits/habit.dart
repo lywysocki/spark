@@ -11,6 +11,7 @@ class Habit {
   final String targetType;
   final String category;
   int? quantity;
+  int? streak;
 
   Habit({
     required this.habitId,
@@ -25,7 +26,52 @@ class Habit {
     required this.targetType,
     required this.category,
     int? quan,
+    this.streak,
   })  : endDate = end,
         reminderMessage = msg,
         quantity = quan;
+
+  String getTitle() {
+    return title;
+  }
+
+  String getNote() {
+    return note;
+  }
+
+  DateTime getStart() {
+    return startDate;
+  }
+
+  DateTime? getEnd() {
+    return endDate;
+  }
+
+  String getFrequency() {
+    return frequency;
+  }
+
+  bool getRemindersSet() {
+    return reminders;
+  }
+
+  String? getRemindersMessage() {
+    return reminderMessage;
+  }
+
+  String getTargetType() {
+    return targetType;
+  }
+
+  String getCategory() {
+    return category;
+  }
+
+  int? getQuantity() {
+    return quantity;
+  }
+
+  int? getStreak() {
+    return streak;
+  }
 }

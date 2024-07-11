@@ -7,29 +7,74 @@ import 'package:spark/habits/habit.dart';
 //habits: habit_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity
 //activities: user_id, habit_id, timestamp, quanity
 class HabitController extends ChangeNotifier {
-  HabitController() {
+  final String currentUserId;
+
+  HabitController({required this.currentUserId}) {
     _load();
   }
 
   List<Habit> allHabits = [];
+  List<Habit> todaysHabits = [];
+  List<Habit> tomorrowsHabits = [];
 
-  Future<void> _load() async {}
+  Future<void> _load() async {
+    allHabits = await getAllHabits();
+    todaysHabits = await getTodaysHabits();
+    tomorrowsHabits = await getTomorrowsHabits();
+  }
 
 //Homepage methods
-  Future<List<List<Map<String, dynamic>>>> getUpcomingHabits(
-      String user) async {
+  Future<List<Habit>> getAllHabits() async {
+    // Get all habits
+    List<List<dynamic>> allHabitsAllData =
+        await selectHabitsByUserID(currentUserId);
+    /* returned fields:
+      habit_id, 
+      user_id, 
+      title, 
+      note, 
+      start_date, 
+      end_date, 
+      frequency, 
+      reminders, 
+      reminder_message, 
+      target_type, 
+      category, 
+      quantity,
+      streak
+      */
+
+    List<Habit> habits = [];
+    //convert rows to a Habit and add to list
+    allHabitsAllData.forEach((row) {
+      Habit h = new Habit(
+          habitId: row[0],
+          userId: row[1],
+          title: row[2],
+          note: row[3],
+          startDate: row[4],
+          end: row[5],
+          frequency: row[6],
+          reminders: row[7],
+          msg: row[8],
+          targetType: row[9],
+          category: row[10],
+          quan: row[11],
+          streak: row[12]);
+      habits.add(h);
+    });
+
+    return habits;
+  }
+
+  Future<List<Habit>> getTodaysHabits() async {
     final dateFormat = DateFormat('yyyy-MM-dd');
     DateTime now = DateTime.now();
     String today = dateFormat.format(now);
     DateTime todayFormatted = dateFormat.parse(today);
 
-    DateTime tom = now.add(Duration(days: 1));
-    String tomorrow = dateFormat.format(tom);
-    DateTime tomorrowFormatted = dateFormat.parse(tomorrow);
-
-    // Get today's habits
     List<List<dynamic>> todaysHabitsAllData =
-        await selectHabitsByDate(user, todayFormatted);
+        await selectHabitsByDate(currentUserId, todayFormatted);
     /* returned fields:
       habit_id, 
       user_id, 
@@ -47,136 +92,31 @@ class HabitController extends ChangeNotifier {
       next_due_date (timestamp)
       */
     int habitIdIndex = 0;
-    int habitTitleIndex = 2;
-
-    List<dynamic> ids = todaysHabitsAllData.map((row) => row[0]).toList();
-    List<List<dynamic>> habitsStreaks = await selectHabitStreaks(user, ids);
-    /* returned fields:
-      habit_id,
-      user_id,
-      title,
-      sequential_date_count
-      */
     int habitStreakIndex = 3;
-    Map<dynamic, List<dynamic>> streaksMap = {
-      for (var row in habitsStreaks) row[0]: row[habitStreakIndex]
-    };
 
-    //pull out just the ids, titles, and streaks
-    List<Map<String, dynamic>> todaysHabitsQuickView =
-        todaysHabitsAllData.map((row) {
-      var habitId = row[habitIdIndex];
-      var streak = streaksMap[habitId];
+    List<Habit> habits = [];
+    todaysHabitsAllData.forEach((row) {
+      Habit h = new Habit(
+          habitId: row[0],
+          userId: row[1],
+          title: row[2],
+          note: row[3],
+          startDate: row[4],
+          end: row[5],
+          frequency: row[6],
+          reminders: row[7],
+          msg: row[8],
+          targetType: row[9],
+          category: row[10],
+          quan: row[11],
+          streak: 0);
+      habits.add(h);
+    });
 
-      return {
-        'id': habitId,
-        'title': row[habitTitleIndex],
-        'streak': streak,
-      };
-    }).toList();
-
-    // Get tomorrow's habits
-    List<List<dynamic>> tomorrowsHabitsAllData =
-        await selectHabitsByDate(user, tomorrowFormatted);
-
-    ids = tomorrowsHabitsAllData.map((row) => row[0]).toList();
-    habitsStreaks = await selectHabitStreaks(user, ids);
-    /* returned fields:
-      habit_id,
-      user_id,
-      title,
-      sequential_date_count
-      */
-    streaksMap = {for (var row in habitsStreaks) row[0]: row[habitStreakIndex]};
-
-    //pull out just the ids, titles, and streaks
-    List<Map<String, dynamic>> tomorrowsHabitsQuickView =
-        tomorrowsHabitsAllData.map((row) {
-      var habitId = row[habitIdIndex];
-      var streak = streaksMap[habitId];
-
-      return {
-        'id': habitId,
-        'title': row[habitTitleIndex],
-        'streak': streak,
-      };
-    }).toList();
-
-    /* upcomingHabits
-   * [x][y][z] where... 
-   * x is 0(todays habits) or 1(tomorrows habits),
-   * y is the index of the individual habit in that list
-   * z is the map of habit id, title, and streak
-  */
-    List<List<Map<String, dynamic>>> upcomingHabits = [
-      todaysHabitsQuickView,
-      tomorrowsHabitsQuickView
-    ];
-    return upcomingHabits;
+    return habits;
   }
 
-  Future<List<Map<String, dynamic>>> getTodaysHabits(String user) async {
-    final dateFormat = DateFormat('yyyy-MM-dd');
-    DateTime now = DateTime.now();
-    String today = dateFormat.format(now);
-    DateTime todayFormatted = dateFormat.parse(today);
-
-    List<List<dynamic>> todaysHabitsAllData =
-        await selectHabitsByDate(user, todayFormatted);
-    /* returned fields:
-      habit_id, 
-      user_id, 
-      title, 
-      note, 
-      start_date, 
-      end_date, 
-      frequency, 
-      reminders, 
-      reminder_message, 
-      target_type, 
-      category, 
-      quantity,
-      most_recent_activity (timestamp),
-      next_due_date (timestamp)
-      */
-    int habitIdIndex = 0;
-    int habitTitleIndex = 2;
-
-    List<dynamic> ids = todaysHabitsAllData.map((row) => row[0]).toList();
-    List<List<dynamic>> habitsStreaks = await selectHabitStreaks(user, ids);
-    /* returned fields:
-      habit_id,
-      user_id,
-      title,
-      sequential_date_count
-      */
-    int habitStreakIndex = 3;
-    Map<dynamic, List<dynamic>> streaksMap = {
-      for (var row in habitsStreaks) row[0]: row[habitStreakIndex]
-    };
-
-    //pull out just the ids, titles, and streaks
-    List<Map<String, dynamic>> todaysHabitsQuickView =
-        todaysHabitsAllData.map((row) {
-      var habitId = row[habitIdIndex];
-      var streak = streaksMap[habitId];
-
-      return {
-        'id': habitId,
-        'title': row[habitTitleIndex],
-        'streak': streak,
-      };
-    }).toList();
-
-    /* todaysHabits
-   * [x][y] where... 
-   * x is the index of the individual habit in that list
-   * y is the map of the habit id, title, and streak
-  */
-    return todaysHabitsQuickView;
-  }
-
-  Future<List<Map<String, dynamic>>> getTomorrowsHabits(String user) async {
+  Future<List<Habit>> getTomorrowsHabits() async {
     final dateFormat = DateFormat('yyyy-MM-dd');
     DateTime tom = DateTime.now().add(Duration(days: 1));
     String tomorrow = dateFormat.format(tom);
@@ -184,7 +124,7 @@ class HabitController extends ChangeNotifier {
 
     // Get tomorrow's habits
     List<List<dynamic>> tomorrowsHabitsAllData =
-        await selectHabitsByDate(user, tomorrowFormatted);
+        await selectHabitsByDate(currentUserId, tomorrowFormatted);
     /* returned fields:
       habit_id, 
       user_id, 
@@ -201,41 +141,27 @@ class HabitController extends ChangeNotifier {
       most_recent_activity (timestamp),
       next_due_date (timestamp)
       */
-    int habitIdIndex = 0;
-    int habitTitleIndex = 2;
-    int habitStreakIndex = 3;
 
-    List<dynamic> ids = tomorrowsHabitsAllData.map((row) => row[0]).toList();
-    List<List<dynamic>> habitsStreaks = await selectHabitStreaks(user, ids);
-    /* returned fields:
-      habit_id,
-      user_id,
-      title,
-      sequential_date_count
-      */
-    Map<dynamic, List<dynamic>> streaksMap = {
-      for (var row in habitsStreaks) row[0]: row[habitStreakIndex]
-    };
+    List<Habit> habits = [];
+    tomorrowsHabitsAllData.forEach((row) {
+      Habit h = new Habit(
+          habitId: row[0],
+          userId: row[1],
+          title: row[2],
+          note: row[3],
+          startDate: row[4],
+          end: row[5],
+          frequency: row[6],
+          reminders: row[7],
+          msg: row[8],
+          targetType: row[9],
+          category: row[10],
+          quan: row[11],
+          streak: 0);
+      habits.add(h);
+    });
 
-    //pull out just the ids, titles, and streaks
-    List<Map<String, dynamic>> tomorrowsHabitsQuickView =
-        tomorrowsHabitsAllData.map((row) {
-      var habitId = row[habitIdIndex];
-      var streak = streaksMap[habitId];
-
-      return {
-        'id': habitId,
-        'title': row[habitTitleIndex],
-        'streak': streak,
-      };
-    }).toList();
-
-    /* tomorrowsHabits
-   * [x][y] where... 
-   * x is the index of the individual habit in that list
-   * y is the map of the habit id, title, and streak
-  */
-    return tomorrowsHabitsQuickView;
+    return habits;
   }
 
 //New Habit page
