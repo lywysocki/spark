@@ -140,7 +140,6 @@ Future<bool> createAchievement(
 Future<bool> createActivity(
   String userID,
   String habitID,
-  String achievementTitle,
   int? quantity,
 ) async {
   try {
