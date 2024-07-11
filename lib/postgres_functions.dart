@@ -602,7 +602,16 @@ Future<List<List<dynamic>>> selectSharedHabits(String userId1, userId2) async {
     const query = '''
       SELECT
         h1.habit_id,
-        h1.title
+        h1.title,
+        h1.note,
+        h1.start_date,
+        h1.end_date,
+        h1.frequency,
+        h1.reminders,
+        h1.reminder_message,
+        h1.target_type,
+        h1.category,
+        h1.quantity,
       FROM habits as h1
       JOIN habits as h2
         on h1.habit_id = h2.habit_id
