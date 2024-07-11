@@ -6,6 +6,7 @@ achievements:    achievement_id, user_id, habit_id, achievement_title, date, tim
 activities: user_id, habit_id, timestamp, quanity
  */
 
+import 'dart:ffi';
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import 'package:postgres/postgres.dart';
@@ -153,19 +154,13 @@ Future<bool> createActivity(String userID, String habitID,
 
 //SELECT Functions
 // Users
-
-Future<List<List<dynamic>>> selectUsersLogin(
-  String user,
-  String password,
-) async {
+Future<List<List<dynamic>>> selectUsersByUserID(String id) async {
   try {
     databaseConnection.open();
     List<List<dynamic>> results = await databaseConnection.query(
-      'SELECT user_id FROM users WHERE (username = @username OR email = @email) AND password = @password',
+      'SELECT * FROM users WHERE user_id = @id',
       substitutionValues: {
-        'username': user,
-        'email': user,
-        'password': password,
+        'id': id,
       },
     );
     return results;
@@ -232,18 +227,53 @@ Future<List<List<dynamic>>> selectUsersByName(String first, String last) async {
   }
 }
 
+Future<List<List<dynamic>>> selectUsersLogin(
+    String user, String password) async {
+  try {
+    databaseConnection.open();
+    List<List<dynamic>> results = await databaseConnection.query(
+      'SELECT user_id FROM users WHERE (username = @username OR email = @email) AND password = @password',
+      substitutionValues: {
+        'username': user,
+        'email': user,
+        'password': password,
+      },
+    );
+    return results;
+  } catch (e) {
+    debugPrint('Error: ${e.toString()}');
+    return List.empty();
+  } finally {
+    await databaseConnection.close();
+  }
+}
+
 // Friendships
 Future<List<List<dynamic>>> selectFriendsByUser(String userID) async {
   try {
     databaseConnection.open();
     List<List<dynamic>> results = await databaseConnection.query(
-      'SELECT user2_id FROM users WHERE user1_id = @id',
+      '''SELECT 
+          friendships.user2_id,
+          users.username,
+          users.first_name,
+          users.last_name
+        FROM friendships
+        JOIN users on friendships.user2_id = users.user_id
+        WHERE user1_id = @id ''',
       substitutionValues: {
         'id': userID,
       },
     );
     List<List<dynamic>> results2 = await databaseConnection.query(
-      'SELECT user1_id FROM users WHERE user2_id = @id',
+      '''SELECT
+          friendships.user1_id,
+          users.username,
+          users.first_name,
+          users.last_name 
+        FROM friendships 
+        JOIN users on friendships.user1_id = users.user_id
+        WHERE user2_id = @id''',
       substitutionValues: {
         'id': userID,
       },
@@ -263,12 +293,97 @@ Future<List<List<dynamic>>> selectFriendsByUser(String userID) async {
 Future<List<List<dynamic>>> selectHabitsByUserID(String id) async {
   try {
     databaseConnection.open();
-    List<List<dynamic>> results = await databaseConnection.query(
-      'SELECT * FROM habits WHERE user_id = @userID',
-      substitutionValues: {
-        'userID': id,
-      },
-    );
+    const query = '''
+      WITH ranked_activities AS (
+        SELECT
+          a.habit_id,
+          a.user_id,
+          h.title,
+          h.note,
+          h.start_date,
+          h.end_date,
+          h.frequency,
+          h.reminders,
+          h.reminder_message,
+          h.target_type,
+          h.category,
+          h.quantity,
+          a.timestamp,
+          ROW_NUMBER() OVER (PARTITION BY a.habit_id, a.user_id ORDER BY a.timestamp) AS seq
+        FROM
+          activity a
+        JOIN
+          habits h ON a.habit_id = h.habit_id AND a.user_id = h.user_id
+        WHERE
+          a.user_id = @userId
+      ),
+      date_diffs AS (
+        SELECT
+          habit_id,
+          user_id,
+          title,
+          note,
+          start_date,
+          end_date,
+          frequency,
+          reminders,
+          reminder_message,
+          target_type,
+          category,
+          quantity,
+          timestamp,
+          seq,
+          timestamp - INTERVAL '1 day' * (seq - 1) AS date_group
+        FROM
+          ranked_activities
+      ),
+      sequential_dates AS (
+        SELECT
+          habit_id,
+          user_id,
+          title,
+          note,
+          start_date,
+          end_date,
+          frequency,
+          reminders,
+          reminder_message,
+          target_type,
+          category,
+          quantity,
+          MAX(timestamp) AS most_recent_date,
+          COUNT(DISTINCT date_group) AS sequential_date_count
+        FROM
+          date_diffs
+        GROUP BY
+          habit_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity
+      )
+      SELECT
+        habit_id,
+        user_id,
+        title,
+        note,
+        start_date,
+        end_date,
+        frequency,
+        reminders,
+        reminder_message,
+        target_type,
+        category,
+        quantity,
+        sequential_date_count
+      FROM
+        sequential_dates
+      WHERE
+        most_recent_date >= CURRENT_DATE - INTERVAL '1 day'
+      ORDER BY
+        habit_id,
+        user_id;
+    ''';
+    List<List<dynamic>> results =
+        await databaseConnection.query(query, substitutionValues: {
+      'userId': id,
+    });
     return results;
   } catch (e) {
     debugPrint('Error: ${e.toString()}');
@@ -286,6 +401,62 @@ Future<List<List<dynamic>>> selectHabitsByTitle(String id, String title) async {
       substitutionValues: {
         'userID': id,
         'title': title,
+      },
+    );
+    return results;
+  } catch (e) {
+    debugPrint('Error: ${e.toString()}');
+    return List.empty();
+  } finally {
+    await databaseConnection.close();
+  }
+}
+
+Future<List<List<dynamic>>> selectHabitsByDate(String id, DateTime date) async {
+  try {
+    databaseConnection.open();
+    String query = '''
+      WITH latest_activities AS (
+        SELECT
+          habit_id,
+          user_id,
+          MAX(a.timestamp) AS most_recent_activity
+        FROM activities
+        WHERE user_id = @userID
+        GROUP BY habit_id, user_id
+      ),
+      due_habits AS (
+        SELECT
+          h.*,
+          la.most_recent_activity,
+          CASE
+            WHEN h.frequency = 'daily' THEN la.most_recent_activity + INTERVAL '1 day'
+            WHEN h.frequency = 'weekly' THEN la.most_recent_activity + INTERVAL '1 week'
+            WHEN h.frequency = 'biweekly' THEN la.most_recent_activity + INTERVAL '2 weeks'
+            WHEN h.frequency = 'monthly' THEN la.most_recent_activity + INTERVAL '1 month'
+            ELSE la.most_recent_activity + INTERVAL '1 day' -- default to daily
+          END AS next_due_date
+        FROM habits h
+        LEFT JOIN
+          latest_activities la ON h.habit_id = la.habit_id AND h.user_id = la.user_id
+      )
+      SELECT
+        *
+      FROM
+        due_habits
+      WHERE
+        next_due_date = @date
+        OR (next_due_date IS NULL AND h.start_date <= CURRENT_DATE)
+      ORDER BY
+        habit_id,
+        user_id;
+    ''';
+
+    List<List<dynamic>> results = await databaseConnection.query(
+      query,
+      substitutionValues: {
+        'userID': id,
+        'date': date,
       },
     );
     return results;
@@ -348,6 +519,124 @@ Future<List<List<dynamic>>> selectHabitsByCategory(
         'category': cat,
       },
     );
+    return results;
+  } catch (e) {
+    debugPrint('Error: ${e.toString()}');
+    return List.empty();
+  } finally {
+    await databaseConnection.close();
+  }
+}
+
+Future<List<List<dynamic>>> selectSharedHabits(String id1, id2) async {
+  try {
+    databaseConnection.open();
+
+    const query = '''
+      SELECT
+        h1.habit_id,
+        h1.title
+      FROM habits as h1
+      JOIN habits as h2
+        on h1.habit_id = h2.habit_id
+      WHERE (h1.user_id = @user1 and h2.user_id = @user2)
+        or (h1.user_id = @user2 and h2.user_id = @user1)
+    ''';
+    List<List<dynamic>> results = await databaseConnection.query(
+      query,
+      substitutionValues: {
+        'user1': id1,
+        'user2': id2,
+      },
+    );
+    return results;
+  } catch (e) {
+    debugPrint('Error: ${e.toString()}');
+    return List.empty();
+  } finally {
+    await databaseConnection.close();
+  }
+}
+
+Future<List<List<dynamic>>> selectHabitByID(
+    String userID, String habitID) async {
+  try {
+    databaseConnection.open();
+    List<List<dynamic>> results = await databaseConnection.query(
+      'SELECT * FROM habits WHERE user_id = @user AND habit_id = @habit',
+      substitutionValues: {
+        'user': userID,
+        'habit': habitID,
+      },
+    );
+    return results;
+  } catch (e) {
+    debugPrint('Error: ${e.toString()}');
+    return List.empty();
+  } finally {
+    await databaseConnection.close();
+  }
+}
+
+Future<List<List<dynamic>>> selectHabitStreaks(String user_id) async {
+  try {
+    await databaseConnection.open();
+
+    const query = '''
+      WITH ranked_activities AS (
+          SELECT
+              a.habit_id,
+              a.user_id,
+              h.title,
+              a.timestamp,
+              ROW_NUMBER() OVER (PARTITION BY a.habit_id, a.user_id ORDER BY a.timestamp) AS seq
+          FROM
+              activity a
+          JOIN
+              habits h ON a.habit_id = h.habit_id AND a.user_id = h.user_id
+          WHERE
+              a.user_id = your_user_id
+      ),
+      date_diffs AS (
+          SELECT
+              habit_id,
+              user_id,
+              title,
+              timestamp,
+              seq,
+              timestamp - INTERVAL '1 day' * (seq - 1) AS date_group
+          FROM
+              ranked_activities
+      ),
+      sequential_dates AS (
+          SELECT
+              habit_id,
+              user_id,
+              title,
+              MAX(timestamp) AS most_recent_date,
+              COUNT(DISTINCT date_group) AS sequential_date_count
+          FROM
+              date_diffs
+          GROUP BY
+              habit_id, user_id, title
+      )
+      SELECT
+          habit_id,
+          user_id,
+          title,
+          sequential_date_count
+      FROM
+          sequential_dates
+      WHERE
+          most_recent_date >= CURRENT_DATE - INTERVAL '1 day'
+      ORDER BY
+          habit_id,
+          user_id;
+    ''';
+
+    List<List<dynamic>> results = await databaseConnection
+        .query(query, substitutionValues: {'user_id': user_id});
+
     return results;
   } catch (e) {
     debugPrint('Error: ${e.toString()}');
