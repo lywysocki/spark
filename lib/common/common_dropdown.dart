@@ -1,21 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:collection/collection.dart';
 
 class CommonDropdown extends StatelessWidget {
   const CommonDropdown({
     super.key,
     required this.dropdownItems,
     required this.hintText,
-    this.hasInitialValue = false,
+    this.initialValue,
   });
 
   final List<DropdownMenuItem<String>> dropdownItems;
   final String hintText;
-  final bool hasInitialValue;
+  final String? initialValue;
 
   @override
   Widget build(BuildContext context) {
     return DropdownButtonFormField<String>(
-      value: hasInitialValue ? dropdownItems.first.value : null,
+      value: dropdownItems
+          .firstWhereOrNull((element) => element.value == initialValue)
+          ?.value,
       decoration: InputDecoration(
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(20),
