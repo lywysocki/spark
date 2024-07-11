@@ -1,13 +1,27 @@
-import 'dart:ffi';
-import 'package:flutter/cupertino.dart';
-import 'package:intl/intl.dart';
+import 'package:flutter/material.dart';
 import 'package:spark/postgres_functions.dart';
+import 'package:spark/friends/friend.dart';
 
 //friendships:   user1_id, user2_id
 class FriendshipController extends ChangeNotifier {
+  final String currentUserId;
+
+  FriendshipController({required this.currentUserId}) {
+    _load();
+  }
+
+  List<Friend> allFriends = [];
+  List<Friend> todaysHabits = [];
+  List<Friend> tomorrowsHabits = [];
+
+  Future<void> _load() async {
+    allFriends = await getAllFriends();
+  }
+
 //Friends List View
-  Future<List<Map<String, dynamic>>> viewAllFriends(String userID) async {
-    List<List<dynamic>> allFriendData = await selectFriendsByUser(userID);
+  Future<List<Friend>> getAllFriends() async {
+    List<List<dynamic>> allFriendData =
+        await selectFriendsByUser(currentUserId);
     //selectFriendsByUser returns a list of friends data in format [id, username, first, last]
     int friendsIdIndex = 0;
     int friendsUsernameIndex = 1;
@@ -15,21 +29,26 @@ class FriendshipController extends ChangeNotifier {
     int friendsLastIndex = 3;
 
     //pull out just the ids, titles, and streaks
-    List<Map<String, dynamic>> allFriendsQuickView = allFriendData.map((row) {
-      return {
-        'friendsID': row[friendsIdIndex],
-        'friendsUsername': row[friendsUsernameIndex],
-        'friendsFullName': row[friendsFirstIndex] + ' ' + row[friendsLastIndex],
-      };
-    }).toList();
+    List<Friend> friends = [];
 
-    return allFriendsQuickView;
+    for (var row in allFriendData) {
+      Friend f = Friend(
+        userId: row[friendsIdIndex],
+        username: row[friendsUsernameIndex],
+        firstName: row[friendsFirstIndex],
+        lastName: row[friendsLastIndex],
+      );
+      friends.add(f);
+    }
+
+    return friends;
   }
 
   Future<List<Map<String, dynamic>>> viewSharedHabits(
-      String user, String friend) async {
+    String friendId,
+  ) async {
     List<List<dynamic>> allSharedHabitData =
-        await selectSharedHabits(user, friend);
+        await selectSharedHabits(currentUserId, friendId);
 
     List<Map<String, dynamic>> sharedHabitQuickView =
         allSharedHabitData.map((row) {
