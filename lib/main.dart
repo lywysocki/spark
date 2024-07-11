@@ -2,6 +2,7 @@ import 'package:spark/friends/friends_screen.dart';
 import 'package:spark/habits/habits_screen.dart';
 import 'package:spark/habits/new_habit_screen.dart';
 import 'package:spark/home_screen.dart';
+import 'package:spark/login/login.dart';
 import 'package:spark/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:spark/theme.dart';
@@ -29,7 +30,8 @@ class MyApp extends StatelessWidget {
       theme: brightness == Brightness.light
           ? theme.lightMediumContrast()
           : theme.darkMediumContrast(),
-      home: const MyHomePage(),
+      initialRoute: '/',
+      home: const LoginScreen(),
     );
   }
 }
@@ -60,6 +62,7 @@ class _MyHomePageState extends State<MyHomePage> {
         child: const Icon(Icons.add),
       ),
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: Text(
           'LOGO',
           style: Theme.of(context).textTheme.titleLarge,

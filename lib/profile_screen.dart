@@ -68,11 +68,23 @@ class UserProfileScreen extends StatelessWidget {
                 const Spacer(),
                 TextButton(
                   child: const Text('Logout'),
-                  onPressed: () {},
+                  onPressed: () {
+                    /// TODO: currentUserId set null
+                    Navigator.popUntil(
+                      context,
+                      ModalRoute.withName('/'),
+                    );
+                  },
                 ),
                 TextButton(
                   child: const Text('Delete account'),
-                  onPressed: () {},
+                  onPressed: () {
+                    /// TODO: delete user account
+                    Navigator.popUntil(
+                      context,
+                      ModalRoute.withName('/'),
+                    );
+                  },
                 ),
               ],
             ),
