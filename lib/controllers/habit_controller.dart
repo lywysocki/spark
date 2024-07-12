@@ -167,7 +167,7 @@ class HabitController extends ChangeNotifier {
   }
 
 //New Habit page
-  Future<String> createNewHabit(
+  Future<void> createNewHabit(
     String userID,
     String title,
     String note,
@@ -186,7 +186,7 @@ class HabitController extends ChangeNotifier {
 
     if (existingHabit.isNotEmpty) {
       //if habit with this title exists
-      return ("Exists");
+      throw "Habit by that name exists";
     } else {
       //if habit doesn't exist, create it
       createHabit(
@@ -202,30 +202,18 @@ class HabitController extends ChangeNotifier {
         category,
         quantity,
       );
-      return ("Complete");
     }
   }
 
 //All Habit View
-  Future<List<Map<String, dynamic>>> viewAllHabits(String userID) async {
-    List<List<dynamic>> allHabitsAllData = await selectHabitsByUserID(userID);
-
-    //pull out just the ids, titles, and streaks
-    List<Map<String, dynamic>> allHabitsQuickView = allHabitsAllData.map((row) {
-      return {
-        'habit_id': row[0],
-        'user_id': row[1],
-        'title': row[2],
-        'streak': row[3],
-      };
-    }).toList();
-
-    return allHabitsQuickView;
+  Future<List<Habit>> viewAllHabits() async {
+    return allHabits;
   }
 
 //Habit View
-  Future<List<dynamic>> viewHabit(String userID, String habitID) async {
-    List<List<dynamic>> habitAllData = await selectHabitByID(userID, habitID);
+  Future<List<dynamic>> getHabit(String habitID) async {
+    List<List<dynamic>> habitAllData =
+        await selectHabitByID(currentUserId, habitID);
 
     if (habitAllData.length > 1) {
       //there are multiple habits with that habit_id
@@ -242,11 +230,11 @@ class HabitController extends ChangeNotifier {
     return habitAllData[0];
   }
 
-  Future<void> logActivity(String userID, String habitID, int? quantity) async {
-    List<List<dynamic>> habits = await selectHabitByID(userID, habitID);
+  Future<void> logActivity(String habitID, int? quantity) async {
+    List<List<dynamic>> habits = await selectHabitByID(currentUserId, habitID);
 
     if (habits.length == 1) {
-      createActivity(userID, habitID, quantity);
+      createActivity(currentUserId, habitID, quantity);
     } else {
       duplicateHabitIDs(habits);
       debugPrint(
@@ -255,11 +243,13 @@ class HabitController extends ChangeNotifier {
     }
   }
 
-  Future<void> deleteHabit(String userID, String title) async {
-    List<List<dynamic>> habits = await selectHabitsByTitle(userID, title);
+  Future<void> deleteHabitByTitle(String title) async {
+    List<List<dynamic>> habits =
+        await selectHabitsByTitle(currentUserId, title);
 
     if (habits.length == 1) {
-      deleteHabit(userID, title);
+      deleteHabitCascade(title);
+      allHabits = await getAllHabits();
     } else {
       duplicateHabitIDs(habits);
       debugPrint('Tried to delete habit $title, but there was an issue.');
