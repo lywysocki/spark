@@ -44,22 +44,24 @@ class FriendshipController extends ChangeNotifier {
           await selectSharedHabits(currentUserId, row[friendsIdIndex]);
       List<Habit> sharedHabits = [];
 
-      Habit h = Habit(
-        habitId: row[0],
-        userId: row[1],
-        title: row[2],
-        note: row[3],
-        startDate: row[4],
-        end: row[5],
-        frequency: row[6],
-        reminders: row[7],
-        msg: row[8],
-        targetType: row[9],
-        category: row[10],
-        quan: row[11],
-        streak: row[12],
-      );
-      sharedHabits.add(h);
+      for (var hrow in sharedHabitsData) {
+        Habit h = Habit(
+          habitId: hrow[0],
+          userId: hrow[1],
+          title: hrow[2],
+          note: hrow[3],
+          startDate: hrow[4],
+          end: hrow[5],
+          frequency: hrow[6],
+          reminders: hrow[7],
+          msg: hrow[8],
+          targetType: hrow[9],
+          category: hrow[10],
+          quan: hrow[11],
+          streak: hrow[12],
+        );
+        sharedHabits.add(h);
+      }
 
       f.setSharedHabits(sharedHabits);
       friends.add(f);
