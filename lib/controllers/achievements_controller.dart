@@ -3,6 +3,7 @@ import 'package:spark/postgres_functions.dart';
 
 import 'package:spark/achievements/achievement.dart';
 
+//achievements:    achievement_id, user_id, habit_id, achievement_title, timestamp, quantity
 class AchievementsController extends ChangeNotifier {
   AchievementsController({required this.currentUserId});
   final String currentUserId;
@@ -30,7 +31,6 @@ class AchievementsController extends ChangeNotifier {
     /// userID,
     /// habitID,
     /// achievementTitle,
-    /// date,
     /// time,
     /// quantity
     final userAchievements = await selectAchievements(currentUserId);
@@ -44,7 +44,6 @@ class AchievementsController extends ChangeNotifier {
             item[3],
             item[4],
             item[5],
-            item[6],
           ),
         )
         .toList();
@@ -67,7 +66,6 @@ class AchievementsController extends ChangeNotifier {
             item[3],
             item[4],
             item[5],
-            item[6],
           ),
         )
         .toList();
@@ -90,7 +88,6 @@ class AchievementsController extends ChangeNotifier {
             item[3],
             item[4],
             item[5],
-            item[6],
           ),
         )
         .toList();
@@ -112,7 +109,6 @@ class AchievementsController extends ChangeNotifier {
             item[3],
             item[4],
             item[5],
-            item[6],
           ),
         )
         .toList();
@@ -136,7 +132,6 @@ class AchievementsController extends ChangeNotifier {
             item[3],
             item[4],
             item[5],
-            item[6],
           ),
         )
         .toList();
