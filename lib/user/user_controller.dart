@@ -1,13 +1,14 @@
 // ignore_for_file: unused_field
 
 import 'package:flutter/material.dart';
-import 'package:spark/postgres_functions.dart';
 import 'package:spark/user/user.dart';
+import 'package:spark/user/user_repository.dart';
 
 class UserController extends ChangeNotifier {
   UserController();
 
   String? currentUserId;
+  final UserRepository _userRepo = UserRepository();
 
   final int _idIndex = 0;
   final int _usernameIndex = 1;
@@ -22,7 +23,8 @@ class UserController extends ChangeNotifier {
       throw "Username or password invalid";
     }
 
-    List<List<dynamic>> results = await selectUsersLogin(username, pass);
+    List<List<dynamic>> results =
+        await _userRepo.selectUsersLogin(username, pass);
     //selectUsersLogin queries only user_ids, so it returns should return a list of a list with one element: user_id
     if (results.length == 1) {
       currentUserId = results[0][0];
@@ -51,7 +53,8 @@ class UserController extends ChangeNotifier {
     String joined = '';
     int longestStreak = 0;
 
-    List<List<dynamic>> userResults = await selectUsersByUserID(currentUserId!);
+    List<List<dynamic>> userResults =
+        await _userRepo.selectUsersByUserID(currentUserId!);
     if (userResults.length == 1) {
       if (userResults[0][_fNameIndex] == null) {
         if (userResults[0][_usernameIndex] != null) {
@@ -76,9 +79,9 @@ class UserController extends ChangeNotifier {
     }
 
     List<List<dynamic>> streakResults =
-        await selectHabitStreaks(currentUserId!);
+        await _userRepo.selectUsersStreaks(currentUserId!);
     if (streakResults.isNotEmpty) {
-      List<dynamic> streaks = streakResults.map((row) => row[3]).toList();
+      List<dynamic> streaks = streakResults.map((row) => row[1]).toList();
       longestStreak = streaks.reduce((a, b) => a > b ? a : b);
     }
     final user = User(
@@ -94,17 +97,19 @@ class UserController extends ChangeNotifier {
   }
 
   Future<void> signup(String username, String email, String pass) async {
-    List<List<dynamic>> usernameResults = await selectUsersByUsername(username);
+    List<List<dynamic>> usernameResults =
+        await _userRepo.selectUsersByUsername(username);
     if (usernameResults.isNotEmpty) {
       throw "An account already exists by this username.";
     }
 
-    List<List<dynamic>> emailResults = await selectUsersByEmail(email);
+    List<List<dynamic>> emailResults =
+        await _userRepo.selectUsersByEmail(email);
     if (emailResults.isNotEmpty) {
       throw "An account exists using this email.";
     }
 
-    createUser(username, pass, email, null, null);
+    _userRepo.createUser(username, pass, email, null, null);
     login(username: username, pass: pass);
   }
 
@@ -112,7 +117,7 @@ class UserController extends ChangeNotifier {
     debugPrint("Duplicate user fields: \n");
     List<Map<String, dynamic>> allDuplicates = [];
     for (int i = 0; i < ids.length; i++) {
-      List<List<dynamic>> results = await selectUsersByUserID(ids[i]);
+      List<List<dynamic>> results = await _userRepo.selectUsersByUserID(ids[i]);
       Map<String, dynamic> result = {
         'user_id': results[0][0],
         'username': results[0][1],
