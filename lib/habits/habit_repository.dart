@@ -481,6 +481,74 @@ class HabitRepository extends ChangeNotifier {
     }
   }
 
+  Future<List<List<dynamic>>> selectHabitStreaks(String userId) async {
+    try {
+      await databaseConnection.open();
+
+      const query = '''
+      WITH ranked_activities AS (
+          SELECT
+              a.habit_id,
+              a.user_id,
+              h.title,
+              a.timestamp,
+              ROW_NUMBER() OVER (PARTITION BY a.habit_id, a.user_id ORDER BY a.timestamp) AS seq
+          FROM
+              activities a
+          JOIN
+              habits h ON a.habit_id = h.habit_id AND a.user_id = h.user_id
+          WHERE
+              a.user_id = your_user_id
+      ),
+      date_diffs AS (
+          SELECT
+              habit_id,
+              user_id,
+              title,
+              timestamp,
+              seq,
+              timestamp - INTERVAL '1 day' * (seq - 1) AS date_group
+          FROM
+              ranked_activities
+      ),
+      sequential_dates AS (
+          SELECT
+              habit_id,
+              user_id,
+              title,
+              MAX(timestamp) AS most_recent_date,
+              COUNT(DISTINCT date_group) AS sequential_date_count
+          FROM
+              date_diffs
+          GROUP BY
+              habit_id, user_id, title
+      )
+      SELECT
+          habit_id,
+          user_id,
+          title,
+          sequential_date_count
+      FROM
+          sequential_dates
+      WHERE
+          most_recent_date >= CURRENT_DATE - INTERVAL '1 day'
+      ORDER BY
+          habit_id,
+          user_id;
+    ''';
+
+      List<List<dynamic>> results = await databaseConnection
+          .query(query, substitutionValues: {'user_id': userId});
+
+      return results;
+    } catch (e) {
+      debugPrint('Error: ${e.toString()}');
+      return List.empty();
+    } finally {
+      await databaseConnection.close();
+    }
+  }
+
   Future<List<List<dynamic>>> selectActivities(String userID) async {
     try {
       databaseConnection.open();
