@@ -41,7 +41,7 @@ class UserRepository extends ChangeNotifier {
     }
   }
 
-  ////// Insert
+  ////// Select
   Future<List<List<dynamic>>> selectUsersByUserID(String userId) async {
     try {
       databaseConnection.open();
