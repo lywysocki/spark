@@ -17,13 +17,13 @@ class HabitController extends ChangeNotifier {
   List<Habit> tomorrowsHabits = [];
 
   Future<void> _load() async {
-    allHabits = await getAllHabits();
+    allHabits = await loadAllHabits();
     todaysHabits = await getTodaysHabits();
     tomorrowsHabits = await getTomorrowsHabits();
   }
 
 //Homepage methods
-  Future<List<Habit>> getAllHabits() async {
+  Future<List<Habit>> loadAllHabits() async {
     // Get all habits
     List<List<dynamic>> allHabitsAllData =
         await selectHabitsByUserID(currentUserId);
@@ -202,11 +202,12 @@ class HabitController extends ChangeNotifier {
         category,
         quantity,
       );
+
+      allHabits = await loadAllHabits();
     }
   }
 
-//All Habit View
-  Future<List<Habit>> viewAllHabits() async {
+  Future<List<Habit>> getAllHabits() async {
     return allHabits;
   }
 
@@ -249,7 +250,7 @@ class HabitController extends ChangeNotifier {
 
     if (habits.length == 1) {
       deleteHabitCascade(title);
-      allHabits = await getAllHabits();
+      allHabits = await loadAllHabits();
     } else {
       duplicateHabitIDs(habits);
       debugPrint('Tried to delete habit $title, but there was an issue.');
