@@ -3,37 +3,37 @@ import 'package:spark/postgres_functions.dart';
 
 import 'package:spark/achievements/achievement.dart';
 
+//achievements:    achievement_id, user_id, habit_id, achievement_title, timestamp, quantity
 class AchievementsController extends ChangeNotifier {
-  AchievementsController();
+  AchievementsController({required this.currentUserId});
+  final String currentUserId;
+
   List<Achievement> _achievements = [];
-  final _tempUserID = '1';
 
   List<Achievement> get achievements => _achievements;
 
   Future<void> _load() async {
-    _achievements = await getAchievements(_tempUserID);
+    _achievements = await getAchievements();
     notifyListeners();
   }
 
   Future<void> setAchievement(
-    String userID,
     String habitID,
     String achievementTitle,
     int? quantity,
   ) async {
-    await createAchievement(userID, habitID, achievementTitle, quantity);
+    await createAchievement(currentUserId, habitID, achievementTitle, quantity);
   }
 
-  Future<List<Achievement>> getAchievements(String userId) async {
+  Future<List<Achievement>> getAchievements() async {
     /// Returned Items:
     /// achievementID,
     /// userID,
     /// habitID,
     /// achievementTitle,
-    /// date,
     /// time,
     /// quantity
-    final userAchievements = await selectAchievements(userId);
+    final userAchievements = await selectAchievements(currentUserId);
 
     List<Achievement> mappedAchievements = userAchievements
         .map(
@@ -44,7 +44,6 @@ class AchievementsController extends ChangeNotifier {
             item[3],
             item[4],
             item[5],
-            item[6],
           ),
         )
         .toList();
@@ -53,10 +52,10 @@ class AchievementsController extends ChangeNotifier {
   }
 
   Future<List<Achievement>> getByHabitId(
-    String userId,
     String habitId,
   ) async {
-    final achievements = await selectAchievementsByHabitID(userId, habitId);
+    final achievements =
+        await selectAchievementsByHabitID(currentUserId, habitId);
 
     List<Achievement> mappedAchievements = achievements
         .map(
@@ -67,7 +66,6 @@ class AchievementsController extends ChangeNotifier {
             item[3],
             item[4],
             item[5],
-            item[6],
           ),
         )
         .toList();
@@ -76,11 +74,10 @@ class AchievementsController extends ChangeNotifier {
   }
 
   Future<List<Achievement>> getByAchievementType(
-    String userId,
     String achievementType,
   ) async {
     final achievements =
-        await selectAchievementsByType(userId, achievementType);
+        await selectAchievementsByType(currentUserId, achievementType);
 
     List<Achievement> mappedAchievements = achievements
         .map(
@@ -91,7 +88,6 @@ class AchievementsController extends ChangeNotifier {
             item[3],
             item[4],
             item[5],
-            item[6],
           ),
         )
         .toList();
@@ -100,10 +96,9 @@ class AchievementsController extends ChangeNotifier {
   }
 
   Future<List<Achievement>> getByDate(
-    String userId,
     DateTime date,
   ) async {
-    final achievements = await selectAchievementsByDate(userId, date);
+    final achievements = await selectAchievementsByDate(currentUserId, date);
 
     List<Achievement> mappedAchievements = achievements
         .map(
@@ -114,7 +109,6 @@ class AchievementsController extends ChangeNotifier {
             item[3],
             item[4],
             item[5],
-            item[6],
           ),
         )
         .toList();
@@ -123,12 +117,11 @@ class AchievementsController extends ChangeNotifier {
   }
 
   Future<List<Achievement>> getByDateRange(
-    String userId,
     DateTime start,
     DateTime end,
   ) async {
     final achievements =
-        await selectAchievementsWithinDateRange(userId, start, end);
+        await selectAchievementsWithinDateRange(currentUserId, start, end);
 
     List<Achievement> mappedAchievements = achievements
         .map(
@@ -139,7 +132,6 @@ class AchievementsController extends ChangeNotifier {
             item[3],
             item[4],
             item[5],
-            item[6],
           ),
         )
         .toList();
