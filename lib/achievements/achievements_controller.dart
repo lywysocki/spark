@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:spark/postgres_functions.dart';
+import 'package:spark/achievements/achievements_repository.dart';
 
 import 'package:spark/achievements/achievement.dart';
 
@@ -7,6 +7,8 @@ import 'package:spark/achievements/achievement.dart';
 class AchievementsController extends ChangeNotifier {
   AchievementsController({required this.currentUserId});
   final String currentUserId;
+
+  final AchievementsRepository _achievementsRepo = AchievementsRepository();
 
   List<Achievement> _achievements = [];
 
@@ -22,7 +24,8 @@ class AchievementsController extends ChangeNotifier {
     String achievementTitle,
     int? quantity,
   ) async {
-    await createAchievement(currentUserId, habitID, achievementTitle, quantity);
+    await _achievementsRepo.createAchievement(
+        currentUserId, habitID, achievementTitle, quantity);
   }
 
   Future<List<Achievement>> getAchievements() async {
@@ -33,7 +36,8 @@ class AchievementsController extends ChangeNotifier {
     /// achievementTitle,
     /// time,
     /// quantity
-    final userAchievements = await selectAchievements(currentUserId);
+    final userAchievements =
+        await _achievementsRepo.selectAchievements(currentUserId);
 
     List<Achievement> mappedAchievements = userAchievements
         .map(
@@ -54,8 +58,8 @@ class AchievementsController extends ChangeNotifier {
   Future<List<Achievement>> getByHabitId(
     String habitId,
   ) async {
-    final achievements =
-        await selectAchievementsByHabitID(currentUserId, habitId);
+    final achievements = await _achievementsRepo.selectAchievementsByHabitID(
+        currentUserId, habitId);
 
     List<Achievement> mappedAchievements = achievements
         .map(
@@ -76,8 +80,8 @@ class AchievementsController extends ChangeNotifier {
   Future<List<Achievement>> getByAchievementType(
     String achievementType,
   ) async {
-    final achievements =
-        await selectAchievementsByType(currentUserId, achievementType);
+    final achievements = await _achievementsRepo.selectAchievementsByType(
+        currentUserId, achievementType);
 
     List<Achievement> mappedAchievements = achievements
         .map(
@@ -98,7 +102,8 @@ class AchievementsController extends ChangeNotifier {
   Future<List<Achievement>> getByDate(
     DateTime date,
   ) async {
-    final achievements = await selectAchievementsByDate(currentUserId, date);
+    final achievements =
+        await _achievementsRepo.selectAchievementsByDate(currentUserId, date);
 
     List<Achievement> mappedAchievements = achievements
         .map(
@@ -120,8 +125,8 @@ class AchievementsController extends ChangeNotifier {
     DateTime start,
     DateTime end,
   ) async {
-    final achievements =
-        await selectAchievementsWithinDateRange(currentUserId, start, end);
+    final achievements = await _achievementsRepo
+        .selectAchievementsWithinDateRange(currentUserId, start, end);
 
     List<Achievement> mappedAchievements = achievements
         .map(
