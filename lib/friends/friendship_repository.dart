@@ -74,6 +74,48 @@ class FriendshipRepository extends ChangeNotifier {
     }
   }
 
+  Future<List<List<dynamic>>> selectSharedHabits(
+    String userId1,
+    userId2,
+  ) async {
+    try {
+      databaseConnection.open();
+
+      const query = '''
+      SELECT
+        h1.habit_id,
+        h1.title,
+        h1.note,
+        h1.start_date,
+        h1.end_date,
+        h1.frequency,
+        h1.reminders,
+        h1.reminder_message,
+        h1.target_type,
+        h1.category,
+        h1.quantity,
+      FROM habits as h1
+      JOIN habits as h2
+        on h1.habit_id = h2.habit_id
+      WHERE (h1.user_id = @user1 and h2.user_id = @user2)
+        or (h1.user_id = @user2 and h2.user_id = @user1)
+    ''';
+      List<List<dynamic>> results = await databaseConnection.query(
+        query,
+        substitutionValues: {
+          'user1': userId1,
+          'user2': userId2,
+        },
+      );
+      return results;
+    } catch (e) {
+      debugPrint('Error: ${e.toString()}');
+      return List.empty();
+    } finally {
+      await databaseConnection.close();
+    }
+  }
+
   /////Delete
   Future<bool> deleteFriendships(String userID1, String userID2) async {
     try {
