@@ -8,6 +8,7 @@ class CommonTextfield extends StatefulWidget {
     this.maxLines = 1,
     this.isTapped,
     this.initialValue,
+    this.validator,
   });
 
   final String hintText;
@@ -15,6 +16,7 @@ class CommonTextfield extends StatefulWidget {
   final int maxLines;
   final bool? isTapped;
   final String? initialValue;
+  final String? Function(String?)? validator;
 
   @override
   State<CommonTextfield> createState() => _CommonTextfieldState();
@@ -24,6 +26,8 @@ class _CommonTextfieldState extends State<CommonTextfield> {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      autovalidateMode: AutovalidateMode.onUserInteraction,
+      validator: widget.validator,
       initialValue: widget.initialValue,
       showCursor: !(widget.isTapped ?? false),
       mouseCursor:

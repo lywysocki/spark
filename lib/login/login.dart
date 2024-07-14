@@ -168,9 +168,15 @@ class _UserFormFieldsState extends State<_UserFormFields> {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (widget.isSignUp)
-            const _FormFieldWidget(
+            _FormFieldWidget(
               title: 'First name*',
               hintText: 'Enter your first name*',
+              validator: (input) {
+                if (input == null || input.isEmpty) {
+                  return 'Field cannot be blank.';
+                }
+                return null;
+              },
             ),
           if (widget.isSignUp)
             const _FormFieldWidget(
@@ -178,24 +184,52 @@ class _UserFormFieldsState extends State<_UserFormFields> {
               hintText: 'Enter your last name',
             ),
           if (widget.isSignUp)
-            const _FormFieldWidget(
+            _FormFieldWidget(
               title: 'Email',
               hintText: 'Enter your email*',
+              validator: (input) {
+                if (input == null || input.isEmpty) {
+                  return 'Field cannot be blank.';
+                }
+                return null;
+              },
             ),
           if (widget.isSignUp)
-            const _FormFieldWidget(
+            _FormFieldWidget(
               title: 'Username',
               hintText: 'Enter a username*',
+              validator: (input) {
+                if (input == null || input.isEmpty) {
+                  return 'Field cannot be blank.';
+                }
+                return null;
+
+                ///TODO: if username exists, 'This username already exists.'
+              },
             ),
           if (!widget.isSignUp)
-            const _FormFieldWidget(
+            _FormFieldWidget(
               title: 'Username or email*',
               hintText: 'Enter your username or email*',
+              validator: (input) {
+                if (input == null || input.isEmpty) {
+                  return 'Field cannot be blank.';
+                }
+
+                ///TODO: 'Incorrect username or password.'
+                return null;
+              },
             ),
           _FormFieldWidget(
             title: 'Password*',
             hintText:
                 widget.isSignUp ? 'Enter a password' : 'Enter your password*',
+            validator: (input) {
+              if (input == null || input.isEmpty) {
+                return 'Field cannot be blank.';
+              }
+              return null;
+            },
           ),
         ],
       ),
@@ -207,10 +241,12 @@ class _FormFieldWidget extends StatelessWidget {
   const _FormFieldWidget({
     required this.title,
     required this.hintText,
+    this.validator,
   });
 
   final String title;
   final String hintText;
+  final String? Function(String?)? validator;
 
   @override
   Widget build(BuildContext context) {
@@ -224,6 +260,7 @@ class _FormFieldWidget extends StatelessWidget {
           topPadding: 0,
         ),
         CommonTextfield(
+          validator: validator,
           hintText: hintText,
         ),
         const SizedBox(
