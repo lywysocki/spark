@@ -14,14 +14,37 @@ class FriendshipRepository extends ChangeNotifier {
   );
 
   ///// Create
-  Future<bool> createFriendship(String user1, String user2) async {
+  Future<bool> createFriendshipRequest(String user1, String user2) async {
     try {
       await databaseConnection.open();
+      String requestState = 'pending';
       await databaseConnection.query(
-        'INSERT INTO friendships (user1_id, user2_id) VALUES (@user1, @user2)',
+        'INSERT INTO friendships (user1_id, user2_id, state) VALUES (@user1, @user2, @state)',
         substitutionValues: {
           'user1': user1,
           'user2': user2,
+          'state': requestState,
+        },
+      );
+      return true;
+    } catch (e) {
+      debugPrint('Error: ${e.toString()}');
+      return false;
+    } finally {
+      await databaseConnection.close();
+    }
+  }
+
+  Future<bool> createFriendshipEstablished(String user1, String user2) async {
+    try {
+      await databaseConnection.open();
+      String establishedState = 'established';
+      await databaseConnection.query(
+        'INSERT INTO friendships (user1_id, user2_id, state) VALUES (@user1, @user2, @state)',
+        substitutionValues: {
+          'user1': user1,
+          'user2': user2,
+          'state': establishedState,
         },
       );
       return true;
@@ -36,6 +59,7 @@ class FriendshipRepository extends ChangeNotifier {
   ///// Select
   Future<List<List<dynamic>>> selectFriendsByUser(String userID) async {
     try {
+      String state = 'established';
       await databaseConnection.open();
       List<List<dynamic>> results = await databaseConnection.query(
         '''SELECT 
@@ -45,9 +69,10 @@ class FriendshipRepository extends ChangeNotifier {
           users.last_name
         FROM friendships
         JOIN users on friendships.user2_id = users.user_id
-        WHERE user1_id = @id ''',
+        WHERE user1_id = @id AND state = @state''',
         substitutionValues: {
           'id': userID,
+          'state': state,
         },
       );
       List<List<dynamic>> results2 = await databaseConnection.query(
@@ -58,13 +83,44 @@ class FriendshipRepository extends ChangeNotifier {
           users.last_name 
         FROM friendships 
         JOIN users on friendships.user1_id = users.user_id
-        WHERE user2_id = @id''',
+        WHERE user2_id = @id AND state = @state''',
         substitutionValues: {
           'id': userID,
+          'state': state,
         },
       );
 
       results.addAll(results2);
+      return results;
+    } catch (e) {
+      debugPrint('Error: ${e.toString()}');
+      return List.empty();
+    } finally {
+      await databaseConnection.close();
+    }
+  }
+
+  Future<List<List<dynamic>>> selectPendingRequests(String userID) async {
+    try {
+      String state = 'pending';
+      await databaseConnection.open();
+      //when a request is sent, user1_id is the sender and user2_id is the reciever
+      //so must filter for user2_id for pending requests in inbox
+      List<List<dynamic>> results = await databaseConnection.query(
+        '''SELECT 
+          friendships.user1_id,
+          users.username,
+          users.first_name,
+          users.last_name
+        FROM friendships
+        JOIN users on friendships.user1_id = users.user_id
+        WHERE user2_id = @id AND state = @state''',
+        substitutionValues: {
+          'id': userID,
+          'state': state,
+        },
+      );
+
       return results;
     } catch (e) {
       debugPrint('Error: ${e.toString()}');
@@ -116,8 +172,37 @@ class FriendshipRepository extends ChangeNotifier {
     }
   }
 
+  Future<void> updateFriendshipState(
+    String userID1,
+    String userID2,
+    String state,
+  ) async {
+    try {
+      await databaseConnection.open();
+
+      String query = '''
+        UPDATE friendships SET state = @newState 
+        WHERE (user1_id = @userId1 AND user2_id = @userId2 )
+        OR (user1_id = @userId2 AND user2_id = @userId1 )
+      ''';
+      await databaseConnection.query(
+        query,
+        substitutionValues: {
+          'userId1': userID1,
+          'userId2': userID2,
+          'newState': state,
+        },
+      );
+    } catch (e) {
+      debugPrint('Error: ${e.toString()}');
+      throw 'Could not update';
+    } finally {
+      await databaseConnection.close();
+    }
+  }
+
   /////Delete
-  Future<bool> deleteFriendships(String userID1, String userID2) async {
+  Future<void> deleteFriendships(String userID1, String userID2) async {
     try {
       await databaseConnection.open();
       await databaseConnection.query(
@@ -128,10 +213,9 @@ class FriendshipRepository extends ChangeNotifier {
           'id2': userID2,
         },
       );
-      return true;
     } catch (e) {
       debugPrint('Error: ${e.toString()}');
-      return false;
+      throw 'Could not delete friendship';
     } finally {
       await databaseConnection.close();
     }
