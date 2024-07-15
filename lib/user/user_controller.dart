@@ -96,7 +96,13 @@ class UserController extends ChangeNotifier {
     return user;
   }
 
-  Future<void> signup(String username, String email, String pass) async {
+  Future<void> signUp({
+    required String username,
+    required String email,
+    required String pass,
+    required String fName,
+    String? lName,
+  }) async {
     List<List<dynamic>> usernameResults =
         await _userRepo.selectUsersByUsername(username);
     if (usernameResults.isNotEmpty) {
@@ -109,7 +115,13 @@ class UserController extends ChangeNotifier {
       throw "An account exists using this email.";
     }
 
-    _userRepo.createUser(username, pass, email, null, null);
+    _userRepo.createUser(
+      username: username,
+      password: pass,
+      email: email,
+      first: fName,
+      last: lName,
+    );
     login(username: username, pass: pass);
   }
 

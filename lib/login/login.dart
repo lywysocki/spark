@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import 'package:spark/common/common_habit_header.dart';
 import 'package:spark/common/common_textfield.dart';
 import 'package:spark/main.dart';
+import 'package:spark/user/user_controller.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -12,6 +15,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   bool hasAccount = true;
+  bool loading = false;
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context).textTheme;
@@ -34,22 +38,35 @@ class _LoginScreenState extends State<LoginScreen> {
             height: 10,
           ),
           Text(
-            '  Welcome back!',
+            hasAccount ? '  Welcome back!' : '  Welcome!',
             style: theme.titleLarge,
           ),
-          hasAccount
-              ? _LoginForm(
-                  onPressed: () {
-                    hasAccount = !hasAccount;
-                    setState(() {});
-                  },
+          loading
+              ? const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 150.0),
+                  child: CircularProgressIndicator(),
                 )
-              : _SignUpForm(
-                  onPressed: () {
-                    hasAccount = !hasAccount;
-                    setState(() {});
-                  },
-                ),
+              : hasAccount
+                  ? _UserInfoForm(
+                      loading: () {
+                        loading = !loading;
+                      },
+                      onPressed: () {
+                        hasAccount = !hasAccount;
+                        setState(() {});
+                      },
+                      isSignUp: false,
+                    )
+                  : _UserInfoForm(
+                      loading: () {
+                        loading = !loading;
+                      },
+                      onPressed: () {
+                        hasAccount = !hasAccount;
+                        setState(() {});
+                      },
+                      isSignUp: true,
+                    ),
           const SizedBox(
             height: 30,
           ),
@@ -59,88 +76,46 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 }
 
-class _LoginForm extends StatelessWidget {
-  const _LoginForm({required this.onPressed});
+class _UserInfoForm extends StatefulWidget {
+  const _UserInfoForm({
+    required this.onPressed,
+    required this.loading,
+    required this.isSignUp,
+  });
 
   final VoidCallback onPressed;
+  final Function loading;
+  final bool isSignUp;
 
+  @override
+  State<_UserInfoForm> createState() => _UserInfoFormState();
+}
+
+class _UserInfoFormState extends State<_UserInfoForm> {
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const Padding(
-          padding: EdgeInsets.only(
+        Padding(
+          padding: const EdgeInsets.only(
             top: 30.0,
             bottom: 20.0,
             left: 10.0,
             right: 10.0,
           ),
-          child: _UserFormFields(),
-        ),
-        FilledButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) {
-                  return const MyHomePage();
-                },
-              ),
-            );
-          },
-          child: const Text('Login'),
-        ),
-        const SizedBox(
-          height: 10,
-        ),
-        TextButton(
-          onPressed: onPressed,
-          child: const Text('Don\'t have an account? Sign up here!'),
-        ),
-      ],
-    );
-  }
-}
-
-class _SignUpForm extends StatelessWidget {
-  const _SignUpForm({required this.onPressed});
-
-  final VoidCallback onPressed;
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const Padding(
-          padding: EdgeInsets.only(
-            top: 30.0,
-            bottom: 15.0,
-            left: 10.0,
-            right: 10.0,
-          ),
           child: _UserFormFields(
-            isSignUp: true,
+            loading: widget.loading,
+            isSignUp: widget.isSignUp,
           ),
         ),
-        FilledButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) {
-                  return const MyHomePage();
-                },
-              ),
-            );
-          },
-          child: const Text('Sign up'),
-        ),
-        const SizedBox(
-          height: 10,
-        ),
         TextButton(
-          onPressed: onPressed,
-          child: const Text('Already have an account? Sign up here!'),
+          onPressed: widget.onPressed,
+          child: Text(
+            !widget.isSignUp
+                ? 'Don\'t have an account? Sign up here!'
+                : 'Already have an account? Login here!',
+          ),
         ),
       ],
     );
@@ -148,60 +123,125 @@ class _SignUpForm extends StatelessWidget {
 }
 
 class _UserFormFields extends StatefulWidget {
-  const _UserFormFields({this.isSignUp = false});
+  const _UserFormFields({
+    this.isSignUp = false,
+    required this.loading,
+  });
 
   final bool isSignUp;
+  final Function loading;
 
   @override
   State<_UserFormFields> createState() => _UserFormFieldsState();
 }
 
 class _UserFormFieldsState extends State<_UserFormFields> {
-  final _userFormKey = GlobalKey<FormState>();
+  UserController? controller;
+  final userFormKey = GlobalKey<FormState>();
+  String? username;
+  String? email;
+  String? password;
+  String? fName;
+  String? lName;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    controller = context.watch<UserController>();
+    userFormKey.currentState?.reset();
+    email = null;
+    password = null;
+    fName = null;
+    lName = null;
+  }
+
+  void onChanged(value) {
+    setState(() {});
+  }
+
+  Future<SnackBar?> signUp() async {
+    try {
+      await controller!.signUp(
+        username: username!,
+        email: email!,
+        pass: password!,
+        fName: fName!,
+        lName: lName,
+      );
+      return null;
+    } catch (e) {
+      return SnackBar(
+        content: Text('$e'),
+      );
+    }
+  }
+
+  Future<SnackBar?> login() async {
+    try {
+      await controller!.login(
+        username: username!,
+        pass: password!,
+      );
+      return null;
+    } catch (e) {
+      return SnackBar(
+        content: Text('$e'),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Form(
-      key: _userFormKey,
+      key: userFormKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
           if (widget.isSignUp)
             _FormFieldWidget(
+              onChanged: onChanged,
               title: 'First name*',
               hintText: 'Enter your first name*',
               validator: (input) {
                 if (input == null || input.isEmpty) {
                   return 'Field cannot be blank.';
                 }
+                fName = input;
                 return null;
               },
             ),
           if (widget.isSignUp)
-            const _FormFieldWidget(
+            _FormFieldWidget(
+              onChanged: onChanged,
               title: 'Last name',
               hintText: 'Enter your last name',
             ),
           if (widget.isSignUp)
             _FormFieldWidget(
+              onChanged: onChanged,
               title: 'Email',
               hintText: 'Enter your email*',
               validator: (input) {
                 if (input == null || input.isEmpty) {
                   return 'Field cannot be blank.';
                 }
+                lName = input;
+
                 return null;
               },
             ),
           if (widget.isSignUp)
             _FormFieldWidget(
+              onChanged: onChanged,
               title: 'Username',
               hintText: 'Enter a username*',
               validator: (input) {
                 if (input == null || input.isEmpty) {
                   return 'Field cannot be blank.';
                 }
+                username = input;
+
                 return null;
 
                 ///TODO: if username exists, 'This username already exists.'
@@ -209,18 +249,21 @@ class _UserFormFieldsState extends State<_UserFormFields> {
             ),
           if (!widget.isSignUp)
             _FormFieldWidget(
+              onChanged: onChanged,
               title: 'Username or email*',
               hintText: 'Enter your username or email*',
               validator: (input) {
                 if (input == null || input.isEmpty) {
                   return 'Field cannot be blank.';
                 }
+                username = input;
 
                 ///TODO: 'Incorrect username or password.'
                 return null;
               },
             ),
           _FormFieldWidget(
+            onChanged: onChanged,
             title: 'Password*',
             hintText:
                 widget.isSignUp ? 'Enter a password' : 'Enter your password*',
@@ -228,8 +271,54 @@ class _UserFormFieldsState extends State<_UserFormFields> {
               if (input == null || input.isEmpty) {
                 return 'Field cannot be blank.';
               }
+              password = input;
+
               return null;
             },
+          ),
+          const SizedBox(
+            height: 25,
+          ),
+          Center(
+            child: FilledButton(
+              onPressed: userFormKey.currentState?.validate() ?? false
+                  ? () {
+                      if (widget.isSignUp) {
+                        signUp().then((value) {
+                          if (value != null) {
+                            ScaffoldMessenger.of(context).showSnackBar(value);
+                            return;
+                          } else {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) {
+                                  return const MyHomePage();
+                                },
+                              ),
+                            );
+                          }
+                        });
+                      }
+                      login().then((value) {
+                        if (value != null) {
+                          ScaffoldMessenger.of(context).showSnackBar(value);
+                          return;
+                        } else {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return const MyHomePage();
+                              },
+                            ),
+                          );
+                        }
+                      });
+                    }
+                  : null,
+              child: Text(widget.isSignUp ? 'Sign up' : 'Login'),
+            ),
           ),
         ],
       ),
@@ -242,11 +331,13 @@ class _FormFieldWidget extends StatelessWidget {
     required this.title,
     required this.hintText,
     this.validator,
+    this.onChanged,
   });
 
   final String title;
   final String hintText;
   final String? Function(String?)? validator;
+  final Function(String)? onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -260,6 +351,7 @@ class _FormFieldWidget extends StatelessWidget {
           topPadding: 0,
         ),
         CommonTextfield(
+          onChanged: onChanged,
           validator: validator,
           hintText: hintText,
         ),

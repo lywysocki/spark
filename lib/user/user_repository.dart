@@ -5,13 +5,13 @@ class UserRepository extends ChangeNotifier {
   UserRepository();
 
   ////// Create
-  Future<bool> createUser(
+  Future<bool> createUser({
     String? username,
     String? password,
     String? email,
     String? first,
     String? last,
-  ) async {
+  }) async {
     final databaseConnection = await Connection.open(
       Endpoint(
         host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host

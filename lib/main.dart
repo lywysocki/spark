@@ -6,7 +6,9 @@ import 'package:spark/login/login.dart';
 import 'package:spark/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:spark/theme.dart';
+import 'package:spark/user/user_controller.dart';
 import 'package:spark/util.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   runApp(const MyApp());
@@ -31,7 +33,10 @@ class MyApp extends StatelessWidget {
           ? theme.lightMediumContrast()
           : theme.darkMediumContrast(),
       initialRoute: '/',
-      home: const LoginScreen(),
+      home: ChangeNotifierProvider(
+        create: (context) => UserController(),
+        child: const LoginScreen(),
+      ),
     );
   }
 }
