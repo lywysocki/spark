@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:spark/postgres_functions.dart';
+import 'package:spark/friends/friendship_repository.dart';
 import 'package:spark/friends/friend.dart';
 import 'package:spark/habits/habit.dart';
 
 //friendships:   user1_id, user2_id
 class FriendshipController extends ChangeNotifier {
   final String currentUserId;
+  final FriendshipRepository _friendRepo = FriendshipRepository();
 
   FriendshipController({required this.currentUserId}) {
     _load();
@@ -22,7 +23,7 @@ class FriendshipController extends ChangeNotifier {
 //Friends List View
   Future<List<Friend>> getAllFriends() async {
     List<List<dynamic>> allFriendData =
-        await selectFriendsByUser(currentUserId);
+        await _friendRepo.selectFriendsByUser(currentUserId);
     //selectFriendsByUser returns a list of friends data in format [id, username, first, last]
     int friendsIdIndex = 0;
     int friendsUsernameIndex = 1;
@@ -40,8 +41,8 @@ class FriendshipController extends ChangeNotifier {
         lastName: row[friendsLastIndex],
       );
 
-      List<List<dynamic>> sharedHabitsData =
-          await selectSharedHabits(currentUserId, row[friendsIdIndex]);
+      List<List<dynamic>> sharedHabitsData = await _friendRepo
+          .selectSharedHabits(currentUserId, row[friendsIdIndex]);
       List<Habit> sharedHabits = [];
 
       for (var hrow in sharedHabitsData) {

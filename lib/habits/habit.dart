@@ -31,6 +31,10 @@ class Habit {
         reminderMessage = msg,
         quantity = quan;
 
+  String getId() {
+    return habitId;
+  }
+
   String getTitle() {
     return title;
   }
