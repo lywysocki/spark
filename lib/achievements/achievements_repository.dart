@@ -9,8 +9,8 @@ class AchievementsRepository extends ChangeNotifier {
     '192.168.56.1', // host // 192.168.56.1 (Jill's IP address) // localhost
     5432, // port
     'spark', // database name
-    username: 'postgres', // username
-    password: 'get\$park3d!', // password
+    username: 'my_flutter_user', // username
+    password: 'jyjsuX-2puzka', // password
   );
 
   ////// Create
