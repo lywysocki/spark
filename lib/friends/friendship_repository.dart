@@ -9,8 +9,8 @@ class FriendshipRepository extends ChangeNotifier {
     '192.168.56.1', // host // 192.168.56.1 (Jill's IP address) // localhost
     5432, // port
     'spark', // database name
-    username: 'postgres', // username
-    password: 'get\$park3d!', // password
+    username: 'my_flutter_user', // username
+    password: 'jyjsuX-2puzka', // password
   );
 
   ///// Create
@@ -36,7 +36,7 @@ class FriendshipRepository extends ChangeNotifier {
   ///// Select
   Future<List<List<dynamic>>> selectFriendsByUser(String userID) async {
     try {
-      databaseConnection.open();
+      await databaseConnection.open();
       List<List<dynamic>> results = await databaseConnection.query(
         '''SELECT 
           friendships.user2_id,
@@ -79,7 +79,7 @@ class FriendshipRepository extends ChangeNotifier {
     userId2,
   ) async {
     try {
-      databaseConnection.open();
+      await databaseConnection.open();
 
       const query = '''
       SELECT

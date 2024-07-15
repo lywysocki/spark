@@ -9,8 +9,8 @@ class AchievementsRepository extends ChangeNotifier {
     '192.168.56.1', // host // 192.168.56.1 (Jill's IP address) // localhost
     5432, // port
     'spark', // database name
-    username: 'postgres', // username
-    password: 'get\$park3d!', // password
+    username: 'my_flutter_user', // username
+    password: 'jyjsuX-2puzka', // password
   );
 
   ////// Create
@@ -46,7 +46,7 @@ class AchievementsRepository extends ChangeNotifier {
   ////// Select
   Future<List<List<dynamic>>> selectAchievements(String userId) async {
     try {
-      databaseConnection.open();
+      await databaseConnection.open();
       List<List<dynamic>> results = await databaseConnection.query(
         'SELECT * FROM achievements WHERE user_id = @userID',
         substitutionValues: {
@@ -67,7 +67,7 @@ class AchievementsRepository extends ChangeNotifier {
     String habitId,
   ) async {
     try {
-      databaseConnection.open();
+      await databaseConnection.open();
       List<List<dynamic>> results = await databaseConnection.query(
         'SELECT * FROM achievements WHERE user_id = @userID and habit_id = @habitID',
         substitutionValues: {
@@ -89,7 +89,7 @@ class AchievementsRepository extends ChangeNotifier {
     String type,
   ) async {
     try {
-      databaseConnection.open();
+      await databaseConnection.open();
       List<List<dynamic>> results = await databaseConnection.query(
         'SELECT * FROM achievements WHERE user_id = @userID and achievement_title = @achievementType',
         substitutionValues: {
@@ -111,7 +111,7 @@ class AchievementsRepository extends ChangeNotifier {
     DateTime date,
   ) async {
     try {
-      databaseConnection.open();
+      await databaseConnection.open();
       List<List<dynamic>> results = await databaseConnection.query(
         'SELECT * FROM achievements WHERE user_id = @userID and date = @date',
         substitutionValues: {
@@ -134,7 +134,7 @@ class AchievementsRepository extends ChangeNotifier {
     DateTime end,
   ) async {
     try {
-      databaseConnection.open();
+      await databaseConnection.open();
       List<List<dynamic>> results = await databaseConnection.query(
         'SELECT * FROM achievements WHERE user_id = @userID and date >= @startDate and date <= @endDate',
         substitutionValues: {
