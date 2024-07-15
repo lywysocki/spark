@@ -44,7 +44,7 @@ class UserRepository extends ChangeNotifier {
   ////// Select
   Future<List<List<dynamic>>> selectUsersByUserID(String userId) async {
     try {
-      databaseConnection.open();
+      await databaseConnection.open();
       List<List<dynamic>> results = await databaseConnection.query(
         'SELECT * FROM users WHERE user_id = @id',
         substitutionValues: {
@@ -62,7 +62,7 @@ class UserRepository extends ChangeNotifier {
 
   Future<List<List<dynamic>>> selectUsersByUsername(String username) async {
     try {
-      databaseConnection.open();
+      await databaseConnection.open();
       List<List<dynamic>> results = await databaseConnection.query(
         'SELECT * FROM users WHERE username = @name',
         substitutionValues: {
@@ -80,7 +80,7 @@ class UserRepository extends ChangeNotifier {
 
   Future<List<List<dynamic>>> selectUsersByEmail(String email) async {
     try {
-      databaseConnection.open();
+      await databaseConnection.open();
       List<List<dynamic>> results = await databaseConnection.query(
         'SELECT * FROM users WHERE email = @email',
         substitutionValues: {
@@ -172,7 +172,7 @@ class UserRepository extends ChangeNotifier {
     String last,
   ) async {
     try {
-      databaseConnection.open();
+      await databaseConnection.open();
       List<List<dynamic>> results = await databaseConnection.query(
         'SELECT * FROM users WHERE first_name = @firstname AND last_name = @lastname',
         substitutionValues: {
@@ -194,7 +194,7 @@ class UserRepository extends ChangeNotifier {
     String password,
   ) async {
     try {
-      databaseConnection.open();
+      await databaseConnection.open();
       List<List<dynamic>> results = await databaseConnection.query(
         'SELECT user_id FROM users WHERE (username = @username OR email = @email) AND password = @password',
         substitutionValues: {

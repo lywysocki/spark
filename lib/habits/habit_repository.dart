@@ -128,7 +128,7 @@ class HabitRepository extends ChangeNotifier {
   ///// Select
   Future<List<List<dynamic>>> selectHabitsByUserID(String userId) async {
     try {
-      databaseConnection.open();
+      await databaseConnection.open();
       const query = '''
       WITH ranked_activities AS (
         SELECT
@@ -225,7 +225,7 @@ class HabitRepository extends ChangeNotifier {
     String title,
   ) async {
     try {
-      databaseConnection.open();
+      await databaseConnection.open();
       List<List<dynamic>> results = await databaseConnection.query(
         'SELECT * FROM habits WHERE user_id = @userID and title = @title',
         substitutionValues: {
@@ -247,7 +247,7 @@ class HabitRepository extends ChangeNotifier {
     DateTime date,
   ) async {
     try {
-      databaseConnection.open();
+      await databaseConnection.open();
       String query = '''
       WITH ranked_activities AS (
         SELECT
@@ -355,7 +355,7 @@ class HabitRepository extends ChangeNotifier {
     DateTime date,
   ) async {
     try {
-      databaseConnection.open();
+      await databaseConnection.open();
       List<List<dynamic>> results = await databaseConnection.query(
         'SELECT * FROM habits WHERE user_id = @userID and start_date <= @date '
         'and (end_date is NULL or end_date >= @date)',
@@ -378,7 +378,7 @@ class HabitRepository extends ChangeNotifier {
     DateTime date,
   ) async {
     try {
-      databaseConnection.open();
+      await databaseConnection.open();
       List<List<dynamic>> results = await databaseConnection.query(
         'SELECT * FROM habits WHERE user_id = @userID and end_date < @date',
         substitutionValues: {
@@ -400,7 +400,7 @@ class HabitRepository extends ChangeNotifier {
     String cat,
   ) async {
     try {
-      databaseConnection.open();
+      await databaseConnection.open();
       List<List<dynamic>> results = await databaseConnection.query(
         'SELECT * FROM habits WHERE user_id = @userID and category = @category',
         substitutionValues: {
@@ -422,7 +422,7 @@ class HabitRepository extends ChangeNotifier {
     userId2,
   ) async {
     try {
-      databaseConnection.open();
+      await databaseConnection.open();
 
       const query = '''
       SELECT
@@ -464,7 +464,7 @@ class HabitRepository extends ChangeNotifier {
     String habitID,
   ) async {
     try {
-      databaseConnection.open();
+      await databaseConnection.open();
       List<List<dynamic>> results = await databaseConnection.query(
         'SELECT * FROM habits WHERE user_id = @user AND habit_id = @habit',
         substitutionValues: {
@@ -483,7 +483,7 @@ class HabitRepository extends ChangeNotifier {
 
   Future<List<List<dynamic>>> selectActivities(String userID) async {
     try {
-      databaseConnection.open();
+      await databaseConnection.open();
       List<List<dynamic>> results = await databaseConnection.query(
         'SELECT * FROM activities WHERE user_id = @userID',
         substitutionValues: {
@@ -504,7 +504,7 @@ class HabitRepository extends ChangeNotifier {
     String habit,
   ) async {
     try {
-      databaseConnection.open();
+      await databaseConnection.open();
       List<List<dynamic>> results = await databaseConnection.query(
         'SELECT * FROM activities WHERE user_id = @userID and habit_id = @habitID',
         substitutionValues: {
@@ -526,7 +526,7 @@ class HabitRepository extends ChangeNotifier {
     DateTime date,
   ) async {
     try {
-      databaseConnection.open();
+      await databaseConnection.open();
       List<List<dynamic>> results = await databaseConnection.query(
         'SELECT * FROM activities WHERE user_id = @userID and date = @date',
         substitutionValues: {
@@ -549,7 +549,7 @@ class HabitRepository extends ChangeNotifier {
     DateTime end,
   ) async {
     try {
-      databaseConnection.open();
+      await databaseConnection.open();
       List<List<dynamic>> results = await databaseConnection.query(
         'SELECT * FROM activities WHERE user_id = @userID and date >= @startDate and date <= @endDate',
         substitutionValues: {

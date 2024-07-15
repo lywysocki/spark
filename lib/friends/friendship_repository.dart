@@ -36,7 +36,7 @@ class FriendshipRepository extends ChangeNotifier {
   ///// Select
   Future<List<List<dynamic>>> selectFriendsByUser(String userID) async {
     try {
-      databaseConnection.open();
+      await databaseConnection.open();
       List<List<dynamic>> results = await databaseConnection.query(
         '''SELECT 
           friendships.user2_id,
@@ -79,7 +79,7 @@ class FriendshipRepository extends ChangeNotifier {
     userId2,
   ) async {
     try {
-      databaseConnection.open();
+      await databaseConnection.open();
 
       const query = '''
       SELECT
