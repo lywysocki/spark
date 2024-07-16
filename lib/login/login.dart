@@ -219,6 +219,7 @@ class _UserFormFieldsState extends State<_UserFormFields> {
               },
             ),
           _FormFieldWidget(
+            hideText: widget.isSignUp ? false : true,
             onChanged: onChanged,
             title: 'Password*',
             hintText:
@@ -312,12 +313,14 @@ class _FormFieldWidget extends StatelessWidget {
     required this.hintText,
     this.validator,
     this.onChanged,
+    this.hideText = false,
   });
 
   final String title;
   final String hintText;
   final String? Function(String?)? validator;
   final Function(String)? onChanged;
+  final bool? hideText;
 
   @override
   Widget build(BuildContext context) {
@@ -331,6 +334,7 @@ class _FormFieldWidget extends StatelessWidget {
           topPadding: 0,
         ),
         CommonTextfield(
+          hideText: hideText ?? false,
           onChanged: onChanged,
           validator: validator,
           hintText: hintText,

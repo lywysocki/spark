@@ -10,6 +10,7 @@ class CommonTextfield extends StatefulWidget {
     this.initialValue,
     this.validator,
     this.onChanged,
+    this.hideText = false,
   });
 
   final String hintText;
@@ -19,6 +20,7 @@ class CommonTextfield extends StatefulWidget {
   final String? initialValue;
   final String? Function(String?)? validator;
   final Function(String)? onChanged;
+  final bool hideText;
 
   @override
   State<CommonTextfield> createState() => _CommonTextfieldState();
@@ -38,6 +40,7 @@ class _CommonTextfieldState extends State<CommonTextfield> {
           (value) {
             setState(() {});
           },
+      obscureText: widget.hideText,
       maxLength: widget.maxLength,
       maxLines: widget.maxLines,
       decoration: InputDecoration(
