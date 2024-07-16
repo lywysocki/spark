@@ -12,7 +12,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  postgres: ^2.4.3
+  postgres: ^3.2.1
   collection: 1.18.0  
   google_fonts: ^6.2.1
   intl: ^0.17.0

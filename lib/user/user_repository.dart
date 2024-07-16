@@ -4,14 +4,6 @@ import 'package:postgres/postgres.dart';
 class UserRepository extends ChangeNotifier {
   UserRepository();
 
-  final databaseConnection = PostgreSQLConnection(
-    '192.168.56.1', // host // 192.168.56.1 (Jill's IP address) // localhost
-    5432, // port
-    'spark', // database name
-    username: 'my_flutter_user', // username
-    password: 'jyjsuX-2puzka', // password
-  );
-
   ////// Create
   Future<bool> createUser(
     String? username,
@@ -20,11 +12,21 @@ class UserRepository extends ChangeNotifier {
     String? first,
     String? last,
   ) async {
+    final databaseConnection = await Connection.open(
+      Endpoint(
+        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
+        //port: 5432, // port
+        database: 'spark', // database name
+        username: 'postgres', // username
+        password: 'get\$park3d!', // password
+      ),
+    );
     try {
-      await databaseConnection.open();
-      await databaseConnection.query(
-        'INSERT INTO users(username, password, email, first_name, last_name) VALUES (@username, @password, @email, @firstname, @lastname)',
-        substitutionValues: {
+      await databaseConnection.execute(
+        Sql.named(
+          'INSERT INTO users(username, password, email, first_name, last_name) VALUES (@username, @password, @email, @firstname, @lastname)',
+        ),
+        parameters: {
           'username': username,
           'password': password,
           'email': email,
@@ -43,11 +45,19 @@ class UserRepository extends ChangeNotifier {
 
   ////// Select
   Future<List<List<dynamic>>> selectUsersByUserID(String userId) async {
+    final databaseConnection = await Connection.open(
+      Endpoint(
+        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
+        //port: 5432, // port
+        database: 'spark', // database name
+        username: 'postgres', // username
+        password: 'get\$park3d!', // password
+      ),
+    );
     try {
-      await databaseConnection.open();
-      List<List<dynamic>> results = await databaseConnection.query(
-        'SELECT * FROM users WHERE user_id = @id',
-        substitutionValues: {
+      List<List<dynamic>> results = await databaseConnection.execute(
+        Sql.named('SELECT * FROM users WHERE user_id = @id'),
+        parameters: {
           'id': userId,
         },
       );
@@ -61,11 +71,19 @@ class UserRepository extends ChangeNotifier {
   }
 
   Future<List<List<dynamic>>> selectUsersByUsername(String username) async {
+    final databaseConnection = await Connection.open(
+      Endpoint(
+        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
+        //port: 5432, // port
+        database: 'spark', // database name
+        username: 'postgres', // username
+        password: 'get\$park3d!', // password
+      ),
+    );
     try {
-      await databaseConnection.open();
-      List<List<dynamic>> results = await databaseConnection.query(
-        'SELECT * FROM users WHERE username = @name',
-        substitutionValues: {
+      List<List<dynamic>> results = await databaseConnection.execute(
+        Sql.named('SELECT * FROM users WHERE username = @name'),
+        parameters: {
           'name': username,
         },
       );
@@ -79,11 +97,19 @@ class UserRepository extends ChangeNotifier {
   }
 
   Future<List<List<dynamic>>> selectUsersByEmail(String email) async {
+    final databaseConnection = await Connection.open(
+      Endpoint(
+        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
+        //port: 5432, // port
+        database: 'spark', // database name
+        username: 'postgres', // username
+        password: 'get\$park3d!', // password
+      ),
+    );
     try {
-      await databaseConnection.open();
-      List<List<dynamic>> results = await databaseConnection.query(
-        'SELECT * FROM users WHERE email = @email',
-        substitutionValues: {
+      List<List<dynamic>> results = await databaseConnection.execute(
+        Sql.named('SELECT * FROM users WHERE email = @email'),
+        parameters: {
           'email': email,
         },
       );
@@ -97,9 +123,16 @@ class UserRepository extends ChangeNotifier {
   }
 
   Future<List<List<dynamic>>> selectUsersStreaks(String userId) async {
+    final databaseConnection = await Connection.open(
+      Endpoint(
+        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
+        //port: 5432, // port
+        database: 'spark', // database name
+        username: 'postgres', // username
+        password: 'get\$park3d!', // password
+      ),
+    );
     try {
-      await databaseConnection.open();
-
       const query = '''
       WITH ranked_activities AS (
         SELECT
@@ -156,7 +189,7 @@ class UserRepository extends ChangeNotifier {
     ''';
 
       List<List<dynamic>> results = await databaseConnection
-          .query(query, substitutionValues: {'user_id': userId});
+          .execute(Sql.named(query), parameters: {'user_id': userId});
 
       return results;
     } catch (e) {
@@ -171,11 +204,21 @@ class UserRepository extends ChangeNotifier {
     String first,
     String last,
   ) async {
+    final databaseConnection = await Connection.open(
+      Endpoint(
+        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
+        //port: 5432, // port
+        database: 'spark', // database name
+        username: 'postgres', // username
+        password: 'get\$park3d!', // password
+      ),
+    );
     try {
-      await databaseConnection.open();
-      List<List<dynamic>> results = await databaseConnection.query(
-        'SELECT * FROM users WHERE first_name = @firstname AND last_name = @lastname',
-        substitutionValues: {
+      List<List<dynamic>> results = await databaseConnection.execute(
+        Sql.named(
+          'SELECT * FROM users WHERE first_name = @firstname AND last_name = @lastname',
+        ),
+        parameters: {
           'firstname': first,
           'lastname': last,
         },
@@ -193,11 +236,21 @@ class UserRepository extends ChangeNotifier {
     String userInfo,
     String password,
   ) async {
+    final databaseConnection = await Connection.open(
+      Endpoint(
+        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
+        //port: 5432, // port
+        database: 'spark', // database name
+        username: 'postgres', // username
+        password: 'get\$park3d!', // password
+      ),
+    );
     try {
-      await databaseConnection.open();
-      List<List<dynamic>> results = await databaseConnection.query(
-        'SELECT user_id FROM users WHERE (username = @username OR email = @email) AND password = @password',
-        substitutionValues: {
+      List<List<dynamic>> results = await databaseConnection.execute(
+        Sql.named(
+          'SELECT user_id FROM users WHERE (username = @username OR email = @email) AND password = @password',
+        ),
+        parameters: {
           'username': userInfo,
           'email': userInfo,
           'password': password,
@@ -214,11 +267,19 @@ class UserRepository extends ChangeNotifier {
 
   ///// Update
   Future<bool> updateUserUsername(String userID, String newUsername) async {
+    final databaseConnection = await Connection.open(
+      Endpoint(
+        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
+        //port: 5432, // port
+        database: 'spark', // database name
+        username: 'postgres', // username
+        password: 'get\$park3d!', // password
+      ),
+    );
     try {
-      await databaseConnection.open();
-      await databaseConnection.query(
-        'UPDATE users SET username = @username WHERE user_id = @id',
-        substitutionValues: {
+      await databaseConnection.execute(
+        Sql.named('UPDATE users SET username = @username WHERE user_id = @id'),
+        parameters: {
           'id': userID,
           'username': newUsername,
         },
@@ -233,11 +294,21 @@ class UserRepository extends ChangeNotifier {
   }
 
   Future<bool> updateUserFirstName(String userID, String newName) async {
+    final databaseConnection = await Connection.open(
+      Endpoint(
+        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
+        //port: 5432, // port
+        database: 'spark', // database name
+        username: 'postgres', // username
+        password: 'get\$park3d!', // password
+      ),
+    );
     try {
-      await databaseConnection.open();
-      await databaseConnection.query(
-        'UPDATE users SET first_name = @firstName WHERE user_id = @id',
-        substitutionValues: {
+      await databaseConnection.execute(
+        Sql.named(
+          'UPDATE users SET first_name = @firstName WHERE user_id = @id',
+        ),
+        parameters: {
           'id': userID,
           'firstName': newName,
         },
@@ -252,11 +323,19 @@ class UserRepository extends ChangeNotifier {
   }
 
   Future<bool> updateUserLastName(String userID, String newName) async {
+    final databaseConnection = await Connection.open(
+      Endpoint(
+        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
+        //port: 5432, // port
+        database: 'spark', // database name
+        username: 'postgres', // username
+        password: 'get\$park3d!', // password
+      ),
+    );
     try {
-      await databaseConnection.open();
-      await databaseConnection.query(
-        'UPDATE users SET last_name = @lastName WHERE user_id = @id',
-        substitutionValues: {
+      await databaseConnection.execute(
+        Sql.named('UPDATE users SET last_name = @lastName WHERE user_id = @id'),
+        parameters: {
           'id': userID,
           'lastName': newName,
         },
@@ -271,11 +350,19 @@ class UserRepository extends ChangeNotifier {
   }
 
   Future<bool> updateUserPassword(String userID, String newPassword) async {
+    final databaseConnection = await Connection.open(
+      Endpoint(
+        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
+        //port: 5432, // port
+        database: 'spark', // database name
+        username: 'postgres', // username
+        password: 'get\$park3d!', // password
+      ),
+    );
     try {
-      await databaseConnection.open();
-      await databaseConnection.query(
-        'UPDATE users SET password = @password WHERE user_id = @id',
-        substitutionValues: {
+      await databaseConnection.execute(
+        Sql.named('UPDATE users SET password = @password WHERE user_id = @id'),
+        parameters: {
           'id': userID,
           'password': newPassword,
         },
@@ -290,11 +377,19 @@ class UserRepository extends ChangeNotifier {
   }
 
   Future<bool> updateUserEmail(String userID, String newEmail) async {
+    final databaseConnection = await Connection.open(
+      Endpoint(
+        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
+        //port: 5432, // port
+        database: 'spark', // database name
+        username: 'postgres', // username
+        password: 'get\$park3d!', // password
+      ),
+    );
     try {
-      await databaseConnection.open();
-      await databaseConnection.query(
-        'UPDATE users SET email = @email WHERE user_id = @id',
-        substitutionValues: {
+      await databaseConnection.execute(
+        Sql.named('UPDATE users SET email = @email WHERE user_id = @id'),
+        parameters: {
           'id': userID,
           'email': newEmail,
         },
@@ -310,29 +405,37 @@ class UserRepository extends ChangeNotifier {
 
   ////// Delete
   Future<bool> deleteUser(String userId) async {
+    final databaseConnection = await Connection.open(
+      Endpoint(
+        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
+        //port: 5432, // port
+        database: 'spark', // database name
+        username: 'postgres', // username
+        password: 'get\$park3d!', // password
+      ),
+    );
     try {
-      await databaseConnection.open();
-      await databaseConnection.query(
-        'DELETE FROM users WHERE user_id = @userId',
-        substitutionValues: {
+      await databaseConnection.execute(
+        Sql.named('DELETE FROM users WHERE user_id = @userId'),
+        parameters: {
           'userId': userId,
         },
       );
-      await databaseConnection.query(
-        'DELETE FROM habits WHERE user_id = @userId',
-        substitutionValues: {
+      await databaseConnection.execute(
+        Sql.named('DELETE FROM habits WHERE user_id = @userId'),
+        parameters: {
           'userId': userId,
         },
       );
-      await databaseConnection.query(
-        'DELETE FROM activities WHERE user_id = @userId',
-        substitutionValues: {
+      await databaseConnection.execute(
+        Sql.named('DELETE FROM activities WHERE user_id = @userId'),
+        parameters: {
           'userId': userId,
         },
       );
-      await databaseConnection.query(
-        'DELETE FROM achievements WHERE user_id = @userId',
-        substitutionValues: {
+      await databaseConnection.execute(
+        Sql.named('DELETE FROM achievements WHERE user_id = @userId'),
+        parameters: {
           'userId': userId,
         },
       );
