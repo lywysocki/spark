@@ -57,7 +57,7 @@ class UserRepository extends ChangeNotifier {
       ),
     );
     try {
-      List<List<dynamic>> results = await databaseConnection.execute(
+      final results = await databaseConnection.execute(
         Sql.named('SELECT * FROM users WHERE user_id = @id'),
         parameters: {
           'id': userId,
@@ -83,7 +83,7 @@ class UserRepository extends ChangeNotifier {
       ),
     );
     try {
-      List<List<dynamic>> results = await databaseConnection.execute(
+      final results = await databaseConnection.execute(
         Sql.named('SELECT * FROM users WHERE username = @name'),
         parameters: {
           'name': username,
@@ -109,7 +109,7 @@ class UserRepository extends ChangeNotifier {
       ),
     );
     try {
-      List<List<dynamic>> results = await databaseConnection.execute(
+      final results = await databaseConnection.execute(
         Sql.named('SELECT * FROM users WHERE email = @email'),
         parameters: {
           'email': email,
@@ -190,7 +190,7 @@ class UserRepository extends ChangeNotifier {
         habit_id
     ''';
 
-      List<List<dynamic>> results = await databaseConnection
+      final results = await databaseConnection
           .execute(Sql.named(query), parameters: {'user_id': userId});
 
       return results;
@@ -216,7 +216,7 @@ class UserRepository extends ChangeNotifier {
       ),
     );
     try {
-      List<List<dynamic>> results = await databaseConnection.execute(
+      final results = await databaseConnection.execute(
         Sql.named(
           'SELECT * FROM users WHERE first_name = @firstname AND last_name = @lastname',
         ),
@@ -248,7 +248,7 @@ class UserRepository extends ChangeNotifier {
       ),
     );
     try {
-      List<List<dynamic>> results = await databaseConnection.execute(
+      final results = await databaseConnection.execute(
         Sql.named(
           'SELECT user_id FROM users WHERE (username = @username OR email = @email) AND password = @password',
         ),

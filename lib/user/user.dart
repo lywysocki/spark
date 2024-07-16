@@ -13,4 +13,6 @@ class User {
   final String lName;
   final String joined;
   final int longestStreak;
+
+  String getName() => '$fName $lName';
 }
