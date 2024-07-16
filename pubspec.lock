@@ -279,10 +279,10 @@ packages:
     dependency: "direct main"
     description:
       name: postgres
-      sha256: f8e4f14734d096277f77ed5dddefcbc1ce18f8f7db5b7ff4b5dd6df2d9db2730
+      sha256: ad94089c7f18f4fcae83f42b475c32dfe7619df2fa8c86e17b2309f6c547897b
       url: "https://pub.dev"
     source: hosted
-    version: "2.6.4"
+    version: "3.2.1"
   sasl_scram:
     dependency: transitive
     description:

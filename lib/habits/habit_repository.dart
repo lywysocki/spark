@@ -5,14 +5,6 @@ import 'package:postgres/postgres.dart';
 class HabitRepository extends ChangeNotifier {
   HabitRepository();
 
-  final databaseConnection = PostgreSQLConnection(
-    '192.168.56.1', // host // 192.168.56.1 (Jill's IP address) // localhost
-    5432, // port
-    'spark', // database name
-    username: 'my_flutter_user', // username
-    password: 'jyjsuX-2puzka', // password
-  );
-
   /////Insert
   Future<bool> createHabit(
     String userID,
@@ -27,12 +19,21 @@ class HabitRepository extends ChangeNotifier {
     String category,
     int? quantity,
   ) async {
+    final databaseConnection = await Connection.open(
+      Endpoint(
+        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
+        //port: 5432, // port
+        database: 'spark', // database name
+        username: 'postgres', // username
+        password: 'get\$park3d!', // password
+      ),
+    );
     try {
-      await databaseConnection.open();
-      await databaseConnection.query(
-        'INSERT INTO habits (user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity) '
-        'VALUES (@user_id, @title, @note, @start_date, @end_date, @frequency, @reminders, @reminder_message, @target_type, @category, @quantity)',
-        substitutionValues: {
+      await databaseConnection.execute(
+        Sql.named(
+            'INSERT INTO habits (user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity) '
+            'VALUES (@user_id, @title, @note, @start_date, @end_date, @frequency, @reminders, @reminder_message, @target_type, @category, @quantity)'),
+        parameters: {
           'user_id': userID,
           'title': title,
           'note': note,
@@ -69,12 +70,21 @@ class HabitRepository extends ChangeNotifier {
     String category,
     int? quantity,
   ) async {
+    final databaseConnection = await Connection.open(
+      Endpoint(
+        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
+        //port: 5432, // port
+        database: 'spark', // database name
+        username: 'postgres', // username
+        password: 'get\$park3d!', // password
+      ),
+    );
     try {
-      await databaseConnection.open();
-      await databaseConnection.query(
-        'INSERT INTO habits (habit_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity) '
-        'VALUES (@habit_id @user_id, @title, @note, @start_date, @end_date, @frequency, @reminders, @reminder_message, @target_type, @category, @quantity)',
-        substitutionValues: {
+      await databaseConnection.execute(
+        Sql.named(
+            'INSERT INTO habits (habit_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity) '
+            'VALUES (@habit_id @user_id, @title, @note, @start_date, @end_date, @frequency, @reminders, @reminder_message, @target_type, @category, @quantity)'),
+        parameters: {
           'habit_id': habitID,
           'user_id': userID,
           'title': title,
@@ -103,13 +113,22 @@ class HabitRepository extends ChangeNotifier {
     String habitID,
     int? quantity,
   ) async {
+    final databaseConnection = await Connection.open(
+      Endpoint(
+        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
+        //port: 5432, // port
+        database: 'spark', // database name
+        username: 'postgres', // username
+        password: 'get\$park3d!', // password
+      ),
+    );
     try {
-      await databaseConnection.open();
       DateTime now = DateTime.now(); //system date and timestamp
-      await databaseConnection.query(
-        'INSERT INTO activities (user_id, habit_id, timestamp, quantity) '
-        'VALUES (@user_id, @habit_id, @timestamp, @quantity)',
-        substitutionValues: {
+      await databaseConnection.execute(
+        Sql.named(
+            'INSERT INTO activities (user_id, habit_id, timestamp, quantity) '
+            'VALUES (@user_id, @habit_id, @timestamp, @quantity)'),
+        parameters: {
           'user_id': userID,
           'habit_id': habitID,
           'timestamp': DateFormat('yyyy-MM-dd hh:mm:ss').format(now),
@@ -127,8 +146,16 @@ class HabitRepository extends ChangeNotifier {
 
   ///// Select
   Future<List<List<dynamic>>> selectHabitsByUserID(String userId) async {
+    final databaseConnection = await Connection.open(
+      Endpoint(
+        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
+        //port: 5432, // port
+        database: 'spark', // database name
+        username: 'postgres', // username
+        password: 'get\$park3d!', // password
+      ),
+    );
     try {
-      await databaseConnection.open();
       const query = '''
       WITH ranked_activities AS (
         SELECT
@@ -205,9 +232,9 @@ class HabitRepository extends ChangeNotifier {
         habit_id,
         user_id;
     ''';
-      List<List<dynamic>> results = await databaseConnection.query(
-        query,
-        substitutionValues: {
+      List<List<dynamic>> results = await databaseConnection.execute(
+        Sql.named(query),
+        parameters: {
           'userId': userId,
         },
       );
@@ -224,11 +251,21 @@ class HabitRepository extends ChangeNotifier {
     String userId,
     String title,
   ) async {
+    final databaseConnection = await Connection.open(
+      Endpoint(
+        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
+        //port: 5432, // port
+        database: 'spark', // database name
+        username: 'postgres', // username
+        password: 'get\$park3d!', // password
+      ),
+    );
     try {
-      await databaseConnection.open();
-      List<List<dynamic>> results = await databaseConnection.query(
-        'SELECT * FROM habits WHERE user_id = @userID and title = @title',
-        substitutionValues: {
+      List<List<dynamic>> results = await databaseConnection.execute(
+        Sql.named(
+          'SELECT * FROM habits WHERE user_id = @userID and title = @title',
+        ),
+        parameters: {
           'userID': userId,
           'title': title,
         },
@@ -246,8 +283,16 @@ class HabitRepository extends ChangeNotifier {
     String userId,
     DateTime date,
   ) async {
+    final databaseConnection = await Connection.open(
+      Endpoint(
+        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
+        //port: 5432, // port
+        database: 'spark', // database name
+        username: 'postgres', // username
+        password: 'get\$park3d!', // password
+      ),
+    );
     try {
-      await databaseConnection.open();
       String query = '''
       WITH ranked_activities AS (
         SELECT
@@ -334,9 +379,9 @@ class HabitRepository extends ChangeNotifier {
         user_id;
     ''';
 
-      List<List<dynamic>> results = await databaseConnection.query(
-        query,
-        substitutionValues: {
+      List<List<dynamic>> results = await databaseConnection.execute(
+        Sql.named(query),
+        parameters: {
           'userID': userId,
           'date': date,
         },
@@ -354,12 +399,21 @@ class HabitRepository extends ChangeNotifier {
     String userId,
     DateTime date,
   ) async {
+    final databaseConnection = await Connection.open(
+      Endpoint(
+        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
+        //port: 5432, // port
+        database: 'spark', // database name
+        username: 'postgres', // username
+        password: 'get\$park3d!', // password
+      ),
+    );
     try {
-      await databaseConnection.open();
-      List<List<dynamic>> results = await databaseConnection.query(
-        'SELECT * FROM habits WHERE user_id = @userID and start_date <= @date '
-        'and (end_date is NULL or end_date >= @date)',
-        substitutionValues: {
+      List<List<dynamic>> results = await databaseConnection.execute(
+        Sql.named(
+            'SELECT * FROM habits WHERE user_id = @userID and start_date <= @date '
+            'and (end_date is NULL or end_date >= @date)'),
+        parameters: {
           'userID': userId,
           'date': date,
         },
@@ -377,11 +431,21 @@ class HabitRepository extends ChangeNotifier {
     String userId,
     DateTime date,
   ) async {
+    final databaseConnection = await Connection.open(
+      Endpoint(
+        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
+        //port: 5432, // port
+        database: 'spark', // database name
+        username: 'postgres', // username
+        password: 'get\$park3d!', // password
+      ),
+    );
     try {
-      await databaseConnection.open();
-      List<List<dynamic>> results = await databaseConnection.query(
-        'SELECT * FROM habits WHERE user_id = @userID and end_date < @date',
-        substitutionValues: {
+      List<List<dynamic>> results = await databaseConnection.execute(
+        Sql.named(
+          'SELECT * FROM habits WHERE user_id = @userID and end_date < @date',
+        ),
+        parameters: {
           'userID': userId,
           'date': date,
         },
@@ -399,11 +463,21 @@ class HabitRepository extends ChangeNotifier {
     String userId,
     String cat,
   ) async {
+    final databaseConnection = await Connection.open(
+      Endpoint(
+        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
+        //port: 5432, // port
+        database: 'spark', // database name
+        username: 'postgres', // username
+        password: 'get\$park3d!', // password
+      ),
+    );
     try {
-      await databaseConnection.open();
-      List<List<dynamic>> results = await databaseConnection.query(
-        'SELECT * FROM habits WHERE user_id = @userID and category = @category',
-        substitutionValues: {
+      List<List<dynamic>> results = await databaseConnection.execute(
+        Sql.named(
+          'SELECT * FROM habits WHERE user_id = @userID and category = @category',
+        ),
+        parameters: {
           'userID': userId,
           'category': cat,
         },
@@ -421,9 +495,16 @@ class HabitRepository extends ChangeNotifier {
     String userId1,
     userId2,
   ) async {
+    final databaseConnection = await Connection.open(
+      Endpoint(
+        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
+        //port: 5432, // port
+        database: 'spark', // database name
+        username: 'postgres', // username
+        password: 'get\$park3d!', // password
+      ),
+    );
     try {
-      await databaseConnection.open();
-
       const query = '''
       SELECT
         h1.habit_id,
@@ -443,9 +524,9 @@ class HabitRepository extends ChangeNotifier {
       WHERE (h1.user_id = @user1 and h2.user_id = @user2)
         or (h1.user_id = @user2 and h2.user_id = @user1)
     ''';
-      List<List<dynamic>> results = await databaseConnection.query(
-        query,
-        substitutionValues: {
+      List<List<dynamic>> results = await databaseConnection.execute(
+        Sql.named(query),
+        parameters: {
           'user1': userId1,
           'user2': userId2,
         },
@@ -463,11 +544,21 @@ class HabitRepository extends ChangeNotifier {
     String userID,
     String habitID,
   ) async {
+    final databaseConnection = await Connection.open(
+      Endpoint(
+        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
+        //port: 5432, // port
+        database: 'spark', // database name
+        username: 'postgres', // username
+        password: 'get\$park3d!', // password
+      ),
+    );
     try {
-      await databaseConnection.open();
-      List<List<dynamic>> results = await databaseConnection.query(
-        'SELECT * FROM habits WHERE user_id = @user AND habit_id = @habit',
-        substitutionValues: {
+      List<List<dynamic>> results = await databaseConnection.execute(
+        Sql.named(
+          'SELECT * FROM habits WHERE user_id = @user AND habit_id = @habit',
+        ),
+        parameters: {
           'user': userID,
           'habit': habitID,
         },
@@ -482,11 +573,19 @@ class HabitRepository extends ChangeNotifier {
   }
 
   Future<List<List<dynamic>>> selectActivities(String userID) async {
+    final databaseConnection = await Connection.open(
+      Endpoint(
+        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
+        //port: 5432, // port
+        database: 'spark', // database name
+        username: 'postgres', // username
+        password: 'get\$park3d!', // password
+      ),
+    );
     try {
-      await databaseConnection.open();
-      List<List<dynamic>> results = await databaseConnection.query(
-        'SELECT * FROM activities WHERE user_id = @userID',
-        substitutionValues: {
+      List<List<dynamic>> results = await databaseConnection.execute(
+        Sql.named('SELECT * FROM activities WHERE user_id = @userID'),
+        parameters: {
           'userID': userID,
         },
       );
@@ -503,11 +602,21 @@ class HabitRepository extends ChangeNotifier {
     String userID,
     String habit,
   ) async {
+    final databaseConnection = await Connection.open(
+      Endpoint(
+        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
+        //port: 5432, // port
+        database: 'spark', // database name
+        username: 'postgres', // username
+        password: 'get\$park3d!', // password
+      ),
+    );
     try {
-      await databaseConnection.open();
-      List<List<dynamic>> results = await databaseConnection.query(
-        'SELECT * FROM activities WHERE user_id = @userID and habit_id = @habitID',
-        substitutionValues: {
+      List<List<dynamic>> results = await databaseConnection.execute(
+        Sql.named(
+          'SELECT * FROM activities WHERE user_id = @userID and habit_id = @habitID',
+        ),
+        parameters: {
           'userID': userID,
           'habitID': habit,
         },
@@ -525,11 +634,21 @@ class HabitRepository extends ChangeNotifier {
     String userID,
     DateTime date,
   ) async {
+    final databaseConnection = await Connection.open(
+      Endpoint(
+        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
+        //port: 5432, // port
+        database: 'spark', // database name
+        username: 'postgres', // username
+        password: 'get\$park3d!', // password
+      ),
+    );
     try {
-      await databaseConnection.open();
-      List<List<dynamic>> results = await databaseConnection.query(
-        'SELECT * FROM activities WHERE user_id = @userID and date = @date',
-        substitutionValues: {
+      List<List<dynamic>> results = await databaseConnection.execute(
+        Sql.named(
+          'SELECT * FROM activities WHERE user_id = @userID and date = @date',
+        ),
+        parameters: {
           'userID': userID,
           'date': date,
         },
@@ -548,11 +667,21 @@ class HabitRepository extends ChangeNotifier {
     DateTime start,
     DateTime end,
   ) async {
+    final databaseConnection = await Connection.open(
+      Endpoint(
+        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
+        //port: 5432, // port
+        database: 'spark', // database name
+        username: 'postgres', // username
+        password: 'get\$park3d!', // password
+      ),
+    );
     try {
-      await databaseConnection.open();
-      List<List<dynamic>> results = await databaseConnection.query(
-        'SELECT * FROM activities WHERE user_id = @userID and date >= @startDate and date <= @endDate',
-        substitutionValues: {
+      List<List<dynamic>> results = await databaseConnection.execute(
+        Sql.named(
+          'SELECT * FROM activities WHERE user_id = @userID and date >= @startDate and date <= @endDate',
+        ),
+        parameters: {
           'userID': userID,
           'startDate': start,
           'endDate': end,
@@ -569,11 +698,19 @@ class HabitRepository extends ChangeNotifier {
 
   ///// Update
   Future<bool> updateHabitTitle(String habitID, String newTitle) async {
+    final databaseConnection = await Connection.open(
+      Endpoint(
+        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
+        //port: 5432, // port
+        database: 'spark', // database name
+        username: 'postgres', // username
+        password: 'get\$park3d!', // password
+      ),
+    );
     try {
-      await databaseConnection.open();
-      await databaseConnection.query(
-        'UPDATE habits SET title = @title WHERE habit_id = @id',
-        substitutionValues: {
+      await databaseConnection.execute(
+        Sql.named('UPDATE habits SET title = @title WHERE habit_id = @id'),
+        parameters: {
           'id': habitID,
           'title': newTitle,
         },
@@ -588,11 +725,19 @@ class HabitRepository extends ChangeNotifier {
   }
 
   Future<bool> updateHabitNote(String habitID, String newNote) async {
+    final databaseConnection = await Connection.open(
+      Endpoint(
+        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
+        //port: 5432, // port
+        database: 'spark', // database name
+        username: 'postgres', // username
+        password: 'get\$park3d!', // password
+      ),
+    );
     try {
-      await databaseConnection.open();
-      await databaseConnection.query(
-        'UPDATE habits SET note = @note WHERE habit_id = @id',
-        substitutionValues: {
+      await databaseConnection.execute(
+        Sql.named('UPDATE habits SET note = @note WHERE habit_id = @id'),
+        parameters: {
           'id': habitID,
           'note': newNote,
         },
@@ -607,11 +752,19 @@ class HabitRepository extends ChangeNotifier {
   }
 
   Future<bool> updateHabitEnd(String habitID, DateTime newEnd) async {
+    final databaseConnection = await Connection.open(
+      Endpoint(
+        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
+        //port: 5432, // port
+        database: 'spark', // database name
+        username: 'postgres', // username
+        password: 'get\$park3d!', // password
+      ),
+    );
     try {
-      await databaseConnection.open();
-      await databaseConnection.query(
-        'UPDATE habits SET end_date = @end WHERE habit_id = @id',
-        substitutionValues: {
+      await databaseConnection.execute(
+        Sql.named('UPDATE habits SET end_date = @end WHERE habit_id = @id'),
+        parameters: {
           'id': habitID,
           'end': newEnd,
         },
@@ -626,11 +779,21 @@ class HabitRepository extends ChangeNotifier {
   }
 
   Future<bool> updateHabitFrequency(String habitID, String newFrequency) async {
+    final databaseConnection = await Connection.open(
+      Endpoint(
+        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
+        //port: 5432, // port
+        database: 'spark', // database name
+        username: 'postgres', // username
+        password: 'get\$park3d!', // password
+      ),
+    );
     try {
-      await databaseConnection.open();
-      await databaseConnection.query(
-        'UPDATE habits SET frequency = @frequency WHERE habit_id = @id',
-        substitutionValues: {
+      await databaseConnection.execute(
+        Sql.named(
+          'UPDATE habits SET frequency = @frequency WHERE habit_id = @id',
+        ),
+        parameters: {
           'id': habitID,
           'frequency': newFrequency,
         },
@@ -645,11 +808,21 @@ class HabitRepository extends ChangeNotifier {
   }
 
   Future<bool> updateHabitReminders(String habitID, bool newReminder) async {
+    final databaseConnection = await Connection.open(
+      Endpoint(
+        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
+        //port: 5432, // port
+        database: 'spark', // database name
+        username: 'postgres', // username
+        password: 'get\$park3d!', // password
+      ),
+    );
     try {
-      await databaseConnection.open();
-      await databaseConnection.query(
-        'UPDATE habits SET reminders = @reminder WHERE habit_id = @id',
-        substitutionValues: {
+      await databaseConnection.execute(
+        Sql.named(
+          'UPDATE habits SET reminders = @reminder WHERE habit_id = @id',
+        ),
+        parameters: {
           'id': habitID,
           'reminder': newReminder,
         },
@@ -667,11 +840,21 @@ class HabitRepository extends ChangeNotifier {
     String habitID,
     String newMessage,
   ) async {
+    final databaseConnection = await Connection.open(
+      Endpoint(
+        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
+        //port: 5432, // port
+        database: 'spark', // database name
+        username: 'postgres', // username
+        password: 'get\$park3d!', // password
+      ),
+    );
     try {
-      await databaseConnection.open();
-      await databaseConnection.query(
-        'UPDATE habits SET reminder_message = @message WHERE habit_id = @id',
-        substitutionValues: {
+      await databaseConnection.execute(
+        Sql.named(
+          'UPDATE habits SET reminder_message = @message WHERE habit_id = @id',
+        ),
+        parameters: {
           'id': habitID,
           'message': newMessage,
         },
@@ -686,11 +869,19 @@ class HabitRepository extends ChangeNotifier {
   }
 
   Future<bool> updateHabitTargetType(String habitID, String newType) async {
+    final databaseConnection = await Connection.open(
+      Endpoint(
+        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
+        //port: 5432, // port
+        database: 'spark', // database name
+        username: 'postgres', // username
+        password: 'get\$park3d!', // password
+      ),
+    );
     try {
-      await databaseConnection.open();
-      await databaseConnection.query(
-        'UPDATE habits SET target_type = @type WHERE habit_id = @id',
-        substitutionValues: {
+      await databaseConnection.execute(
+        Sql.named('UPDATE habits SET target_type = @type WHERE habit_id = @id'),
+        parameters: {
           'id': habitID,
           'type': newType,
         },
@@ -705,11 +896,21 @@ class HabitRepository extends ChangeNotifier {
   }
 
   Future<bool> updateHabitCategory(String habitID, String newCategory) async {
+    final databaseConnection = await Connection.open(
+      Endpoint(
+        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
+        //port: 5432, // port
+        database: 'spark', // database name
+        username: 'postgres', // username
+        password: 'get\$park3d!', // password
+      ),
+    );
     try {
-      await databaseConnection.open();
-      await databaseConnection.query(
-        'UPDATE habits SET category = @category WHERE habit_id = @id',
-        substitutionValues: {
+      await databaseConnection.execute(
+        Sql.named(
+          'UPDATE habits SET category = @category WHERE habit_id = @id',
+        ),
+        parameters: {
           'id': habitID,
           'category': newCategory,
         },
@@ -724,11 +925,21 @@ class HabitRepository extends ChangeNotifier {
   }
 
   Future<bool> updateHabitQuantity(String habitID, String newQuantity) async {
+    final databaseConnection = await Connection.open(
+      Endpoint(
+        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
+        //port: 5432, // port
+        database: 'spark', // database name
+        username: 'postgres', // username
+        password: 'get\$park3d!', // password
+      ),
+    );
     try {
-      await databaseConnection.open();
-      await databaseConnection.query(
-        'UPDATE habits SET quantity = @quantity WHERE habit_id = @id',
-        substitutionValues: {
+      await databaseConnection.execute(
+        Sql.named(
+          'UPDATE habits SET quantity = @quantity WHERE habit_id = @id',
+        ),
+        parameters: {
           'id': habitID,
           'quantity': newQuantity,
         },
@@ -743,23 +954,31 @@ class HabitRepository extends ChangeNotifier {
   }
 
   Future<bool> deleteHabitCascade(String habitID) async {
+    final databaseConnection = await Connection.open(
+      Endpoint(
+        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
+        //port: 5432, // port
+        database: 'spark', // database name
+        username: 'postgres', // username
+        password: 'get\$park3d!', // password
+      ),
+    );
     try {
-      await databaseConnection.open();
-      await databaseConnection.query(
-        'DELETE FROM habits WHERE habit_id = @id',
-        substitutionValues: {
+      await databaseConnection.execute(
+        Sql.named('DELETE FROM habits WHERE habit_id = @id'),
+        parameters: {
           'id': habitID,
         },
       );
-      await databaseConnection.query(
-        'DELETE FROM activities WHERE habit_id = @id',
-        substitutionValues: {
+      await databaseConnection.execute(
+        Sql.named('DELETE FROM activities WHERE habit_id = @id'),
+        parameters: {
           'id': habitID,
         },
       );
-      await databaseConnection.query(
-        'DELETE FROM achievements WHERE habit_id = @id',
-        substitutionValues: {
+      await databaseConnection.execute(
+        Sql.named('DELETE FROM achievements WHERE habit_id = @id'),
+        parameters: {
           'id': habitID,
         },
       );
@@ -773,11 +992,19 @@ class HabitRepository extends ChangeNotifier {
   }
 
   Future<bool> deleteActivity(String activityID) async {
+    final databaseConnection = await Connection.open(
+      Endpoint(
+        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
+        //port: 5432, // port
+        database: 'spark', // database name
+        username: 'postgres', // username
+        password: 'get\$park3d!', // password
+      ),
+    );
     try {
-      await databaseConnection.open();
-      await databaseConnection.query(
-        'DELETE FROM activities WHERE activity_id = @id',
-        substitutionValues: {
+      await databaseConnection.execute(
+        Sql.named('DELETE FROM activities WHERE activity_id = @id'),
+        parameters: {
           'id': activityID,
         },
       );

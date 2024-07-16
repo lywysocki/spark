@@ -5,14 +5,6 @@ import 'package:postgres/postgres.dart';
 class AchievementsRepository extends ChangeNotifier {
   AchievementsRepository();
 
-  final databaseConnection = PostgreSQLConnection(
-    '192.168.56.1', // host // 192.168.56.1 (Jill's IP address) // localhost
-    5432, // port
-    'spark', // database name
-    username: 'my_flutter_user', // username
-    password: 'jyjsuX-2puzka', // password
-  );
-
   ////// Create
   Future<bool> createAchievement(
     String userID,
@@ -20,13 +12,22 @@ class AchievementsRepository extends ChangeNotifier {
     String achievementTitle,
     int? quantity,
   ) async {
+    final databaseConnection = await Connection.open(
+      Endpoint(
+        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
+        //port: 5432, // port
+        database: 'spark', // database name
+        username: 'postgres', // username
+        password: 'get\$park3d!', // password
+      ),
+    );
     try {
-      await databaseConnection.open();
       DateTime now = DateTime.now(); //system date and timestamp
-      await databaseConnection.query(
-        'INSERT INTO achievements (user_id, habit_id, achievement_type, achievement_description, timestamp, quantity) '
-        'VALUES (@user_id, @habit_id, @achievement_title, @timestamp, @quantity)',
-        substitutionValues: {
+      await databaseConnection.execute(
+        Sql.named(
+            '''INSERT INTO achievements (user_id, habit_id, achievement_type, achievement_description, timestamp, quantity)
+        VALUES (@user_id, @habit_id, @achievement_title, @timestamp, @quantity)'''),
+        parameters: {
           'user_id': userID,
           'habit_id': habitID,
           'achievement_type': achievementTitle,
@@ -45,11 +46,19 @@ class AchievementsRepository extends ChangeNotifier {
 
   ////// Select
   Future<List<List<dynamic>>> selectAchievements(String userId) async {
+    final databaseConnection = await Connection.open(
+      Endpoint(
+        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
+        //port: 5432, // port
+        database: 'spark', // database name
+        username: 'postgres', // username
+        password: 'get\$park3d!', // password
+      ),
+    );
     try {
-      await databaseConnection.open();
-      List<List<dynamic>> results = await databaseConnection.query(
-        'SELECT * FROM achievements WHERE user_id = @userID',
-        substitutionValues: {
+      List<List<dynamic>> results = await databaseConnection.execute(
+        Sql.named('SELECT * FROM achievements WHERE user_id = @userID'),
+        parameters: {
           'userID': userId,
         },
       );
@@ -66,11 +75,20 @@ class AchievementsRepository extends ChangeNotifier {
     String userId,
     String habitId,
   ) async {
+    final databaseConnection = await Connection.open(
+      Endpoint(
+        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
+        //port: 5432, // port
+        database: 'spark', // database name
+        username: 'postgres', // username
+        password: 'get\$park3d!', // password
+      ),
+    );
     try {
-      await databaseConnection.open();
-      List<List<dynamic>> results = await databaseConnection.query(
-        'SELECT * FROM achievements WHERE user_id = @userID and habit_id = @habitID',
-        substitutionValues: {
+      List<List<dynamic>> results = await databaseConnection.execute(
+        Sql.named(
+            'SELECT * FROM achievements WHERE user_id = @userID and habit_id = @habitID'),
+        parameters: {
           'userID': userId,
           'habitID': habitId,
         },
@@ -88,11 +106,20 @@ class AchievementsRepository extends ChangeNotifier {
     String userId,
     String type,
   ) async {
+    final databaseConnection = await Connection.open(
+      Endpoint(
+        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
+        //port: 5432, // port
+        database: 'spark', // database name
+        username: 'postgres', // username
+        password: 'get\$park3d!', // password
+      ),
+    );
     try {
-      await databaseConnection.open();
-      List<List<dynamic>> results = await databaseConnection.query(
-        'SELECT * FROM achievements WHERE user_id = @userID and achievement_title = @achievementType',
-        substitutionValues: {
+      List<List<dynamic>> results = await databaseConnection.execute(
+        Sql.named(
+            'SELECT * FROM achievements WHERE user_id = @userID and achievement_title = @achievementType'),
+        parameters: {
           'userID': userId,
           'achievementType': type,
         },
@@ -110,11 +137,20 @@ class AchievementsRepository extends ChangeNotifier {
     String userId,
     DateTime date,
   ) async {
+    final databaseConnection = await Connection.open(
+      Endpoint(
+        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
+        //port: 5432, // port
+        database: 'spark', // database name
+        username: 'postgres', // username
+        password: 'get\$park3d!', // password
+      ),
+    );
     try {
-      await databaseConnection.open();
-      List<List<dynamic>> results = await databaseConnection.query(
-        'SELECT * FROM achievements WHERE user_id = @userID and date = @date',
-        substitutionValues: {
+      List<List<dynamic>> results = await databaseConnection.execute(
+        Sql.named(
+            'SELECT * FROM achievements WHERE user_id = @userID and date = @date'),
+        parameters: {
           'userID': userId,
           'date': date,
         },
@@ -133,11 +169,20 @@ class AchievementsRepository extends ChangeNotifier {
     DateTime start,
     DateTime end,
   ) async {
+    final databaseConnection = await Connection.open(
+      Endpoint(
+        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
+        //port: 5432, // port
+        database: 'spark', // database name
+        username: 'postgres', // username
+        password: 'get\$park3d!', // password
+      ),
+    );
     try {
-      await databaseConnection.open();
-      List<List<dynamic>> results = await databaseConnection.query(
-        'SELECT * FROM achievements WHERE user_id = @userID and date >= @startDate and date <= @endDate',
-        substitutionValues: {
+      List<List<dynamic>> results = await databaseConnection.execute(
+        Sql.named(
+            'SELECT * FROM achievements WHERE user_id = @userID and date >= @startDate and date <= @endDate'),
+        parameters: {
           'userID': userID,
           'startDate': start,
           'endDate': end,
@@ -154,11 +199,19 @@ class AchievementsRepository extends ChangeNotifier {
 
   ////// Delete
   Future<bool> deleteAchievement(String achievementID) async {
+    final databaseConnection = await Connection.open(
+      Endpoint(
+        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
+        //port: 5432, // port
+        database: 'spark', // database name
+        username: 'postgres', // username
+        password: 'get\$park3d!', // password
+      ),
+    );
     try {
-      await databaseConnection.open();
-      await databaseConnection.query(
-        'DELETE FROM achievements WHERE achievement_id = @id',
-        substitutionValues: {
+      await databaseConnection.execute(
+        Sql.named('DELETE FROM achievements WHERE achievement_id = @id'),
+        parameters: {
           'id': achievementID,
         },
       );
