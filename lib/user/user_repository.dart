@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:postgres/postgres.dart';
 
 class UserRepository extends ChangeNotifier {
@@ -24,7 +25,7 @@ class UserRepository extends ChangeNotifier {
     try {
       await databaseConnection.execute(
         Sql.named(
-          'INSERT INTO users(username, password, email, first_name, last_name) VALUES (@username, @password, @email, @firstname, @lastname)',
+          'INSERT INTO users(username, password, email, first_name, last_name, date_joined) VALUES (@username, @password, @email, @firstname, @lastname, @dateJoined)',
         ),
         parameters: {
           'username': username,
@@ -32,6 +33,7 @@ class UserRepository extends ChangeNotifier {
           'email': email,
           'firstname': first,
           'lastname': last,
+          'dateJoined': DateFormat('yyyy-MM-dd').format(DateTime.now()),
         },
       );
       return true;

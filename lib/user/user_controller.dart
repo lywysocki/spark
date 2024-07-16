@@ -7,6 +7,7 @@ import 'package:spark/user/user_repository.dart';
 class UserController extends ChangeNotifier {
   UserController();
 
+  User? currentUser;
   String? currentUserId;
   final UserRepository _userRepo = UserRepository();
 
@@ -27,7 +28,7 @@ class UserController extends ChangeNotifier {
         await _userRepo.selectUsersLogin(username, pass);
     //selectUsersLogin queries only user_ids, so it returns should return a list of a list with one element: user_id
     if (results.length == 1) {
-      currentUserId = results[0][0];
+      currentUserId = results[0][0].toString();
     } else if (results.length > 1) {
       //there are multiple ids by that login, the system should not have allowed a user to create an account with an existing username
       List<dynamic> multipleIDs = results.map((row) => row[0]).toList();
