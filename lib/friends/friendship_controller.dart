@@ -13,14 +13,43 @@ class FriendshipController extends ChangeNotifier {
   }
 
   List<Friend> allFriends = [];
-  List<Friend> todaysHabits = [];
-  List<Friend> tomorrowsHabits = [];
+  List<Friend> pendingRequests = [];
 
   Future<void> _load() async {
     allFriends = await getAllFriends();
+    pendingRequests = await getPendingRequests();
   }
 
-//Friends List View
+  //Create
+  Future<void> sendFriendRequest(String user2) async {
+    await _friendRepo.createFriendshipRequest(currentUserId, user2);
+  }
+
+  Future<List<Friend>> getPendingRequests() async {
+    List<List<dynamic>> allRequestData =
+        await _friendRepo.selectPendingRequests(currentUserId);
+    //selectFriendsByUser returns a list of friends data in format [id, username, first, last]
+    int friendsIdIndex = 0;
+    int friendsUsernameIndex = 1;
+    int friendsFirstIndex = 2;
+    int friendsLastIndex = 3;
+
+    List<Friend> friends = [];
+
+    for (var row in allRequestData) {
+      Friend f = Friend(
+        userId: row[friendsIdIndex],
+        username: row[friendsUsernameIndex],
+        firstName: row[friendsFirstIndex],
+        lastName: row[friendsLastIndex],
+      );
+
+      friends.add(f);
+    }
+
+    return friends;
+  }
+
   Future<List<Friend>> getAllFriends() async {
     List<List<dynamic>> allFriendData =
         await _friendRepo.selectFriendsByUser(currentUserId);
@@ -69,5 +98,16 @@ class FriendshipController extends ChangeNotifier {
     }
 
     return friends;
+  }
+
+  Future<void> acceptRequest(String otherUser) async {
+    String state = 'established';
+    await _friendRepo.updateFriendshipState(otherUser, currentUserId, state);
+    allFriends = await getAllFriends();
+  }
+
+  Future<void> rejectRequest(String otherUser) async {
+    await _friendRepo.deleteFriendships(otherUser, currentUserId);
+    pendingRequests = await getPendingRequests();
   }
 }
