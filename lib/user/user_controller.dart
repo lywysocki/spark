@@ -115,14 +115,14 @@ class UserController extends ChangeNotifier {
       throw "An account exists using this email.";
     }
 
-    _userRepo.createUser(
+    await _userRepo.createUser(
       username: username,
       password: pass,
       email: email,
       first: fName,
       last: lName,
     );
-    login(username: username, pass: pass);
+    await login(username: username, pass: pass);
   }
 
   void duplicateLogins(List<dynamic> ids) async {

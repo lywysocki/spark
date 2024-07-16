@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:spark/common/common_habit_header.dart';
+import 'package:spark/common/common_loading.dart';
 import 'package:spark/common/common_textfield.dart';
 import 'package:spark/main.dart';
 import 'package:spark/user/user_controller.dart';
@@ -15,7 +16,6 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   bool hasAccount = true;
-  bool loading = false;
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context).textTheme;
@@ -41,34 +41,20 @@ class _LoginScreenState extends State<LoginScreen> {
             hasAccount ? '  Welcome back!' : '  Welcome!',
             style: theme.titleLarge,
           ),
-          loading
-              ? const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 150.0),
-                  child: CircularProgressIndicator(),
-                )
-              : hasAccount
-                  ? _UserInfoForm(
-                      loading: () {
-                        loading = !loading;
-                      },
-                      onPressed: () {
-                        hasAccount = !hasAccount;
-                        setState(() {});
-                      },
-                      isSignUp: false,
-                    )
-                  : _UserInfoForm(
-                      loading: () {
-                        loading = !loading;
-                      },
-                      onPressed: () {
-                        hasAccount = !hasAccount;
-                        setState(() {});
-                      },
-                      isSignUp: true,
-                    ),
-          const SizedBox(
-            height: 30,
+          Padding(
+            padding: const EdgeInsets.only(
+              top: 30.0,
+              bottom: 30.0,
+              left: 10.0,
+              right: 10.0,
+            ),
+            child: _UserFormFields(
+              isSignUp: !hasAccount,
+              onPageChanged: () {
+                hasAccount = !hasAccount;
+                setState(() {});
+              },
+            ),
           ),
         ],
       ),
@@ -76,60 +62,14 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 }
 
-class _UserInfoForm extends StatefulWidget {
-  const _UserInfoForm({
-    required this.onPressed,
-    required this.loading,
-    required this.isSignUp,
-  });
-
-  final VoidCallback onPressed;
-  final Function loading;
-  final bool isSignUp;
-
-  @override
-  State<_UserInfoForm> createState() => _UserInfoFormState();
-}
-
-class _UserInfoFormState extends State<_UserInfoForm> {
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(
-            top: 30.0,
-            bottom: 20.0,
-            left: 10.0,
-            right: 10.0,
-          ),
-          child: _UserFormFields(
-            loading: widget.loading,
-            isSignUp: widget.isSignUp,
-          ),
-        ),
-        TextButton(
-          onPressed: widget.onPressed,
-          child: Text(
-            !widget.isSignUp
-                ? 'Don\'t have an account? Sign up here!'
-                : 'Already have an account? Login here!',
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 class _UserFormFields extends StatefulWidget {
   const _UserFormFields({
     this.isSignUp = false,
-    required this.loading,
+    required this.onPageChanged,
   });
 
   final bool isSignUp;
-  final Function loading;
+  final Function onPageChanged;
 
   @override
   State<_UserFormFields> createState() => _UserFormFieldsState();
@@ -138,6 +78,8 @@ class _UserFormFields extends StatefulWidget {
 class _UserFormFieldsState extends State<_UserFormFields> {
   UserController? controller;
   final userFormKey = GlobalKey<FormState>();
+  bool loading = false;
+
   String? username;
   String? email;
   String? password;
@@ -159,7 +101,13 @@ class _UserFormFieldsState extends State<_UserFormFields> {
     setState(() {});
   }
 
+  void changeLoading() {
+    loading = !loading;
+    setState(() {});
+  }
+
   Future<SnackBar?> signUp() async {
+    changeLoading();
     try {
       await controller!.signUp(
         username: username!,
@@ -170,6 +118,7 @@ class _UserFormFieldsState extends State<_UserFormFields> {
       );
       return null;
     } catch (e) {
+      changeLoading();
       return SnackBar(
         content: Text('$e'),
       );
@@ -177,6 +126,7 @@ class _UserFormFieldsState extends State<_UserFormFields> {
   }
 
   Future<SnackBar?> login() async {
+    changeLoading();
     try {
       await controller!.login(
         username: username!,
@@ -184,6 +134,7 @@ class _UserFormFieldsState extends State<_UserFormFields> {
       );
       return null;
     } catch (e) {
+      changeLoading();
       return SnackBar(
         content: Text('$e'),
       );
@@ -216,6 +167,11 @@ class _UserFormFieldsState extends State<_UserFormFields> {
               onChanged: onChanged,
               title: 'Last name',
               hintText: 'Enter your last name',
+              validator: (input) {
+                lName = input;
+
+                return null;
+              },
             ),
           if (widget.isSignUp)
             _FormFieldWidget(
@@ -226,7 +182,7 @@ class _UserFormFieldsState extends State<_UserFormFields> {
                 if (input == null || input.isEmpty) {
                   return 'Field cannot be blank.';
                 }
-                lName = input;
+                email = input;
 
                 return null;
               },
@@ -280,9 +236,16 @@ class _UserFormFieldsState extends State<_UserFormFields> {
             height: 25,
           ),
           Center(
-            child: FilledButton(
-              onPressed: userFormKey.currentState?.validate() ?? false
-                  ? () {
+            child: loading
+                ? const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 10.0),
+                    child: CommonLoadingWidget(),
+                  )
+                : FilledButton(
+                    onPressed: () {
+                      if (userFormKey.currentState?.validate() != true) {
+                        return;
+                      }
                       if (widget.isSignUp) {
                         signUp().then((value) {
                           if (value != null) {
@@ -299,25 +262,42 @@ class _UserFormFieldsState extends State<_UserFormFields> {
                             );
                           }
                         });
+                      } else {
+                        login().then((value) {
+                          if (value != null) {
+                            ScaffoldMessenger.of(context).showSnackBar(value);
+                            return;
+                          } else {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) {
+                                  return const MyHomePage();
+                                },
+                              ),
+                            );
+                          }
+                        });
                       }
-                      login().then((value) {
-                        if (value != null) {
-                          ScaffoldMessenger.of(context).showSnackBar(value);
-                          return;
-                        } else {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) {
-                                return const MyHomePage();
-                              },
-                            ),
-                          );
-                        }
-                      });
-                    }
-                  : null,
-              child: Text(widget.isSignUp ? 'Sign up' : 'Login'),
+                    },
+                    child: Text(widget.isSignUp ? 'Sign up' : 'Login'),
+                  ),
+          ),
+          const SizedBox(
+            height: 20,
+          ),
+          Center(
+            child: TextButton(
+              onPressed: () {
+                widget.onPageChanged();
+                userFormKey.currentState?.reset();
+                setState(() {});
+              },
+              child: Text(
+                !widget.isSignUp
+                    ? 'Don\'t have an account? Sign up here!'
+                    : 'Already have an account? Login here!',
+              ),
             ),
           ),
         ],
@@ -354,6 +334,7 @@ class _FormFieldWidget extends StatelessWidget {
           onChanged: onChanged,
           validator: validator,
           hintText: hintText,
+          initialValue: null,
         ),
         const SizedBox(
           height: 10,

@@ -28,7 +28,7 @@ class _CommonTextfieldState extends State<CommonTextfield> {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
-      autovalidateMode: AutovalidateMode.onUnfocus,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
       validator: widget.validator,
       initialValue: widget.initialValue,
       showCursor: !(widget.isTapped ?? false),
