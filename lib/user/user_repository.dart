@@ -25,12 +25,13 @@ class UserRepository extends ChangeNotifier {
     try {
       await databaseConnection.execute(
         Sql.named(
-          'INSERT INTO users(username, password, email, first_name, last_name, date_joined) VALUES (@username, @password, @email, @firstname, @lastname, @dateJoined)',
+          'INSERT INTO users(username, password, email, role, first_name, last_name, date_joined) VALUES (@username, crypt(@password, gen_salt(\'md5\')), @email, @role, @firstname, @lastname, @dateJoined)',
         ),
         parameters: {
           'username': username,
           'password': password,
           'email': email,
+          'role': 'registered',
           'firstname': first,
           'lastname': last,
           'dateJoined': DateFormat('yyyy-MM-dd').format(DateTime.now()),
@@ -250,7 +251,7 @@ class UserRepository extends ChangeNotifier {
     try {
       final results = await databaseConnection.execute(
         Sql.named(
-          'SELECT user_id FROM users WHERE (username = @username OR email = @email) AND password = @password',
+          'SELECT user_id FROM users WHERE (username = @username OR email = @email) AND password = crypt(@password, password)',
         ),
         parameters: {
           'username': userInfo,
