@@ -15,9 +15,9 @@ class UserController extends ChangeNotifier {
   final int _usernameIndex = 1;
   final int _passwordIndex = 2;
   final int _emailIndex = 3;
-  final int _fNameIndex = 4;
-  final int _lNameIndex = 5;
-  final int _joinedIndex = 6;
+  final int _fNameIndex = 5;
+  final int _lNameIndex = 6;
+  final int _joinedIndex = 7;
 
   Future<void> login({required String username, required String pass}) async {
     if (username.length <= 1 || pass.length <= 1) {
@@ -49,9 +49,9 @@ class UserController extends ChangeNotifier {
       throw 'No logged in user';
     }
     String fName = '';
-    String lName = '';
+    String? lName = '';
     String email = '';
-    String joined = '';
+    DateTime? joined;
     int longestStreak = 0;
 
     final userResults = await _userRepo.selectUsersByUserID(currentUserId!);
@@ -87,8 +87,8 @@ class UserController extends ChangeNotifier {
       userId: currentUserId!,
       email: email,
       fName: fName,
-      lName: lName,
-      joined: joined,
+      lName: lName ?? '',
+      joined: joined!,
       longestStreak: longestStreak,
     );
 

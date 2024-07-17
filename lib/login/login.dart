@@ -118,10 +118,11 @@ class _UserFormFieldsState extends State<_UserFormFields> {
       );
       return null;
     } catch (e) {
-      changeLoading();
       return SnackBar(
         content: Text('$e'),
       );
+    } finally {
+      changeLoading();
     }
   }
 
@@ -134,10 +135,11 @@ class _UserFormFieldsState extends State<_UserFormFields> {
       );
       return null;
     } catch (e) {
-      changeLoading();
       return SnackBar(
         content: Text('$e'),
       );
+    } finally {
+      changeLoading();
     }
   }
 

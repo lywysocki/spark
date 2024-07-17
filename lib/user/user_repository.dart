@@ -180,7 +180,7 @@ class UserRepository extends ChangeNotifier {
           date_diffs
         GROUP BY
           habit_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity
-      ),
+      )
       SELECT
         habit_id,
         sequential_date_count
@@ -191,7 +191,7 @@ class UserRepository extends ChangeNotifier {
     ''';
 
       final results = await databaseConnection
-          .execute(Sql.named(query), parameters: {'user_id': userId});
+          .execute(Sql.named(query), parameters: {'userId': userId});
 
       return results;
     } catch (e) {
