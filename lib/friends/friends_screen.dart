@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:spark/common/common_search_bar.dart';
 import 'package:spark/common/common_tile.dart';
 import 'package:spark/friends/friendship_controller.dart';
@@ -45,7 +46,11 @@ class _FriendsScreenState extends State<FriendsScreen> {
                   barrierDismissible: false,
                   context: context,
                   builder: (context) {
-                    return const _AddNewFriendDialog();
+                    return ChangeNotifierProvider(
+                      create: (context) =>
+                          FriendshipController(currentUserId: '1'),
+                      child: const _AddNewFriendDialog(),
+                    );
                   },
                 );
               },
@@ -231,9 +236,9 @@ class _AddNewFriendDialogState extends State<_AddNewFriendDialog> {
           onPressed: canAdd
               ? () {
                   //TODO: addFriend
-                  if (userFormKey.currentState?.validate() != true) {
-                    return;
-                  }
+                  // if (userFormKey.currentState?.validate() != true) {
+                  //   return;
+                  // }
                   sendFriendRequest();
 
                   ScaffoldMessenger.of(context).showSnackBar(
