@@ -21,8 +21,8 @@ class FriendshipController extends ChangeNotifier {
   }
 
   //Create
-  Future<void> sendFriendRequest(String user2) async {
-    await _friendRepo.createFriendshipRequest(currentUserId, user2);
+  Future<void> sendFriendRequest(String username) async {
+    await _friendRepo.createFriendshipRequest(currentUserId, username);
   }
 
   Future<List<Friend>> getPendingRequests() async {
