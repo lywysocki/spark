@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:postgres/postgres.dart';
 
 class UserRepository extends ChangeNotifier {
   UserRepository();
 
   ////// Create
-  Future<bool> createUser(
+  Future<bool> createUser({
     String? username,
     String? password,
     String? email,
     String? first,
     String? last,
-  ) async {
+  }) async {
     final databaseConnection = await Connection.open(
       Endpoint(
         host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
@@ -24,7 +25,7 @@ class UserRepository extends ChangeNotifier {
     try {
       await databaseConnection.execute(
         Sql.named(
-          'INSERT INTO users(username, password, email, first_name, last_name) VALUES (@username, @password, @email, @firstname, @lastname)',
+          'INSERT INTO users(username, password, email, first_name, last_name, date_joined) VALUES (@username, @password, @email, @firstname, @lastname, @dateJoined)',
         ),
         parameters: {
           'username': username,
@@ -32,6 +33,7 @@ class UserRepository extends ChangeNotifier {
           'email': email,
           'firstname': first,
           'lastname': last,
+          'dateJoined': DateFormat('yyyy-MM-dd').format(DateTime.now()),
         },
       );
       return true;
@@ -55,7 +57,7 @@ class UserRepository extends ChangeNotifier {
       ),
     );
     try {
-      List<List<dynamic>> results = await databaseConnection.execute(
+      final results = await databaseConnection.execute(
         Sql.named('SELECT * FROM users WHERE user_id = @id'),
         parameters: {
           'id': userId,
@@ -81,7 +83,7 @@ class UserRepository extends ChangeNotifier {
       ),
     );
     try {
-      List<List<dynamic>> results = await databaseConnection.execute(
+      final results = await databaseConnection.execute(
         Sql.named('SELECT * FROM users WHERE username = @name'),
         parameters: {
           'name': username,
@@ -107,7 +109,7 @@ class UserRepository extends ChangeNotifier {
       ),
     );
     try {
-      List<List<dynamic>> results = await databaseConnection.execute(
+      final results = await databaseConnection.execute(
         Sql.named('SELECT * FROM users WHERE email = @email'),
         parameters: {
           'email': email,
@@ -178,7 +180,7 @@ class UserRepository extends ChangeNotifier {
           date_diffs
         GROUP BY
           habit_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity
-      ),
+      )
       SELECT
         habit_id,
         sequential_date_count
@@ -188,8 +190,8 @@ class UserRepository extends ChangeNotifier {
         habit_id
     ''';
 
-      List<List<dynamic>> results = await databaseConnection
-          .execute(Sql.named(query), parameters: {'user_id': userId});
+      final results = await databaseConnection
+          .execute(Sql.named(query), parameters: {'userId': userId});
 
       return results;
     } catch (e) {
@@ -214,7 +216,7 @@ class UserRepository extends ChangeNotifier {
       ),
     );
     try {
-      List<List<dynamic>> results = await databaseConnection.execute(
+      final results = await databaseConnection.execute(
         Sql.named(
           'SELECT * FROM users WHERE first_name = @firstname AND last_name = @lastname',
         ),
@@ -246,7 +248,7 @@ class UserRepository extends ChangeNotifier {
       ),
     );
     try {
-      List<List<dynamic>> results = await databaseConnection.execute(
+      final results = await databaseConnection.execute(
         Sql.named(
           'SELECT user_id FROM users WHERE (username = @username OR email = @email) AND password = @password',
         ),

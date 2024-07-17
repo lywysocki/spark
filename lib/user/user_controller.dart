@@ -7,6 +7,7 @@ import 'package:spark/user/user_repository.dart';
 class UserController extends ChangeNotifier {
   UserController();
 
+  User? currentUser;
   String? currentUserId;
   final UserRepository _userRepo = UserRepository();
 
@@ -14,20 +15,20 @@ class UserController extends ChangeNotifier {
   final int _usernameIndex = 1;
   final int _passwordIndex = 2;
   final int _emailIndex = 3;
-  final int _fNameIndex = 4;
-  final int _lNameIndex = 5;
-  final int _joinedIndex = 6;
+  final int _fNameIndex = 5;
+  final int _lNameIndex = 6;
+  final int _joinedIndex = 7;
 
   Future<void> login({required String username, required String pass}) async {
     if (username.length <= 1 || pass.length <= 1) {
       throw "Username or password invalid";
     }
 
-    List<List<dynamic>> results =
-        await _userRepo.selectUsersLogin(username, pass);
+    final results = await _userRepo.selectUsersLogin(username, pass);
     //selectUsersLogin queries only user_ids, so it returns should return a list of a list with one element: user_id
     if (results.length == 1) {
-      currentUserId = results[0][0];
+      currentUserId = results[0][0].toString();
+      currentUser = await getCurrentUser();
     } else if (results.length > 1) {
       //there are multiple ids by that login, the system should not have allowed a user to create an account with an existing username
       List<dynamic> multipleIDs = results.map((row) => row[0]).toList();
@@ -48,13 +49,12 @@ class UserController extends ChangeNotifier {
       throw 'No logged in user';
     }
     String fName = '';
-    String lName = '';
-    String email = 'email';
-    String joined = '';
+    String? lName = '';
+    String email = '';
+    DateTime? joined;
     int longestStreak = 0;
 
-    List<List<dynamic>> userResults =
-        await _userRepo.selectUsersByUserID(currentUserId!);
+    final userResults = await _userRepo.selectUsersByUserID(currentUserId!);
     if (userResults.length == 1) {
       if (userResults[0][_fNameIndex] == null) {
         if (userResults[0][_usernameIndex] != null) {
@@ -68,7 +68,7 @@ class UserController extends ChangeNotifier {
       email = userResults[0][_emailIndex];
     } else if (userResults.length > 1) {
       //there are multiple ids by that login, the system should not have allowed a user to create an account with an existing username
-      List<dynamic> multipleIDs = userResults.map((row) => row[0]).toList();
+      final multipleIDs = userResults.map((row) => row[0]).toList();
       debugPrint(
         "Database contained multiple user_ids with that username/password.\n",
       );
@@ -78,46 +78,55 @@ class UserController extends ChangeNotifier {
       debugPrint('Account does not exist in database.');
     }
 
-    List<List<dynamic>> streakResults =
-        await _userRepo.selectUsersStreaks(currentUserId!);
+    final streakResults = await _userRepo.selectUsersStreaks(currentUserId!);
     if (streakResults.isNotEmpty) {
-      List<dynamic> streaks = streakResults.map((row) => row[3]).toList();
+      final streaks = streakResults.map((row) => row[3]).toList();
       longestStreak = streaks.reduce((a, b) => a > b ? a : b);
     }
     final user = User(
       userId: currentUserId!,
       email: email,
       fName: fName,
-      lName: lName,
-      joined: joined,
+      lName: lName ?? '',
+      joined: joined!,
       longestStreak: longestStreak,
     );
 
     return user;
   }
 
-  Future<void> signup(String username, String email, String pass) async {
-    List<List<dynamic>> usernameResults =
-        await _userRepo.selectUsersByUsername(username);
+  Future<void> signUp({
+    required String username,
+    required String email,
+    required String pass,
+    required String fName,
+    String? lName,
+  }) async {
+    final usernameResults = await _userRepo.selectUsersByUsername(username);
     if (usernameResults.isNotEmpty) {
       throw "An account already exists by this username.";
     }
 
-    List<List<dynamic>> emailResults =
-        await _userRepo.selectUsersByEmail(email);
+    final emailResults = await _userRepo.selectUsersByEmail(email);
     if (emailResults.isNotEmpty) {
       throw "An account exists using this email.";
     }
 
-    _userRepo.createUser(username, pass, email, null, null);
-    login(username: username, pass: pass);
+    await _userRepo.createUser(
+      username: username,
+      password: pass,
+      email: email,
+      first: fName,
+      last: lName,
+    );
+    await login(username: username, pass: pass);
   }
 
   void duplicateLogins(List<dynamic> ids) async {
     debugPrint("Duplicate user fields: \n");
     List<Map<String, dynamic>> allDuplicates = [];
     for (int i = 0; i < ids.length; i++) {
-      List<List<dynamic>> results = await _userRepo.selectUsersByUserID(ids[i]);
+      final results = await _userRepo.selectUsersByUserID(ids[i]);
       Map<String, dynamic> result = {
         'user_id': results[0][0],
         'username': results[0][1],

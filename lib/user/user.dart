@@ -11,6 +11,8 @@ class User {
   final String email;
   final String fName;
   final String lName;
-  final String joined;
+  final DateTime joined;
   final int longestStreak;
+
+  String getName() => '$fName $lName';
 }
