@@ -364,7 +364,10 @@ class UserRepository extends ChangeNotifier {
     );
     try {
       await databaseConnection.execute(
-        Sql.named('UPDATE users SET password = @password WHERE user_id = @id'),
+        //crypt('w3N+worth', gen_salt('md5'))
+        Sql.named(
+          'UPDATE users SET password = crypt(@password, gen_salt(\'md5\')) WHERE user_id = @id',
+        ),
         parameters: {
           'id': userID,
           'password': newPassword,
