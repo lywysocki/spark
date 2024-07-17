@@ -31,7 +31,7 @@ class FriendshipRepository extends ChangeNotifier {
           'INSERT INTO friendships (user1_id, user2_id, state) VALUES (@user1, @user2, @state)',
         ),
         parameters: {
-          'user1': user1,
+          'user1': userid1,
           'user2': friendID,
           'state': requestState,
         },
