@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:spark/common/common_search_bar.dart';
 import 'package:spark/common/common_tile.dart';
+import 'package:spark/friends/friendship_controller.dart';
 import 'package:spark/profile_screen.dart';
 
 final placeholderFriends = List.generate(5, (int index) => 'Friend $index');
@@ -142,6 +143,30 @@ class _AddNewFriendDialogState extends State<_AddNewFriendDialog> {
   final TextEditingController _textController = TextEditingController();
   bool canAdd = false;
 
+  FriendshipController? controller;
+  final userFormKey = GlobalKey<FormState>();
+
+  String? username;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    controller = context.watch<FriendshipController>();
+    userFormKey.currentState?.reset();
+    username = null;
+  }
+
+  Future<SnackBar?> sendFriendRequest() async {
+    try {
+      await controller!.sendFriendRequest(username!);
+    } catch (e) {
+      return SnackBar(
+        content: Text('$e'),
+      );
+    }
+    return null;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -161,6 +186,7 @@ class _AddNewFriendDialogState extends State<_AddNewFriendDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+      key: userFormKey,
       title: const Row(
         children: [
           Icon(Icons.person_add_alt_1_outlined),
@@ -184,7 +210,11 @@ class _AddNewFriendDialogState extends State<_AddNewFriendDialog> {
           ),
           TextFormField(
             controller: _textController,
-            textInputAction: TextInputAction.send,
+            onChanged: (value) {
+              setState(() {
+                username = value.toString();
+              });
+            },
             decoration: InputDecoration(
               filled: true,
               border: OutlineInputBorder(
@@ -200,6 +230,12 @@ class _AddNewFriendDialogState extends State<_AddNewFriendDialog> {
         FilledButton(
           onPressed: canAdd
               ? () {
+                  //TODO: addFriend
+                  if (userFormKey.currentState?.validate() != true) {
+                    return;
+                  }
+                  sendFriendRequest();
+
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       duration: Duration(seconds: 3),
