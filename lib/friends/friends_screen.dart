@@ -161,15 +161,19 @@ class _AddNewFriendDialogState extends State<_AddNewFriendDialog> {
     username = null;
   }
 
-  Future<SnackBar?> sendFriendRequest() async {
+  Future<SnackBar> sendFriendRequest() async {
     try {
       await controller!.sendFriendRequest(username!);
+      return const SnackBar(
+        duration: Duration(seconds: 3),
+        content: Text('Invite Sent'),
+      );
     } catch (e) {
       return SnackBar(
+        duration: const Duration(seconds: 3),
         content: Text('$e'),
       );
     }
-    return null;
   }
 
   @override
@@ -239,15 +243,10 @@ class _AddNewFriendDialogState extends State<_AddNewFriendDialog> {
                   // if (userFormKey.currentState?.validate() != true) {
                   //   return;
                   // }
-                  sendFriendRequest();
-
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      duration: Duration(seconds: 3),
-                      content: Text('Invite sent!'),
-                    ),
-                  );
-                  Navigator.pop(context);
+                  sendFriendRequest().then((value) {
+                    ScaffoldMessenger.of(context).showSnackBar(value);
+                    Navigator.pop(context);
+                  });
                 }
               : null,
           child: const Text('Add'),

@@ -23,7 +23,8 @@ class FriendshipRepository extends ChangeNotifier {
         parameters: {'username': username2},
       );
       if (idResult.length > 1) {
-        throw "Too many accounts with that username";
+        debugPrint('Error: Duplicate usernames');
+        return false;
       }
       int friendID = idResult[0][0];
       await databaseConnection.execute(
@@ -245,7 +246,6 @@ class FriendshipRepository extends ChangeNotifier {
       );
     } catch (e) {
       debugPrint('Error: ${e.toString()}');
-      throw 'Could not update';
     } finally {
       await databaseConnection.close();
     }
@@ -274,7 +274,6 @@ class FriendshipRepository extends ChangeNotifier {
       );
     } catch (e) {
       debugPrint('Error: ${e.toString()}');
-      throw 'Could not delete friendship';
     } finally {
       await databaseConnection.close();
     }
