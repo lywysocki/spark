@@ -136,8 +136,8 @@ final _destinations = <Destination>[
     title: 'Friends',
     icon: const Icon(Icons.people),
     builder: ChangeNotifierProvider(
-      create: (context) => FriendshipController(currentUserId: currentUserId),
-      child: const FriendsScreen(),
+      create: (context) => FriendshipController(currentUserId: 1),
+      builder: (context, child) => const FriendsScreen(),
     ),
   ),
 ];
