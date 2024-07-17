@@ -158,6 +158,16 @@ class _UserFormFieldsState extends State<_UserFormFields> {
                 if (input == null || input.isEmpty) {
                   return 'Field cannot be blank.';
                 }
+                String regexSpecial = '^(?=.*[-+_!@#\$(){}%^&/<>`~*., ?]).+\$';
+                String reqs = '';
+                if (input.length > 25) {
+                  reqs += 'First name cannot be longer than 25 characters\n';
+                }
+                if (RegExp(regexSpecial).hasMatch(input)) {
+                  reqs += 'First name cannot contain special characters';
+                }
+                if (reqs.isNotEmpty) return reqs;
+
                 fName = input;
                 return null;
               },
@@ -168,6 +178,19 @@ class _UserFormFieldsState extends State<_UserFormFields> {
               title: 'Last name',
               hintText: 'Enter your last name',
               validator: (input) {
+                if (input != null) {
+                  String regexSpecial =
+                      '^(?=.*[-+_!@#\$(){}%^&/<>`~*., ?]).+\$';
+                  String reqs = '';
+                  if (input.length > 25) {
+                    reqs += 'Last name cannot be longer than 25 characters\n';
+                  }
+                  if (RegExp(regexSpecial).hasMatch(input)) {
+                    reqs += 'Last name cannot contain special characters';
+                  }
+                  if (reqs.isNotEmpty) return reqs;
+                }
+
                 lName = input;
 
                 return null;
@@ -182,6 +205,19 @@ class _UserFormFieldsState extends State<_UserFormFields> {
                 if (input == null || input.isEmpty) {
                   return 'Field cannot be blank.';
                 }
+                String regexSpecial = '^(?=.*[-+!#\$(){}%^&/<>`~*, ?]).+\$';
+                String reqs = '';
+                if (!input.contains('@') || !input.contains('.')) {
+                  reqs += 'Must be a valid email address';
+                }
+                if (input.length > 40) {
+                  reqs += 'Email cannot be longer than 40 characters\n';
+                }
+                if (RegExp(regexSpecial).hasMatch(input)) {
+                  reqs += 'Email cannot contain special characters';
+                }
+                if (reqs.isNotEmpty) return reqs;
+
                 email = input;
 
                 return null;
@@ -196,11 +232,19 @@ class _UserFormFieldsState extends State<_UserFormFields> {
                 if (input == null || input.isEmpty) {
                   return 'Field cannot be blank.';
                 }
+                String regexSpecial = '^(?=.*[-+!@#\$(){}%^&/<>`~*., ?]).+\$';
+                String reqs = '';
+                if (input.length > 25) {
+                  reqs += 'Username cannot be longer than 25 characters\n';
+                }
+                if (RegExp(regexSpecial).hasMatch(input)) {
+                  reqs += 'Username cannot contain special characters';
+                }
+                if (reqs.isNotEmpty) return reqs;
+
                 username = input;
 
                 return null;
-
-                ///TODO: if username exists, 'This username already exists.'
               },
             ),
           if (!widget.isSignUp)
@@ -214,7 +258,6 @@ class _UserFormFieldsState extends State<_UserFormFields> {
                 }
                 username = input;
 
-                ///TODO: 'Incorrect username or password.'
                 return null;
               },
             ),
@@ -227,6 +270,25 @@ class _UserFormFieldsState extends State<_UserFormFields> {
             validator: (input) {
               if (input == null || input.isEmpty) {
                 return 'Field cannot be blank.';
+              }
+              if (widget.isSignUp) {
+                String regexCases = '^(?=.*[a-z])(?=.*[A-Z]).+\$';
+                String regexNumber = '^(?=.*\\d).+\$';
+                String regexSpecial = '^(?=.*[-+_!@#\$%^&*., ?]).+\$';
+                String reqs = '';
+                if (input.length < 8) {
+                  reqs += 'Password must be at least 8 characters\n';
+                }
+                if (!RegExp(regexCases).hasMatch(input)) {
+                  reqs += 'Password must contain all character cases\n';
+                }
+                if (!RegExp(regexNumber).hasMatch(input)) {
+                  reqs += 'Password must be contain at least 1 number\n';
+                }
+                if (!RegExp(regexSpecial).hasMatch(input)) {
+                  reqs += 'Password must contain at least 1 special character';
+                }
+                if (reqs.isNotEmpty) return reqs;
               }
               password = input;
 
