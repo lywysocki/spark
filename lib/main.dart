@@ -1,4 +1,5 @@
 import 'package:spark/friends/friends_screen.dart';
+import 'package:spark/friends/friendship_controller.dart';
 import 'package:spark/habits/habits_screen.dart';
 import 'package:spark/habits/new_habit_screen.dart';
 import 'package:spark/home_screen.dart';
@@ -134,7 +135,10 @@ final _destinations = <Destination>[
   Destination(
     title: 'Friends',
     icon: const Icon(Icons.people),
-    builder: (context) => const FriendsScreen(),
+    builder: (context) => ChangeNotifierProvider(
+      create: (context) => FriendshipController(currentUserId: '1'),
+      child: const FriendsScreen(),
+    ),
   ),
 ];
 

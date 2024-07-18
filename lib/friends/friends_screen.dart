@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:spark/common/common_search_bar.dart';
 import 'package:spark/common/common_tile.dart';
+import 'package:spark/friends/friendship_controller.dart';
 import 'package:spark/profile_screen.dart';
 
 final placeholderFriends = List.generate(5, (int index) => 'Friend $index');
@@ -44,7 +46,11 @@ class _FriendsScreenState extends State<FriendsScreen> {
                   barrierDismissible: false,
                   context: context,
                   builder: (context) {
-                    return const _AddNewFriendDialog();
+                    return ChangeNotifierProvider(
+                      create: (context) =>
+                          FriendshipController(currentUserId: '1'),
+                      child: const _AddNewFriendDialog(),
+                    );
                   },
                 );
               },
@@ -142,6 +148,34 @@ class _AddNewFriendDialogState extends State<_AddNewFriendDialog> {
   final TextEditingController _textController = TextEditingController();
   bool canAdd = false;
 
+  FriendshipController? controller;
+  final userFormKey = GlobalKey<FormState>();
+
+  String? username;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    controller = context.watch<FriendshipController>();
+    userFormKey.currentState?.reset();
+    username = null;
+  }
+
+  Future<SnackBar> sendFriendRequest() async {
+    try {
+      await controller!.sendFriendRequest(username!);
+      return const SnackBar(
+        duration: Duration(seconds: 3),
+        content: Text('Invite Sent'),
+      );
+    } catch (e) {
+      return SnackBar(
+        duration: const Duration(seconds: 3),
+        content: Text('$e'),
+      );
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -161,6 +195,7 @@ class _AddNewFriendDialogState extends State<_AddNewFriendDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+      key: userFormKey,
       title: const Row(
         children: [
           Icon(Icons.person_add_alt_1_outlined),
@@ -184,7 +219,11 @@ class _AddNewFriendDialogState extends State<_AddNewFriendDialog> {
           ),
           TextFormField(
             controller: _textController,
-            textInputAction: TextInputAction.send,
+            onChanged: (value) {
+              setState(() {
+                username = value.toString();
+              });
+            },
             decoration: InputDecoration(
               filled: true,
               border: OutlineInputBorder(
@@ -200,13 +239,14 @@ class _AddNewFriendDialogState extends State<_AddNewFriendDialog> {
         FilledButton(
           onPressed: canAdd
               ? () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      duration: Duration(seconds: 3),
-                      content: Text('Invite sent!'),
-                    ),
-                  );
-                  Navigator.pop(context);
+                  //TODO: addFriend
+                  // if (userFormKey.currentState?.validate() != true) {
+                  //   return;
+                  // }
+                  sendFriendRequest().then((value) {
+                    ScaffoldMessenger.of(context).showSnackBar(value);
+                    Navigator.pop(context);
+                  });
                 }
               : null,
           child: const Text('Add'),

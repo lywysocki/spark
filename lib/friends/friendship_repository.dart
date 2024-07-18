@@ -6,7 +6,7 @@ class FriendshipRepository extends ChangeNotifier {
   FriendshipRepository();
 
   ///// Create
-  Future<bool> createFriendshipRequest(String user1, String user2) async {
+  Future<bool> createFriendshipRequest(String userid1, String username2) async {
     final databaseConnection = await Connection.open(
       Endpoint(
         host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
@@ -18,13 +18,22 @@ class FriendshipRepository extends ChangeNotifier {
     );
     try {
       String requestState = 'pending';
+      List<List<dynamic>> idResult = await databaseConnection.execute(
+        Sql.named('select user_id from users where username = @username'),
+        parameters: {'username': username2},
+      );
+      if (idResult.length > 1) {
+        debugPrint('Error: Duplicate usernames');
+        return false;
+      }
+      int friendID = idResult[0][0];
       await databaseConnection.execute(
         Sql.named(
           'INSERT INTO friendships (user1_id, user2_id, state) VALUES (@user1, @user2, @state)',
         ),
         parameters: {
-          'user1': user1,
-          'user2': user2,
+          'user1': userid1,
+          'user2': friendID,
           'state': requestState,
         },
       );
@@ -237,7 +246,6 @@ class FriendshipRepository extends ChangeNotifier {
       );
     } catch (e) {
       debugPrint('Error: ${e.toString()}');
-      throw 'Could not update';
     } finally {
       await databaseConnection.close();
     }
@@ -266,7 +274,6 @@ class FriendshipRepository extends ChangeNotifier {
       );
     } catch (e) {
       debugPrint('Error: ${e.toString()}');
-      throw 'Could not delete friendship';
     } finally {
       await databaseConnection.close();
     }
