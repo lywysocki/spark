@@ -50,12 +50,12 @@ class AchievementsController extends ChangeNotifier {
     List<Achievement> mappedAchievements = userAchievements
         .map(
           (item) => Achievement(
-            item[0],
-            item[1],
-            item[2],
-            item[3],
-            item[4],
-            item[5],
+            achievementID: item[0],
+            achievementTitle: item[1],
+            habitID: item[2],
+            time: item[3],
+            userID: item[4],
+            quantity: item[5],
           ),
         )
         .toList();
@@ -74,12 +74,12 @@ class AchievementsController extends ChangeNotifier {
     List<Achievement> mappedAchievements = achievements
         .map(
           (item) => Achievement(
-            item[0],
-            item[1],
-            item[2],
-            item[3],
-            item[4],
-            item[5],
+            achievementID: item[0],
+            achievementTitle: item[1],
+            habitID: item[2],
+            time: item[3],
+            userID: item[4],
+            quantity: item[5],
           ),
         )
         .toList();
@@ -98,12 +98,12 @@ class AchievementsController extends ChangeNotifier {
     List<Achievement> mappedAchievements = achievements
         .map(
           (item) => Achievement(
-            item[0],
-            item[1],
-            item[2],
-            item[3],
-            item[4],
-            item[5],
+            achievementID: item[0],
+            achievementTitle: item[1],
+            habitID: item[2],
+            time: item[3],
+            userID: item[4],
+            quantity: item[5],
           ),
         )
         .toList();
@@ -120,12 +120,12 @@ class AchievementsController extends ChangeNotifier {
     List<Achievement> mappedAchievements = achievements
         .map(
           (item) => Achievement(
-            item[0],
-            item[1],
-            item[2],
-            item[3],
-            item[4],
-            item[5],
+            achievementID: item[0],
+            achievementTitle: item[1],
+            habitID: item[2],
+            time: item[3],
+            userID: item[4],
+            quantity: item[5],
           ),
         )
         .toList();
@@ -143,12 +143,12 @@ class AchievementsController extends ChangeNotifier {
     List<Achievement> mappedAchievements = achievements
         .map(
           (item) => Achievement(
-            item[0],
-            item[1],
-            item[2],
-            item[3],
-            item[4],
-            item[5],
+            achievementID: item[0],
+            achievementTitle: item[1],
+            habitID: item[2],
+            time: item[3],
+            userID: item[4],
+            quantity: item[5],
           ),
         )
         .toList();
