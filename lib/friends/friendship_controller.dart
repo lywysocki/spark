@@ -5,12 +5,14 @@ import 'package:spark/habits/habit.dart';
 
 //friendships:   user1_id, user2_id
 class FriendshipController extends ChangeNotifier {
+  FriendshipController({required this.currentUserId}) {
+    if (currentUserId.isNotEmpty) {
+      _load();
+    }
+  }
+
   final String currentUserId;
   final FriendshipRepository _friendRepo = FriendshipRepository();
-
-  FriendshipController({required this.currentUserId}) {
-    _load();
-  }
 
   List<Friend> allFriends = [];
   List<Friend> pendingRequests = [];
@@ -42,7 +44,7 @@ class FriendshipController extends ChangeNotifier {
 
     for (var row in allRequestData) {
       Friend f = Friend(
-        userId: row[friendsIdIndex],
+        userId: row[friendsIdIndex].toString(),
         username: row[friendsUsernameIndex],
         firstName: row[friendsFirstIndex],
         lastName: row[friendsLastIndex],

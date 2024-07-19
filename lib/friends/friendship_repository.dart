@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:postgres/postgres.dart';
 
 class FriendshipRepository extends ChangeNotifier {

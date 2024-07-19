@@ -75,64 +75,98 @@ class _FriendTiles extends StatefulWidget {
 class _FriendTilesState extends State<_FriendTiles> {
   @override
   Widget build(BuildContext context) {
-    final displayFriends = placeholderFriends.where(
-      (element) =>
-          element.toLowerCase().contains(widget.currentSearch.toLowerCase()),
+    final controller = context.watch<FriendshipController>();
+
+    final displayFriends = controller.allFriends.where(
+      (element) => element.username
+          .toLowerCase()
+          .contains(widget.currentSearch.toLowerCase()),
     );
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        for (final friend in displayFriends)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4.0),
-            child: CommonCardTile(
-              category: 'None',
-              title: Text(
-                friend,
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-              destination: Scaffold(
-                backgroundColor:
-                    Theme.of(context).colorScheme.tertiaryContainer,
-                appBar: AppBar(
-                  backgroundColor:
-                      Theme.of(context).colorScheme.tertiaryContainer,
-                ),
-                body: const UserProfileScreen(),
-              ),
-              trailingWidget: PopupMenuButton(
-                onSelected: (value) async {
-                  switch (value) {
-                    case 'remove':
-                      return showDialog(
-                        barrierDismissible: false,
-                        context: context,
-                        builder: (context) {
-                          return const _RemoveFriendDialog();
-                        },
-                      );
-                    default:
-                      throw UnimplementedError();
-                  }
-                },
-                icon: const Icon(Icons.more_vert),
-                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                  const PopupMenuItem<String>(
-                    value: 'remove',
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.person_remove_rounded),
-                        SizedBox(width: 10),
-                        Text('Remove'),
+    return displayFriends.isEmpty
+        ? const _EmptyFriendsList()
+        : Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (final friend in displayFriends)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4.0),
+                  child: CommonCardTile(
+                    category: 'None',
+                    title: Text(
+                      friend.username,
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                    destination: Scaffold(
+                      backgroundColor:
+                          Theme.of(context).colorScheme.tertiaryContainer,
+                      appBar: AppBar(
+                        backgroundColor:
+                            Theme.of(context).colorScheme.tertiaryContainer,
+                      ),
+                      body: const UserProfileScreen(),
+                    ),
+                    trailingWidget: PopupMenuButton(
+                      onSelected: (value) async {
+                        switch (value) {
+                          case 'remove':
+                            return showDialog(
+                              barrierDismissible: false,
+                              context: context,
+                              builder: (context) {
+                                return const _RemoveFriendDialog();
+                              },
+                            );
+                          default:
+                            throw UnimplementedError();
+                        }
+                      },
+                      icon: const Icon(Icons.more_vert),
+                      itemBuilder: (BuildContext context) =>
+                          <PopupMenuEntry<String>>[
+                        const PopupMenuItem<String>(
+                          value: 'remove',
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.person_remove_rounded),
+                              SizedBox(width: 10),
+                              Text('Remove'),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ),
-                ],
-              ),
+                ),
+            ],
+          );
+  }
+}
+
+class _EmptyFriendsList extends StatelessWidget {
+  const _EmptyFriendsList();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.all(50.0),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.sentiment_dissatisfied_rounded,
+              size: 50,
             ),
-          ),
-      ],
+            SizedBox(
+              height: 10,
+            ),
+            Text(
+              'You don\'t have any friends yet.\n Add a new friend to get started!',
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

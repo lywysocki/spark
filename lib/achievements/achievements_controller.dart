@@ -5,7 +5,11 @@ import 'package:spark/achievements/achievement.dart';
 
 //achievements:    achievement_id, user_id, habit_id, achievement_title, timestamp, quantity
 class AchievementsController extends ChangeNotifier {
-  AchievementsController({required this.currentUserId});
+  AchievementsController({required this.currentUserId}) {
+    if (currentUserId.isNotEmpty) {
+      _load();
+    }
+  }
   final String currentUserId;
 
   final AchievementsRepository _achievementsRepo = AchievementsRepository();
@@ -25,7 +29,11 @@ class AchievementsController extends ChangeNotifier {
     int? quantity,
   ) async {
     await _achievementsRepo.createAchievement(
-        currentUserId, habitID, achievementTitle, quantity);
+      currentUserId,
+      habitID,
+      achievementTitle,
+      quantity,
+    );
   }
 
   Future<List<Achievement>> getAchievements() async {
@@ -59,7 +67,9 @@ class AchievementsController extends ChangeNotifier {
     String habitId,
   ) async {
     final achievements = await _achievementsRepo.selectAchievementsByHabitID(
-        currentUserId, habitId);
+      currentUserId,
+      habitId,
+    );
 
     List<Achievement> mappedAchievements = achievements
         .map(
@@ -81,7 +91,9 @@ class AchievementsController extends ChangeNotifier {
     String achievementType,
   ) async {
     final achievements = await _achievementsRepo.selectAchievementsByType(
-        currentUserId, achievementType);
+      currentUserId,
+      achievementType,
+    );
 
     List<Achievement> mappedAchievements = achievements
         .map(
