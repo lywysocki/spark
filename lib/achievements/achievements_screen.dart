@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart' hide SearchBar;
+import 'package:provider/provider.dart';
+import 'package:spark/achievements/achievements_controller.dart';
 import 'package:spark/common/common_search_bar.dart';
 
 class AchievementsScreen extends StatefulWidget {
@@ -11,6 +13,7 @@ class AchievementsScreen extends StatefulWidget {
 class _AchievementsScreenState extends State<AchievementsScreen> {
   @override
   Widget build(BuildContext context) {
+    final controller = context.watch<AchievementsController>();
     final theme = Theme.of(context).textTheme;
     String currentSearch = '';
 
@@ -75,7 +78,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
                   ),
 
                   /// TODO: fill with allAchievements.length
-                  itemCount: 17,
+                  itemCount: controller.achievements.length,
                 ),
               ),
             ),

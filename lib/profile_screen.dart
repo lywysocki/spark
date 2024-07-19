@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:spark/achievements/achievements_screen.dart';
 import 'package:spark/common/common_tile.dart';
+import 'package:spark/user/user_controller.dart';
 
 class UserProfileScreen extends StatelessWidget {
   const UserProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final controller = context.watch<UserController>();
     return Stack(
       children: [
         Container(
@@ -28,7 +31,7 @@ class UserProfileScreen extends StatelessWidget {
                 ),
                 Center(
                   child: Text(
-                    'User Name',
+                    controller.currentUser!.getName(),
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                 ),

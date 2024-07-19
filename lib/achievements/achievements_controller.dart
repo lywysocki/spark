@@ -5,7 +5,11 @@ import 'package:spark/achievements/achievement.dart';
 
 //achievements:    achievement_id, user_id, habit_id, achievement_title, timestamp, quantity
 class AchievementsController extends ChangeNotifier {
-  AchievementsController({required this.currentUserId});
+  AchievementsController({required this.currentUserId}) {
+    if (currentUserId.isNotEmpty) {
+      _load();
+    }
+  }
   final String currentUserId;
 
   final AchievementsRepository _achievementsRepo = AchievementsRepository();
@@ -25,7 +29,11 @@ class AchievementsController extends ChangeNotifier {
     int? quantity,
   ) async {
     await _achievementsRepo.createAchievement(
-        currentUserId, habitID, achievementTitle, quantity);
+      currentUserId,
+      habitID,
+      achievementTitle,
+      quantity,
+    );
   }
 
   Future<List<Achievement>> getAchievements() async {
@@ -42,12 +50,12 @@ class AchievementsController extends ChangeNotifier {
     List<Achievement> mappedAchievements = userAchievements
         .map(
           (item) => Achievement(
-            item[0],
-            item[1],
-            item[2],
-            item[3],
-            item[4],
-            item[5],
+            achievementID: item[0],
+            achievementTitle: item[1],
+            habitID: item[2],
+            time: item[3],
+            userID: item[4],
+            quantity: item[5],
           ),
         )
         .toList();
@@ -59,17 +67,19 @@ class AchievementsController extends ChangeNotifier {
     String habitId,
   ) async {
     final achievements = await _achievementsRepo.selectAchievementsByHabitID(
-        currentUserId, habitId);
+      currentUserId,
+      habitId,
+    );
 
     List<Achievement> mappedAchievements = achievements
         .map(
           (item) => Achievement(
-            item[0],
-            item[1],
-            item[2],
-            item[3],
-            item[4],
-            item[5],
+            achievementID: item[0],
+            achievementTitle: item[1],
+            habitID: item[2],
+            time: item[3],
+            userID: item[4],
+            quantity: item[5],
           ),
         )
         .toList();
@@ -81,17 +91,19 @@ class AchievementsController extends ChangeNotifier {
     String achievementType,
   ) async {
     final achievements = await _achievementsRepo.selectAchievementsByType(
-        currentUserId, achievementType);
+      currentUserId,
+      achievementType,
+    );
 
     List<Achievement> mappedAchievements = achievements
         .map(
           (item) => Achievement(
-            item[0],
-            item[1],
-            item[2],
-            item[3],
-            item[4],
-            item[5],
+            achievementID: item[0],
+            achievementTitle: item[1],
+            habitID: item[2],
+            time: item[3],
+            userID: item[4],
+            quantity: item[5],
           ),
         )
         .toList();
@@ -108,12 +120,12 @@ class AchievementsController extends ChangeNotifier {
     List<Achievement> mappedAchievements = achievements
         .map(
           (item) => Achievement(
-            item[0],
-            item[1],
-            item[2],
-            item[3],
-            item[4],
-            item[5],
+            achievementID: item[0],
+            achievementTitle: item[1],
+            habitID: item[2],
+            time: item[3],
+            userID: item[4],
+            quantity: item[5],
           ),
         )
         .toList();
@@ -131,12 +143,12 @@ class AchievementsController extends ChangeNotifier {
     List<Achievement> mappedAchievements = achievements
         .map(
           (item) => Achievement(
-            item[0],
-            item[1],
-            item[2],
-            item[3],
-            item[4],
-            item[5],
+            achievementID: item[0],
+            achievementTitle: item[1],
+            habitID: item[2],
+            time: item[3],
+            userID: item[4],
+            quantity: item[5],
           ),
         )
         .toList();

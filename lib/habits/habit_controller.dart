@@ -6,12 +6,12 @@ import 'package:spark/habits/habit.dart';
 //habits: habit_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity
 //activities: user_id, habit_id, timestamp, quanity
 class HabitController extends ChangeNotifier {
-  final String currentUserId;
-  final HabitRepository _habitRepo = HabitRepository();
-
   HabitController({required this.currentUserId}) {
     _load();
   }
+
+  final String currentUserId;
+  final HabitRepository _habitRepo = HabitRepository();
 
   List<Habit> allHabits = [];
   List<Habit> todaysHabits = [];
