@@ -7,6 +7,7 @@ import 'package:spark/habits/habit.dart';
 class FriendshipController extends ChangeNotifier {
   FriendshipController({required this.currentUserId}) {
     if (currentUserId.isNotEmpty) {
+      // TODO: this isn't awaited so its not showing up immediately
       _load();
     }
   }
@@ -57,8 +58,7 @@ class FriendshipController extends ChangeNotifier {
   }
 
   Future<List<Friend>> getAllFriends() async {
-    List<List<dynamic>> allFriendData =
-        await _friendRepo.selectFriendsByUser(currentUserId);
+    final allFriendData = await _friendRepo.selectFriendsByUser(currentUserId);
     //selectFriendsByUser returns a list of friends data in format [id, username, first, last]
     int friendsIdIndex = 0;
     int friendsUsernameIndex = 1;
@@ -70,31 +70,32 @@ class FriendshipController extends ChangeNotifier {
 
     for (var row in allFriendData) {
       Friend f = Friend(
-        userId: row[friendsIdIndex],
+        userId: row[friendsIdIndex].toString(),
         username: row[friendsUsernameIndex],
         firstName: row[friendsFirstIndex],
         lastName: row[friendsLastIndex],
       );
 
-      List<List<dynamic>> sharedHabitsData = await _friendRepo
-          .selectSharedHabits(currentUserId, row[friendsIdIndex]);
-      List<Habit> sharedHabits = [];
+      final sharedHabitsData = await _friendRepo.selectSharedHabits(
+        currentUserId,
+        row[friendsIdIndex],
+      );
+      final List<Habit> sharedHabits = [];
 
       for (var hrow in sharedHabitsData) {
         Habit h = Habit(
-          habitId: hrow[0],
-          userId: hrow[1],
-          title: hrow[2],
-          note: hrow[3],
-          startDate: hrow[4],
-          end: hrow[5],
-          frequency: hrow[6],
-          reminders: hrow[7],
-          msg: hrow[8],
-          targetType: hrow[9],
-          category: hrow[10],
-          quan: hrow[11],
-          streak: hrow[12],
+          habitId: hrow[0].toString(),
+          userId: currentUserId, //not in query
+          title: hrow[1],
+          note: hrow[2],
+          startDate: hrow[3],
+          end: hrow[4],
+          frequency: hrow[5],
+          reminders: hrow[6],
+          msg: hrow[7],
+          targetType: hrow[8],
+          category: hrow[9],
+          quan: hrow[10],
         );
         sharedHabits.add(h);
       }

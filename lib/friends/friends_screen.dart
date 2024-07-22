@@ -5,8 +5,6 @@ import 'package:spark/common/common_tile.dart';
 import 'package:spark/friends/friendship_controller.dart';
 import 'package:spark/profile_screen.dart';
 
-final placeholderFriends = List.generate(5, (int index) => 'Friend $index');
-
 class FriendsScreen extends StatefulWidget {
   const FriendsScreen({super.key});
 
@@ -37,25 +35,29 @@ class _FriendsScreenState extends State<FriendsScreen> {
           _FriendTiles(
             currentSearch: currentSearch,
           ),
-          Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 100.0, vertical: 20),
-            child: FilledButton(
-              onPressed: () {
-                showDialog(
-                  barrierDismissible: false,
-                  context: context,
-                  builder: (context) {
-                    return ChangeNotifierProvider(
-                      create: (context) =>
-                          FriendshipController(currentUserId: '1'),
-                      child: const _AddNewFriendDialog(),
-                    );
-                  },
-                );
-              },
-              child: const Text('Add new friend'),
-            ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              FilledButton(
+                onPressed: () {
+                  showDialog(
+                    barrierDismissible: false,
+                    context: context,
+                    builder: (context) {
+                      return ChangeNotifierProvider(
+                        create: (context) =>
+                            FriendshipController(currentUserId: '1'),
+                        child: const _AddNewFriendDialog(),
+                      );
+                    },
+                  );
+                },
+                child: const Text(
+                  'Add new friend',
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -163,6 +165,7 @@ class _EmptyFriendsList extends StatelessWidget {
             ),
             Text(
               'You don\'t have any friends yet.\n Add a new friend to get started!',
+              textAlign: TextAlign.center,
             ),
           ],
         ),
