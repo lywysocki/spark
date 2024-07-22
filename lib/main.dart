@@ -66,9 +66,16 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Text(
-          'LOGO',
-          style: Theme.of(context).textTheme.titleLarge,
+        title: Padding(
+          padding: const EdgeInsets.only(top: 5.0),
+          child: SizedBox(
+            height: 28,
+            child: Image.asset(
+              'assets/images/spark.png',
+              alignment: Alignment.centerLeft,
+              fit: BoxFit.contain,
+            ),
+          ),
         ),
         actions: [
           Padding(
