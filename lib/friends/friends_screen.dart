@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:spark/common/common_loading.dart';
 import 'package:spark/common/common_search_bar.dart';
 import 'package:spark/common/common_tile.dart';
+import 'package:spark/friends/friend.dart';
 import 'package:spark/friends/friendship_controller.dart';
 import 'package:spark/profile_screen.dart';
 
@@ -16,6 +18,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
   String currentSearch = '';
   @override
   Widget build(BuildContext context) {
+    final controller = context.watch<FriendshipController>();
     return Scaffold(
       body: ListView(
         padding: const EdgeInsets.all(8.0),
@@ -32,33 +35,44 @@ class _FriendsScreenState extends State<FriendsScreen> {
               });
             },
           ),
-          _FriendTiles(
-            currentSearch: currentSearch,
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              FilledButton(
-                onPressed: () {
-                  showDialog(
-                    barrierDismissible: false,
-                    context: context,
-                    builder: (context) {
-                      return ChangeNotifierProvider(
-                        create: (context) =>
-                            FriendshipController(currentUserId: '1'),
-                        child: const _AddNewFriendDialog(),
-                      );
-                    },
-                  );
-                },
-                child: const Text(
-                  'Add new friend',
-                  textAlign: TextAlign.center,
+          controller.loading
+              ? const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 80.0),
+                  child: Center(
+                    child: CommonLoadingWidget(),
+                  ),
+                )
+              : _FriendTiles(
+                  currentSearch: currentSearch,
                 ),
-              ),
-            ],
+          const SizedBox(
+            height: 15,
           ),
+          if (!controller.loading)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                FilledButton(
+                  onPressed: () {
+                    showDialog(
+                      barrierDismissible: false,
+                      context: context,
+                      builder: (context) {
+                        return ChangeNotifierProvider(
+                          create: (context) =>
+                              FriendshipController(currentUserId: '1'),
+                          child: const _AddNewFriendDialog(),
+                        );
+                      },
+                    );
+                  },
+                  child: const Text(
+                    'Add New Friend',
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
+            ),
         ],
       ),
     );
@@ -75,11 +89,20 @@ class _FriendTiles extends StatefulWidget {
 }
 
 class _FriendTilesState extends State<_FriendTiles> {
+  FriendshipController? controller;
+  List<Friend> displayFriends = [];
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    controller = context.watch<FriendshipController>();
+    displayFriends.addAll(controller!.allFriends);
+    displayFriends.addAll(controller!.pendingRequests);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final controller = context.watch<FriendshipController>();
-
-    final displayFriends = controller.allFriends.where(
+    final displayFriends = controller!.allFriends.where(
       (element) => element.username
           .toLowerCase()
           .contains(widget.currentSearch.toLowerCase()),

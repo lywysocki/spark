@@ -7,7 +7,6 @@ import 'package:spark/habits/habit.dart';
 class FriendshipController extends ChangeNotifier {
   FriendshipController({required this.currentUserId}) {
     if (currentUserId.isNotEmpty) {
-      // TODO: this isn't awaited so its not showing up immediately
       _load();
     }
   }
@@ -18,9 +17,18 @@ class FriendshipController extends ChangeNotifier {
   List<Friend> allFriends = [];
   List<Friend> pendingRequests = [];
 
+  bool loading = false;
+
   Future<void> _load() async {
+    loading = true;
+
     allFriends = await getAllFriends();
     pendingRequests = await getPendingRequests();
+
+    loading = false;
+
+    if (!hasListeners) return;
+    notifyListeners();
   }
 
   //Create
