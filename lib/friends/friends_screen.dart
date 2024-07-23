@@ -6,6 +6,7 @@ import 'package:spark/common/common_tile.dart';
 import 'package:spark/friends/friend.dart';
 import 'package:spark/friends/friendship_controller.dart';
 import 'package:spark/profile_screen.dart';
+import 'package:spark/theme.dart';
 
 class FriendsScreen extends StatefulWidget {
   const FriendsScreen({super.key});
@@ -89,19 +90,20 @@ class _FriendTiles extends StatefulWidget {
 
 class _FriendTilesState extends State<_FriendTiles> {
   FriendshipController? controller;
-  List<Friend> displayFriends = [];
+  List<Friend> allFriends = [];
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     controller = context.watch<FriendshipController>();
-    displayFriends.addAll(controller!.allFriends);
-    displayFriends.addAll(controller!.pendingRequests);
+    allFriends.clear();
+    allFriends.addAll(controller!.allFriends);
+    allFriends.addAll(controller!.pendingRequests);
   }
 
   @override
   Widget build(BuildContext context) {
-    final displayFriends = controller!.allFriends.where(
+    final displayFriends = allFriends.where(
       (element) => element.username
           .toLowerCase()
           .contains(widget.currentSearch.toLowerCase()),
@@ -129,35 +131,76 @@ class _FriendTilesState extends State<_FriendTiles> {
                       ),
                       body: const UserProfileScreen(),
                     ),
-                    trailingWidget: PopupMenuButton(
-                      onSelected: (value) async {
-                        switch (value) {
-                          case 'remove':
-                            return showDialog(
-                              barrierDismissible: false,
-                              context: context,
-                              builder: (context) {
-                                return const _RemoveFriendDialog();
-                              },
-                            );
-                          default:
-                            throw UnimplementedError();
-                        }
-                      },
-                      icon: const Icon(Icons.more_vert),
-                      itemBuilder: (BuildContext context) =>
-                          <PopupMenuEntry<String>>[
-                        const PopupMenuItem<String>(
-                          value: 'remove',
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.person_remove_rounded),
-                              SizedBox(width: 10),
-                              Text('Remove'),
+                    trailingWidget: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (friend.isPending)
+                          IconButton(
+                            onPressed: () async {
+                              await controller!.acceptRequest(friend.userId);
+                              setState(() {});
+                            },
+                            icon: const Icon(
+                              Icons.check_rounded,
+                              color: greenDark,
+                            ),
+                          ),
+                        if (friend.isPending)
+                          IconButton(
+                            onPressed: () async {
+                              await controller!.rejectRequest(friend.userId);
+                              setState(() {});
+                            },
+                            icon: const Icon(
+                              Icons.close_rounded,
+                              color: redDark,
+                            ),
+                          ),
+                        if (!friend.isPending)
+                          PopupMenuButton(
+                            elevation: 10,
+                            menuPadding: EdgeInsets.zero,
+                            shape: const BeveledRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(4)),
+                            ),
+                            onSelected: (value) async {
+                              switch (value) {
+                                case 'remove':
+                                  return showDialog(
+                                    barrierDismissible: false,
+                                    context: context,
+                                    builder: (context) {
+                                      return _RemoveFriendDialog(
+                                        friend: friend,
+                                      );
+                                    },
+                                  );
+                                default:
+                                  throw UnimplementedError();
+                              }
+                            },
+                            icon: const Icon(Icons.more_vert),
+                            itemBuilder: (BuildContext context) =>
+                                <PopupMenuEntry<String>>[
+                              const PopupMenuItem<String>(
+                                value: 'remove',
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.person_remove_rounded,
+                                      color: redDark,
+                                    ),
+                                    SizedBox(width: 10),
+                                    Text(
+                                      'Remove',
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ],
                           ),
-                        ),
                       ],
                     ),
                   ),
@@ -205,11 +248,10 @@ class _AddNewFriendDialog extends StatefulWidget {
 
 class _AddNewFriendDialogState extends State<_AddNewFriendDialog> {
   final TextEditingController _textController = TextEditingController();
-  bool canAdd = false;
-
-  FriendshipController? controller;
   final userFormKey = GlobalKey<FormState>();
 
+  bool canAdd = false;
+  FriendshipController? controller;
   String? username;
 
   @override
@@ -298,10 +340,6 @@ class _AddNewFriendDialogState extends State<_AddNewFriendDialog> {
         FilledButton(
           onPressed: canAdd
               ? () {
-                  //TODO: addFriend
-                  // if (userFormKey.currentState?.validate() != true) {
-                  //   return;
-                  // }
                   sendFriendRequest().then((value) {
                     ScaffoldMessenger.of(context).showSnackBar(value);
                     Navigator.pop(context);
@@ -322,7 +360,9 @@ class _AddNewFriendDialogState extends State<_AddNewFriendDialog> {
 }
 
 class _RemoveFriendDialog extends StatelessWidget {
-  const _RemoveFriendDialog();
+  const _RemoveFriendDialog({required this.friend});
+
+  final Friend friend;
 
   @override
   Widget build(BuildContext context) {
@@ -336,18 +376,22 @@ class _RemoveFriendDialog extends StatelessWidget {
           Text('Remove Friend'),
         ],
       ),
-      content:
-          const Text('Are you sure you want to remove {username} as a friend?'),
+      content: Text(
+        'Are you sure you want to remove ${friend.username} as a friend?',
+      ),
       actions: [
         FilledButton(
           onPressed: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                duration: Duration(seconds: 3),
-                content: Text('{username} removed from friends list.'),
-              ),
-            );
-            Navigator.pop(context);
+            final controller = context.read<FriendshipController>();
+            controller.rejectRequest(friend.userId).then((value) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  duration: const Duration(seconds: 3),
+                  content: Text('${friend.username} removed from friends list'),
+                ),
+              );
+              Navigator.pop(context);
+            });
           },
           child: const Text('Remove'),
         ),

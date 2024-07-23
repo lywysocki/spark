@@ -332,7 +332,7 @@ class _UserFormFieldsState extends State<_UserFormFields> {
                             ScaffoldMessenger.of(context).showSnackBar(value);
                             return;
                           } else {
-                            Navigator.push(
+                            Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
                                 builder: (context) {

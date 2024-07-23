@@ -3,37 +3,23 @@ import 'package:spark/habits/habit.dart';
 class Friend {
   final String userId;
   final String username;
-  final String firstName;
-  final String lastName;
+  final String fName;
+  final String lName;
+  bool isPending = false;
 
   List<Habit> sharedHabits = [];
 
   Friend({
     required this.userId,
     required this.username,
-    required this.firstName,
-    required this.lastName,
+    required this.fName,
+    required this.lName,
+    this.isPending = false,
   });
 
-  String getUserId() {
-    return userId;
-  }
+  String getName() => '$fName $lName';
 
-  String getUsername() {
-    return username;
+  void setSharedHabits({required List<Habit> sharedHabits}) {
+    this.sharedHabits = sharedHabits;
   }
-
-  String getFirstName() {
-    return firstName;
-  }
-
-  String getLastName() {
-    return lastName;
-  }
-
-  List<Habit> getSharedHabits() {
-    return sharedHabits;
-  }
-
-  void setSharedHabits(List<Habit> sharedHabits) {}
 }

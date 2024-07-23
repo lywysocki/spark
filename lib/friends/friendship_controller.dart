@@ -19,7 +19,10 @@ class FriendshipController extends ChangeNotifier {
   Future<void> _load() async {
     loading = true;
 
+    allFriends.clear();
     allFriends = await getAllFriends();
+
+    pendingRequests.clear();
     pendingRequests = await getPendingRequests();
 
     loading = false;
@@ -40,6 +43,7 @@ class FriendshipController extends ChangeNotifier {
     if (!results) {
       throw "Could not send friend request.";
     }
+    await _load();
   }
 
   Future<List<Friend>> getPendingRequests() async {
@@ -57,8 +61,9 @@ class FriendshipController extends ChangeNotifier {
       Friend f = Friend(
         userId: row[friendsIdIndex].toString(),
         username: row[friendsUsernameIndex],
-        firstName: row[friendsFirstIndex],
-        lastName: row[friendsLastIndex],
+        fName: row[friendsFirstIndex],
+        lName: row[friendsLastIndex],
+        isPending: true,
       );
 
       friends.add(f);
@@ -82,8 +87,8 @@ class FriendshipController extends ChangeNotifier {
       Friend f = Friend(
         userId: row[friendsIdIndex].toString(),
         username: row[friendsUsernameIndex],
-        firstName: row[friendsFirstIndex],
-        lastName: row[friendsLastIndex],
+        fName: row[friendsFirstIndex],
+        lName: row[friendsLastIndex],
       );
 
       final sharedHabitsData = await _friendRepo.selectSharedHabits(
@@ -110,7 +115,7 @@ class FriendshipController extends ChangeNotifier {
         sharedHabits.add(h);
       }
 
-      f.setSharedHabits(sharedHabits);
+      f.setSharedHabits(sharedHabits: sharedHabits);
       friends.add(f);
     }
 
@@ -120,11 +125,13 @@ class FriendshipController extends ChangeNotifier {
   Future<void> acceptRequest(String otherUser) async {
     String state = 'established';
     await _friendRepo.updateFriendshipState(otherUser, _currentUserId, state);
-    allFriends = await getAllFriends();
+
+    await _load();
   }
 
   Future<void> rejectRequest(String otherUser) async {
     await _friendRepo.deleteFriendships(otherUser, _currentUserId);
-    pendingRequests = await getPendingRequests();
+
+    await _load();
   }
 }
