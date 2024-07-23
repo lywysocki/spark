@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:spark/common/common_habit_header.dart';
 import 'package:spark/common/common_loading.dart';
 import 'package:spark/common/common_textfield.dart';
+import 'package:spark/friends/friendship_controller.dart';
 import 'package:spark/main.dart';
 import 'package:spark/user/user_controller.dart';
 
@@ -76,6 +77,7 @@ class _UserFormFields extends StatefulWidget {
 }
 
 class _UserFormFieldsState extends State<_UserFormFields> {
+  FriendshipController? _fController;
   UserController? controller;
   final userFormKey = GlobalKey<FormState>();
   bool loading = false;
@@ -87,10 +89,17 @@ class _UserFormFieldsState extends State<_UserFormFields> {
   String? lName;
 
   @override
+  void initState() {
+    super.initState();
+    userFormKey.currentState?.reset();
+
+    _fController = context.read<FriendshipController>();
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     controller = context.watch<UserController>();
-    userFormKey.currentState?.reset();
     email = null;
     password = null;
     fName = null;
@@ -133,6 +142,8 @@ class _UserFormFieldsState extends State<_UserFormFields> {
         username: username!,
         pass: password!,
       );
+      final user = await controller!.getCurrentUser();
+      await updateControllers(user.userId);
       return null;
     } catch (e) {
       return SnackBar(
@@ -141,6 +152,10 @@ class _UserFormFieldsState extends State<_UserFormFields> {
     } finally {
       changeLoading();
     }
+  }
+
+  Future<void> updateControllers(String userId) async {
+    await _fController!.updateUser(userId);
   }
 
   @override

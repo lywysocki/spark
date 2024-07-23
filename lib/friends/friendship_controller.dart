@@ -5,19 +5,16 @@ import 'package:spark/habits/habit.dart';
 
 //friendships:   user1_id, user2_id
 class FriendshipController extends ChangeNotifier {
-  FriendshipController({required this.currentUserId}) {
-    if (currentUserId.isNotEmpty) {
-      _load();
-    }
-  }
+  FriendshipController();
 
-  final String currentUserId;
   final FriendshipRepository _friendRepo = FriendshipRepository();
 
   List<Friend> allFriends = [];
   List<Friend> pendingRequests = [];
 
   bool loading = false;
+
+  String _currentUserId = '';
 
   Future<void> _load() async {
     loading = true;
@@ -31,10 +28,15 @@ class FriendshipController extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> updateUser(String newUserId) async {
+    _currentUserId = newUserId;
+    await _load();
+  }
+
   //Create
   Future<void> sendFriendRequest(String username) async {
     final results =
-        await _friendRepo.createFriendshipRequest(currentUserId, username);
+        await _friendRepo.createFriendshipRequest(_currentUserId, username);
     if (!results) {
       throw "Could not send friend request.";
     }
@@ -42,7 +44,7 @@ class FriendshipController extends ChangeNotifier {
 
   Future<List<Friend>> getPendingRequests() async {
     List<List<dynamic>> allRequestData =
-        await _friendRepo.selectPendingRequests(currentUserId);
+        await _friendRepo.selectPendingRequests(_currentUserId);
     //selectFriendsByUser returns a list of friends data in format [id, username, first, last]
     int friendsIdIndex = 0;
     int friendsUsernameIndex = 1;
@@ -66,7 +68,7 @@ class FriendshipController extends ChangeNotifier {
   }
 
   Future<List<Friend>> getAllFriends() async {
-    final allFriendData = await _friendRepo.selectFriendsByUser(currentUserId);
+    final allFriendData = await _friendRepo.selectFriendsByUser(_currentUserId);
     //selectFriendsByUser returns a list of friends data in format [id, username, first, last]
     int friendsIdIndex = 0;
     int friendsUsernameIndex = 1;
@@ -85,7 +87,7 @@ class FriendshipController extends ChangeNotifier {
       );
 
       final sharedHabitsData = await _friendRepo.selectSharedHabits(
-        currentUserId,
+        _currentUserId,
         row[friendsIdIndex],
       );
       final List<Habit> sharedHabits = [];
@@ -93,7 +95,7 @@ class FriendshipController extends ChangeNotifier {
       for (var hrow in sharedHabitsData) {
         Habit h = Habit(
           habitId: hrow[0].toString(),
-          userId: currentUserId, //not in query
+          userId: _currentUserId, //not in query
           title: hrow[1],
           note: hrow[2],
           startDate: hrow[3],
@@ -117,12 +119,12 @@ class FriendshipController extends ChangeNotifier {
 
   Future<void> acceptRequest(String otherUser) async {
     String state = 'established';
-    await _friendRepo.updateFriendshipState(otherUser, currentUserId, state);
+    await _friendRepo.updateFriendshipState(otherUser, _currentUserId, state);
     allFriends = await getAllFriends();
   }
 
   Future<void> rejectRequest(String otherUser) async {
-    await _friendRepo.deleteFriendships(otherUser, currentUserId);
+    await _friendRepo.deleteFriendships(otherUser, _currentUserId);
     pendingRequests = await getPendingRequests();
   }
 }

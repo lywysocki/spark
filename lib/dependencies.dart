@@ -28,9 +28,7 @@ class Dependencies extends StatelessWidget {
           ),
         ),
         ChangeNotifierProvider(
-          create: (context) => FriendshipController(
-            currentUserId: context.read<UserController>().currentUserId!,
-          ),
+          create: (context) => FriendshipController(),
         ),
       ],
       child: child,

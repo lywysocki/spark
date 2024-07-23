@@ -29,6 +29,7 @@ class UserController extends ChangeNotifier {
     if (results.length == 1) {
       currentUserId = results[0][0].toString();
       currentUser = await getCurrentUser();
+      if (hasListeners) notifyListeners();
     } else if (results.length > 1) {
       //there are multiple ids by that login, the system should not have allowed a user to create an account with an existing username
       List<dynamic> multipleIDs = results.map((row) => row[0]).toList();

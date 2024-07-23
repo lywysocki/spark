@@ -58,9 +58,8 @@ class _FriendsScreenState extends State<FriendsScreen> {
                       barrierDismissible: false,
                       context: context,
                       builder: (context) {
-                        return ChangeNotifierProvider(
-                          create: (context) =>
-                              FriendshipController(currentUserId: '1'),
+                        return ChangeNotifierProvider.value(
+                          value: controller,
                           child: const _AddNewFriendDialog(),
                         );
                       },
