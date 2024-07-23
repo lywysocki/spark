@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:spark/achievements/achievements_controller.dart';
 
 import 'package:spark/common/common_habit_header.dart';
 import 'package:spark/common/common_loading.dart';
 import 'package:spark/common/common_textfield.dart';
 import 'package:spark/friends/friendship_controller.dart';
+import 'package:spark/habits/habit_controller.dart';
 import 'package:spark/main.dart';
 import 'package:spark/user/user_controller.dart';
 
@@ -77,7 +79,9 @@ class _UserFormFields extends StatefulWidget {
 }
 
 class _UserFormFieldsState extends State<_UserFormFields> {
-  FriendshipController? _fController;
+  FriendshipController? _friendshipController;
+  //HabitController? _habitController;
+  AchievementsController? _achievementsController;
   UserController? controller;
   final userFormKey = GlobalKey<FormState>();
   bool loading = false;
@@ -93,7 +97,9 @@ class _UserFormFieldsState extends State<_UserFormFields> {
     super.initState();
     userFormKey.currentState?.reset();
 
-    _fController = context.read<FriendshipController>();
+    _friendshipController = context.read<FriendshipController>();
+    // _habitController = context.read<HabitController>();
+    _achievementsController = context.read<AchievementsController>();
   }
 
   @override
@@ -125,6 +131,8 @@ class _UserFormFieldsState extends State<_UserFormFields> {
         fName: fName!,
         lName: lName,
       );
+      await updateControllers();
+
       return null;
     } catch (e) {
       return SnackBar(
@@ -142,8 +150,8 @@ class _UserFormFieldsState extends State<_UserFormFields> {
         username: username!,
         pass: password!,
       );
-      final user = await controller!.getCurrentUser();
-      await updateControllers(user.userId);
+      await updateControllers();
+
       return null;
     } catch (e) {
       return SnackBar(
@@ -154,8 +162,12 @@ class _UserFormFieldsState extends State<_UserFormFields> {
     }
   }
 
-  Future<void> updateControllers(String userId) async {
-    await _fController!.updateUser(userId);
+  Future<void> updateControllers() async {
+    final userId = (await controller!.getCurrentUser()).userId;
+
+    await _friendshipController!.updateUser(userId);
+    //await _habitController!.updateUser(userId);
+    await _achievementsController!.updateUser(userId);
   }
 
   @override
