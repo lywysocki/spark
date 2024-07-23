@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:spark/achievements/achievements_controller.dart';
 
 import 'package:spark/common/common_habit_header.dart';
 import 'package:spark/common/common_loading.dart';
 import 'package:spark/common/common_textfield.dart';
+import 'package:spark/friends/friendship_controller.dart';
+import 'package:spark/habits/habit_controller.dart';
 import 'package:spark/main.dart';
 import 'package:spark/user/user_controller.dart';
 
@@ -76,6 +79,9 @@ class _UserFormFields extends StatefulWidget {
 }
 
 class _UserFormFieldsState extends State<_UserFormFields> {
+  FriendshipController? _friendshipController;
+  //HabitController? _habitController;
+  AchievementsController? _achievementsController;
   UserController? controller;
   final userFormKey = GlobalKey<FormState>();
   bool loading = false;
@@ -87,10 +93,19 @@ class _UserFormFieldsState extends State<_UserFormFields> {
   String? lName;
 
   @override
+  void initState() {
+    super.initState();
+    userFormKey.currentState?.reset();
+
+    _friendshipController = context.read<FriendshipController>();
+    // _habitController = context.read<HabitController>();
+    _achievementsController = context.read<AchievementsController>();
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     controller = context.watch<UserController>();
-    userFormKey.currentState?.reset();
     email = null;
     password = null;
     fName = null;
@@ -116,6 +131,8 @@ class _UserFormFieldsState extends State<_UserFormFields> {
         fName: fName!,
         lName: lName,
       );
+      await updateControllers();
+
       return null;
     } catch (e) {
       return SnackBar(
@@ -133,6 +150,8 @@ class _UserFormFieldsState extends State<_UserFormFields> {
         username: username!,
         pass: password!,
       );
+      await updateControllers();
+
       return null;
     } catch (e) {
       return SnackBar(
@@ -141,6 +160,14 @@ class _UserFormFieldsState extends State<_UserFormFields> {
     } finally {
       changeLoading();
     }
+  }
+
+  Future<void> updateControllers() async {
+    final userId = (await controller!.getCurrentUser()).userId;
+
+    await _friendshipController!.updateUser(userId);
+    //await _habitController!.updateUser(userId);
+    await _achievementsController!.updateUser(userId);
   }
 
   @override
@@ -317,7 +344,7 @@ class _UserFormFieldsState extends State<_UserFormFields> {
                             ScaffoldMessenger.of(context).showSnackBar(value);
                             return;
                           } else {
-                            Navigator.push(
+                            Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
                                 builder: (context) {

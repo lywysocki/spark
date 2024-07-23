@@ -5,35 +5,50 @@ import 'package:spark/habits/habit.dart';
 
 //friendships:   user1_id, user2_id
 class FriendshipController extends ChangeNotifier {
-  FriendshipController({required this.currentUserId}) {
-    if (currentUserId.isNotEmpty) {
-      _load();
-    }
-  }
+  FriendshipController();
 
-  final String currentUserId;
   final FriendshipRepository _friendRepo = FriendshipRepository();
 
   List<Friend> allFriends = [];
   List<Friend> pendingRequests = [];
 
+  bool loading = false;
+
+  String _currentUserId = '';
+
   Future<void> _load() async {
+    loading = true;
+
+    allFriends.clear();
     allFriends = await getAllFriends();
+
+    pendingRequests.clear();
     pendingRequests = await getPendingRequests();
+
+    loading = false;
+
+    if (!hasListeners) return;
+    notifyListeners();
+  }
+
+  Future<void> updateUser(String newUserId) async {
+    _currentUserId = newUserId;
+    await _load();
   }
 
   //Create
   Future<void> sendFriendRequest(String username) async {
     final results =
-        await _friendRepo.createFriendshipRequest(currentUserId, username);
+        await _friendRepo.createFriendshipRequest(_currentUserId, username);
     if (!results) {
       throw "Could not send friend request.";
     }
+    await _load();
   }
 
   Future<List<Friend>> getPendingRequests() async {
     List<List<dynamic>> allRequestData =
-        await _friendRepo.selectPendingRequests(currentUserId);
+        await _friendRepo.selectPendingRequests(_currentUserId);
     //selectFriendsByUser returns a list of friends data in format [id, username, first, last]
     int friendsIdIndex = 0;
     int friendsUsernameIndex = 1;
@@ -46,8 +61,9 @@ class FriendshipController extends ChangeNotifier {
       Friend f = Friend(
         userId: row[friendsIdIndex].toString(),
         username: row[friendsUsernameIndex],
-        firstName: row[friendsFirstIndex],
-        lastName: row[friendsLastIndex],
+        fName: row[friendsFirstIndex],
+        lName: row[friendsLastIndex],
+        isPending: true,
       );
 
       friends.add(f);
@@ -57,8 +73,7 @@ class FriendshipController extends ChangeNotifier {
   }
 
   Future<List<Friend>> getAllFriends() async {
-    List<List<dynamic>> allFriendData =
-        await _friendRepo.selectFriendsByUser(currentUserId);
+    final allFriendData = await _friendRepo.selectFriendsByUser(_currentUserId);
     //selectFriendsByUser returns a list of friends data in format [id, username, first, last]
     int friendsIdIndex = 0;
     int friendsUsernameIndex = 1;
@@ -70,36 +85,37 @@ class FriendshipController extends ChangeNotifier {
 
     for (var row in allFriendData) {
       Friend f = Friend(
-        userId: row[friendsIdIndex],
+        userId: row[friendsIdIndex].toString(),
         username: row[friendsUsernameIndex],
-        firstName: row[friendsFirstIndex],
-        lastName: row[friendsLastIndex],
+        fName: row[friendsFirstIndex],
+        lName: row[friendsLastIndex],
       );
 
-      List<List<dynamic>> sharedHabitsData = await _friendRepo
-          .selectSharedHabits(currentUserId, row[friendsIdIndex]);
-      List<Habit> sharedHabits = [];
+      final sharedHabitsData = await _friendRepo.selectSharedHabits(
+        _currentUserId,
+        row[friendsIdIndex],
+      );
+      final List<Habit> sharedHabits = [];
 
       for (var hrow in sharedHabitsData) {
         Habit h = Habit(
-          habitId: hrow[0],
-          userId: hrow[1],
-          title: hrow[2],
-          note: hrow[3],
-          startDate: hrow[4],
-          end: hrow[5],
-          frequency: hrow[6],
-          reminders: hrow[7],
-          msg: hrow[8],
-          targetType: hrow[9],
-          category: hrow[10],
-          quan: hrow[11],
-          streak: hrow[12],
+          habitId: hrow[0].toString(),
+          userId: _currentUserId, //not in query
+          title: hrow[1],
+          note: hrow[2],
+          startDate: hrow[3],
+          end: hrow[4],
+          frequency: hrow[5],
+          reminders: hrow[6],
+          msg: hrow[7],
+          targetType: hrow[8],
+          category: hrow[9],
+          quan: hrow[10],
         );
         sharedHabits.add(h);
       }
 
-      f.setSharedHabits(sharedHabits);
+      f.setSharedHabits(sharedHabits: sharedHabits);
       friends.add(f);
     }
 
@@ -108,12 +124,14 @@ class FriendshipController extends ChangeNotifier {
 
   Future<void> acceptRequest(String otherUser) async {
     String state = 'established';
-    await _friendRepo.updateFriendshipState(otherUser, currentUserId, state);
-    allFriends = await getAllFriends();
+    await _friendRepo.updateFriendshipState(otherUser, _currentUserId, state);
+
+    await _load();
   }
 
   Future<void> rejectRequest(String otherUser) async {
-    await _friendRepo.deleteFriendships(otherUser, currentUserId);
-    pendingRequests = await getPendingRequests();
+    await _friendRepo.deleteFriendships(otherUser, _currentUserId);
+
+    await _load();
   }
 }
