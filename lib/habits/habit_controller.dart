@@ -6,12 +6,13 @@ import 'package:spark/habits/habit.dart';
 //habits: habit_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity
 //activities: user_id, habit_id, timestamp, quanity
 class HabitController extends ChangeNotifier {
+  HabitController({required this.currentUserId}) {
+    if (currentUserId.isNotEmpty) {
+      _load();
+    }
+  }
   final String currentUserId;
   final HabitRepository _habitRepo = HabitRepository();
-
-  HabitController({required this.currentUserId}) {
-    _load();
-  }
 
   List<Habit> allHabits = [];
   List<Habit> todaysHabits = [];
@@ -97,8 +98,8 @@ class HabitController extends ChangeNotifier {
     List<Habit> habits = [];
     for (var row in todaysHabitsAllData) {
       Habit h = Habit(
-        habitId: row[0],
-        userId: row[1],
+        habitId: row[0].toString(),
+        userId: row[1].toSting(),
         title: row[2],
         note: row[3],
         startDate: row[4],
@@ -147,8 +148,8 @@ class HabitController extends ChangeNotifier {
     List<Habit> habits = [];
     for (var row in tomorrowsHabitsAllData) {
       Habit h = Habit(
-        habitId: row[0],
-        userId: row[1],
+        habitId: row[0].toString(),
+        userId: row[1].toString(),
         title: row[2],
         note: row[3],
         startDate: row[4],

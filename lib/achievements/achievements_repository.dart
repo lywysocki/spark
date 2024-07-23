@@ -56,7 +56,7 @@ class AchievementsRepository extends ChangeNotifier {
       ),
     );
     try {
-      List<List<dynamic>> results = await databaseConnection.execute(
+      final results = await databaseConnection.execute(
         Sql.named('SELECT * FROM achievements WHERE user_id = @userID'),
         parameters: {
           'userID': userId,
@@ -87,7 +87,8 @@ class AchievementsRepository extends ChangeNotifier {
     try {
       List<List<dynamic>> results = await databaseConnection.execute(
         Sql.named(
-            'SELECT * FROM achievements WHERE user_id = @userID and habit_id = @habitID'),
+          'SELECT * FROM achievements WHERE user_id = @userID and habit_id = @habitID',
+        ),
         parameters: {
           'userID': userId,
           'habitID': habitId,
@@ -118,7 +119,8 @@ class AchievementsRepository extends ChangeNotifier {
     try {
       List<List<dynamic>> results = await databaseConnection.execute(
         Sql.named(
-            'SELECT * FROM achievements WHERE user_id = @userID and achievement_title = @achievementType'),
+          'SELECT * FROM achievements WHERE user_id = @userID and achievement_title = @achievementType',
+        ),
         parameters: {
           'userID': userId,
           'achievementType': type,
@@ -149,7 +151,8 @@ class AchievementsRepository extends ChangeNotifier {
     try {
       List<List<dynamic>> results = await databaseConnection.execute(
         Sql.named(
-            'SELECT * FROM achievements WHERE user_id = @userID and date = @date'),
+          'SELECT * FROM achievements WHERE user_id = @userID and date = @date',
+        ),
         parameters: {
           'userID': userId,
           'date': date,
@@ -181,7 +184,8 @@ class AchievementsRepository extends ChangeNotifier {
     try {
       List<List<dynamic>> results = await databaseConnection.execute(
         Sql.named(
-            'SELECT * FROM achievements WHERE user_id = @userID and date >= @startDate and date <= @endDate'),
+          'SELECT * FROM achievements WHERE user_id = @userID and date >= @startDate and date <= @endDate',
+        ),
         parameters: {
           'userID': userID,
           'startDate': start,

@@ -382,7 +382,7 @@ class HabitRepository extends ChangeNotifier {
       List<List<dynamic>> results = await databaseConnection.execute(
         Sql.named(query),
         parameters: {
-          'userID': userId,
+          'userId': userId,
           'date': date,
         },
       );

@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:spark/achievements/achievements_screen.dart';
 import 'package:spark/common/common_tile.dart';
+import 'package:spark/friends/friend.dart';
+import 'package:spark/user/user_controller.dart';
 
 class UserProfileScreen extends StatelessWidget {
-  const UserProfileScreen({super.key});
+  const UserProfileScreen({super.key, this.friend});
+
+  final Friend? friend;
 
   @override
   Widget build(BuildContext context) {
+    final controller = context.watch<UserController>();
     return Stack(
       children: [
         Container(
@@ -28,13 +35,15 @@ class UserProfileScreen extends StatelessWidget {
                 ),
                 Center(
                   child: Text(
-                    'User Name',
+                    friend?.getName() ?? controller.currentUser!.getName(),
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                 ),
                 Center(
                   child: Text(
-                    'Joined June 2024',
+                    friend != null
+                        ? ''
+                        : 'Joined ${DateFormat('MMMM y').format(controller.currentUser!.joined)}',
                     style: Theme.of(context).textTheme.labelSmall,
                   ),
                 ),
@@ -47,6 +56,7 @@ class UserProfileScreen extends StatelessWidget {
                   trailingWidget: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      //TODO: highest streak
                       Text('10'),
                       SizedBox(width: 8),
                       Icon(Icons.flare_outlined),
@@ -69,10 +79,11 @@ class UserProfileScreen extends StatelessWidget {
                 TextButton(
                   child: const Text('Logout'),
                   onPressed: () {
-                    /// TODO: currentUserId set null
-                    Navigator.popUntil(
+                    controller.currentUserId = null;
+                    controller.currentUser = null;
+                    Navigator.popAndPushNamed(
                       context,
-                      ModalRoute.withName('/'),
+                      '/',
                     );
                   },
                 ),

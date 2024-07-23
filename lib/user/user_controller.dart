@@ -29,6 +29,7 @@ class UserController extends ChangeNotifier {
     if (results.length == 1) {
       currentUserId = results[0][0].toString();
       currentUser = await getCurrentUser();
+      if (hasListeners) notifyListeners();
     } else if (results.length > 1) {
       //there are multiple ids by that login, the system should not have allowed a user to create an account with an existing username
       List<dynamic> multipleIDs = results.map((row) => row[0]).toList();
@@ -40,7 +41,7 @@ class UserController extends ChangeNotifier {
     } else {
       //results.length < 1
       debugPrint('Account does not exist in database.');
-      throw "Account does not exist.";
+      throw "Username/Password incorrect.";
     }
   }
 
@@ -56,16 +57,18 @@ class UserController extends ChangeNotifier {
 
     final userResults = await _userRepo.selectUsersByUserID(currentUserId!);
     if (userResults.length == 1) {
-      if (userResults[0][_fNameIndex] == null) {
-        if (userResults[0][_usernameIndex] != null) {
-          fName = userResults[0][_fNameIndex];
-          if (userResults[0][_lNameIndex] != null) {
-            lName = (userResults[0][_lNameIndex]);
-          }
-        }
+      if (userResults[0][_fNameIndex] != null) {
+        fName = userResults[0][_fNameIndex];
       }
-      joined = userResults[0][_joinedIndex];
-      email = userResults[0][_emailIndex];
+      if (userResults[0][_lNameIndex] != null) {
+        lName = (userResults[0][_lNameIndex]);
+      }
+      if (userResults[0][_joinedIndex] != null) {
+        joined = userResults[0][_joinedIndex];
+      }
+      if (userResults[0][_emailIndex] != null) {
+        email = userResults[0][_emailIndex];
+      }
     } else if (userResults.length > 1) {
       //there are multiple ids by that login, the system should not have allowed a user to create an account with an existing username
       final multipleIDs = userResults.map((row) => row[0]).toList();

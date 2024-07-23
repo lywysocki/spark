@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:postgres/postgres.dart';
 
 class FriendshipRepository extends ChangeNotifier {
@@ -78,7 +77,7 @@ class FriendshipRepository extends ChangeNotifier {
   }
 
   ///// Select
-  Future<List<List<dynamic>>> selectFriendsByUser(String userID) async {
+  Future<List<dynamic>> selectFriendsByUser(String userID) async {
     final databaseConnection = await Connection.open(
       Endpoint(
         host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
@@ -90,7 +89,7 @@ class FriendshipRepository extends ChangeNotifier {
     );
     try {
       String state = 'established';
-      List<List<dynamic>> results = await databaseConnection.execute(
+      final results = await databaseConnection.execute(
         Sql.named('''SELECT 
           friendships.user2_id,
           users.username,
@@ -104,7 +103,7 @@ class FriendshipRepository extends ChangeNotifier {
           'state': state,
         },
       );
-      List<List<dynamic>> results2 = await databaseConnection.execute(
+      final results2 = await databaseConnection.execute(
         Sql.named('''SELECT
           friendships.user1_id,
           users.username,
@@ -119,8 +118,11 @@ class FriendshipRepository extends ChangeNotifier {
         },
       );
 
-      results.addAll(results2);
-      return results;
+      final allResults = [];
+      allResults.addAll(results);
+      allResults.addAll(results2);
+
+      return allResults;
     } catch (e) {
       debugPrint('Error: ${e.toString()}');
       return List.empty();

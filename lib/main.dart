@@ -1,5 +1,5 @@
+import 'package:spark/dependencies.dart';
 import 'package:spark/friends/friends_screen.dart';
-import 'package:spark/friends/friendship_controller.dart';
 import 'package:spark/habits/habits_screen.dart';
 import 'package:spark/habits/new_habit_screen.dart';
 import 'package:spark/home_screen.dart';
@@ -7,9 +7,7 @@ import 'package:spark/login/login.dart';
 import 'package:spark/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:spark/theme.dart';
-import 'package:spark/user/user_controller.dart';
 import 'package:spark/util.dart';
-import 'package:provider/provider.dart';
 
 void main() {
   runApp(const MyApp());
@@ -27,16 +25,15 @@ class MyApp extends StatelessWidget {
     TextTheme textTheme = createTextTheme(context, "Lato", "Lato");
     MaterialTheme theme = MaterialTheme(textTheme);
 
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Spark',
-      theme: brightness == Brightness.light
-          ? theme.lightMediumContrast()
-          : theme.darkMediumContrast(),
-      initialRoute: '/',
-      home: ChangeNotifierProvider(
-        create: (context) => UserController(),
-        child: const LoginScreen(),
+    return Dependencies(
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Spark',
+        theme: brightness == Brightness.light
+            ? theme.lightMediumContrast()
+            : theme.darkMediumContrast(),
+        initialRoute: '/',
+        home: const LoginScreen(),
       ),
     );
   }
@@ -69,9 +66,16 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Text(
-          'LOGO',
-          style: Theme.of(context).textTheme.titleLarge,
+        title: Padding(
+          padding: const EdgeInsets.only(top: 5.0),
+          child: SizedBox(
+            height: 28,
+            child: Image.asset(
+              'assets/images/spark.png',
+              alignment: Alignment.centerLeft,
+              fit: BoxFit.contain,
+            ),
+          ),
         ),
         actions: [
           Padding(
@@ -135,10 +139,7 @@ final _destinations = <Destination>[
   Destination(
     title: 'Friends',
     icon: const Icon(Icons.people),
-    builder: (context) => ChangeNotifierProvider(
-      create: (context) => FriendshipController(currentUserId: '1'),
-      child: const FriendsScreen(),
-    ),
+    builder: (context) => const FriendsScreen(),
   ),
 ];
 
