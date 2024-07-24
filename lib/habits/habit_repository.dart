@@ -163,11 +163,11 @@ class HabitRepository extends ChangeNotifier {
           a.timestamp,
           ROW_NUMBER() OVER (PARTITION BY a.habit_id, a.user_id ORDER BY a.timestamp) AS seq
         FROM
-          activities a
-        JOIN
-          habits h ON a.habit_id = h.habit_id AND a.user_id = h.user_id
+          habits h
+        LEFT JOIN
+          activities a ON h.habit_id = a.habit_id AND h.user_id = a.user_id
         WHERE
-          a.user_id = @userId
+          h.user_id = @userId
       ),
       date_diffs AS (
         SELECT
@@ -219,15 +219,6 @@ class HabitRepository extends ChangeNotifier {
         sequential_date_count
       FROM
         sequential_dates
-      WHERE
-        most_recent_date >= 
-        CASE
-          WHEN frequency = 'daily' THEN CURRENT_DATE - INTERVAL '1 day'
-          WHEN frequency = 'weekly' THEN CURRENT_DATE - INTERVAL '1 week'
-          WHEN frequency = 'biweekly' THEN CURRENT_DATE - INTERVAL '2 weeks'
-          WHEN frequency = 'monthly' THEN CURRENT_DATE - INTERVAL '1 month'
-          ELSE CURRENT_DATE - INTERVAL '1 day' -- default to daily
-        END
       ORDER BY
         habit_id,
         user_id;
@@ -281,7 +272,7 @@ class HabitRepository extends ChangeNotifier {
 
   Future<List<List<dynamic>>> selectHabitsByDate(
     String userId,
-    DateTime date,
+    String date,
   ) async {
     final databaseConnection = await Connection.open(
       Endpoint(
@@ -293,6 +284,8 @@ class HabitRepository extends ChangeNotifier {
       ),
     );
     try {
+      String dateLike = '$date %';
+      debugPrint("dateLike = $dateLike");
       String query = '''
       WITH ranked_activities AS (
         SELECT
@@ -300,11 +293,11 @@ class HabitRepository extends ChangeNotifier {
           a.timestamp,
           ROW_NUMBER() OVER (PARTITION BY a.habit_id, a.user_id ORDER BY a.timestamp) AS seq
         FROM
-          activities a
-        JOIN
-          habits h ON a.habit_id = h.habit_id AND a.user_id = h.user_id
+          habits h
+        LEFT JOIN
+          activities a ON h.habit_id = a.habit_id AND h.user_id = a.user_id
         WHERE
-          a.user_id = @userId
+          h.user_id = @userId
       ),
       date_diffs AS (
         SELECT
@@ -351,8 +344,6 @@ class HabitRepository extends ChangeNotifier {
             ELSE most_recent_activity + INTERVAL '1 day' -- default to daily
           END AS next_due_date
         FROM sequential_dates
-        LEFT JOIN
-          latest_activities la ON h.habit_id = la.habit_id AND h.user_id = la.user_id
       )
       SELECT
         habit_id,
@@ -372,11 +363,11 @@ class HabitRepository extends ChangeNotifier {
       FROM
         due_habits
       WHERE
-        next_due_date = @date
-        OR (next_due_date IS NULL AND h.start_date <= CURRENT_DATE)
+        next_due_date::text like @date
+        OR (next_due_date IS NULL AND start_date <= CURRENT_DATE)
       ORDER BY
         habit_id,
-        user_id;
+	      user_id;
     ''';
 
       List<List<dynamic>> results = await databaseConnection.execute(

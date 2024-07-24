@@ -90,10 +90,10 @@ class HabitController extends ChangeNotifier {
     final dateFormat = DateFormat('yyyy-MM-dd');
     DateTime now = DateTime.now();
     String today = dateFormat.format(now);
-    DateTime todayFormatted = dateFormat.parse(today);
+    debugPrint(today);
 
     List<List<dynamic>> todaysHabitsAllData =
-        await _habitRepo.selectHabitsByDate(_currentUserId, todayFormatted);
+        await _habitRepo.selectHabitsByDate(_currentUserId, today);
     /* returned fields:
         habit_id,
         user_id,
@@ -140,11 +140,11 @@ class HabitController extends ChangeNotifier {
     final dateFormat = DateFormat('yyyy-MM-dd');
     DateTime tom = DateTime.now().add(const Duration(days: 1));
     String tomorrow = dateFormat.format(tom);
-    DateTime tomorrowFormatted = dateFormat.parse(tomorrow);
+    debugPrint(tomorrow);
 
     // Get tomorrow's habits
     List<List<dynamic>> tomorrowsHabitsAllData =
-        await _habitRepo.selectHabitsByDate(_currentUserId, tomorrowFormatted);
+        await _habitRepo.selectHabitsByDate(_currentUserId, tomorrow);
     /* returned fields:
       habit_id,
         user_id,
