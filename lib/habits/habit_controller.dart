@@ -81,8 +81,6 @@ class HabitController extends ChangeNotifier {
       habits.add(h);
     }
 
-    debugPrint("All habits: $habits");
-
     return habits;
   }
 
@@ -131,7 +129,6 @@ class HabitController extends ChangeNotifier {
       habits.add(h);
     }
 
-    debugPrint("today's habits: $habits");
     return habits;
   }
 
@@ -181,7 +178,6 @@ class HabitController extends ChangeNotifier {
       habits.add(h);
     }
 
-    debugPrint("Tomorrow's habits: $habits");
     return habits;
   }
 
@@ -221,9 +217,7 @@ class HabitController extends ChangeNotifier {
         quantity,
       );
 
-      debugPrint("habit created");
       await _load();
-      debugPrint("loaded");
       notifyListeners();
     }
   }

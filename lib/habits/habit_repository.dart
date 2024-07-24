@@ -276,7 +276,6 @@ class HabitRepository extends ChangeNotifier {
     );
     try {
       String dateLike = '$date %';
-      debugPrint("dateLike = $dateLike");
       String query = '''
       WITH ranked_activities AS (
         SELECT
