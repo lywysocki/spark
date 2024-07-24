@@ -7,11 +7,13 @@ class CommonDropdown extends StatelessWidget {
     required this.dropdownItems,
     required this.hintText,
     this.initialValue,
+    required this.onChanged,
   });
 
   final List<DropdownMenuItem<String>> dropdownItems;
   final String hintText;
   final String? initialValue;
+  final ValueChanged onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +31,7 @@ class CommonDropdown extends StatelessWidget {
       focusColor: Colors.transparent,
       hint: Text(hintText),
       items: dropdownItems,
-      onChanged: (value) {},
+      onChanged: onChanged,
     );
   }
 }

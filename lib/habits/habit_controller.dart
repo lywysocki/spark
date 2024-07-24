@@ -6,29 +6,44 @@ import 'package:spark/habits/habit.dart';
 //habits: habit_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity
 //activities: user_id, habit_id, timestamp, quanity
 class HabitController extends ChangeNotifier {
-  HabitController({required this.currentUserId}) {
-    if (currentUserId.isNotEmpty) {
-      _load();
-    }
-  }
-  final String currentUserId;
+  HabitController();
+
   final HabitRepository _habitRepo = HabitRepository();
+
+  bool loading = false;
+
+  String _currentUserId = '';
 
   List<Habit> allHabits = [];
   List<Habit> todaysHabits = [];
   List<Habit> tomorrowsHabits = [];
 
   Future<void> _load() async {
+    loading = true;
+
+    allHabits.clear();
     allHabits = await loadAllHabits();
+    todaysHabits.clear();
     todaysHabits = await getTodaysHabits();
+    tomorrowsHabits.clear();
     tomorrowsHabits = await getTomorrowsHabits();
+
+    loading = false;
+
+    if (!hasListeners) return;
+    notifyListeners();
+  }
+
+  Future<void> updateUser(String newUserId) async {
+    _currentUserId = newUserId;
+    await _load();
   }
 
 //Homepage methods
   Future<List<Habit>> loadAllHabits() async {
     // Get all habits
     List<List<dynamic>> allHabitsAllData =
-        await _habitRepo.selectHabitsByUserID(currentUserId);
+        await _habitRepo.selectHabitsByUserID(_currentUserId);
     /* returned fields:
         habit_id,
         user_id,
@@ -49,18 +64,18 @@ class HabitController extends ChangeNotifier {
     //convert rows to a Habit and add to list
     for (var row in allHabitsAllData) {
       Habit h = Habit(
-        habitId: row[0],
-        userId: row[1],
+        habitId: row[0].toString(),
+        userId: row[1].toString(),
         title: row[2],
         note: row[3],
         startDate: row[4],
-        end: row[5],
+        endDate: row[5],
         frequency: row[6],
         reminders: row[7],
-        msg: row[8],
+        reminderMessage: row[8],
         targetType: row[9],
         category: row[10],
-        quan: row[11],
+        quantity: row[11],
         streak: row[12],
       );
       habits.add(h);
@@ -73,10 +88,9 @@ class HabitController extends ChangeNotifier {
     final dateFormat = DateFormat('yyyy-MM-dd');
     DateTime now = DateTime.now();
     String today = dateFormat.format(now);
-    DateTime todayFormatted = dateFormat.parse(today);
 
     List<List<dynamic>> todaysHabitsAllData =
-        await _habitRepo.selectHabitsByDate(currentUserId, todayFormatted);
+        await _habitRepo.selectHabitsByDate(_currentUserId, today);
     /* returned fields:
         habit_id,
         user_id,
@@ -99,17 +113,17 @@ class HabitController extends ChangeNotifier {
     for (var row in todaysHabitsAllData) {
       Habit h = Habit(
         habitId: row[0].toString(),
-        userId: row[1].toSting(),
+        userId: row[1].toString(),
         title: row[2],
         note: row[3],
         startDate: row[4],
-        end: row[5],
+        endDate: row[5],
         frequency: row[6],
         reminders: row[7],
-        msg: row[8],
+        reminderMessage: row[8],
         targetType: row[9],
         category: row[10],
-        quan: row[11],
+        quantity: row[11],
         streak: row[12],
       );
       habits.add(h);
@@ -122,11 +136,10 @@ class HabitController extends ChangeNotifier {
     final dateFormat = DateFormat('yyyy-MM-dd');
     DateTime tom = DateTime.now().add(const Duration(days: 1));
     String tomorrow = dateFormat.format(tom);
-    DateTime tomorrowFormatted = dateFormat.parse(tomorrow);
 
     // Get tomorrow's habits
     List<List<dynamic>> tomorrowsHabitsAllData =
-        await _habitRepo.selectHabitsByDate(currentUserId, tomorrowFormatted);
+        await _habitRepo.selectHabitsByDate(_currentUserId, tomorrow);
     /* returned fields:
       habit_id,
         user_id,
@@ -153,13 +166,13 @@ class HabitController extends ChangeNotifier {
         title: row[2],
         note: row[3],
         startDate: row[4],
-        end: row[5],
+        endDate: row[5],
         frequency: row[6],
         reminders: row[7],
-        msg: row[8],
+        reminderMessage: row[8],
         targetType: row[9],
         category: row[10],
-        quan: row[11],
+        quantity: row[11],
         streak: row[12],
       );
       habits.add(h);
@@ -170,7 +183,6 @@ class HabitController extends ChangeNotifier {
 
 //New Habit page
   Future<void> createNewHabit(
-    String userID,
     String title,
     String note,
     DateTime start,
@@ -184,7 +196,7 @@ class HabitController extends ChangeNotifier {
   ) async {
     //check if user has a habit like this already?
     List<List<dynamic>> existingHabit =
-        await _habitRepo.selectHabitsByTitle(userID, title);
+        await _habitRepo.selectHabitsByTitle(_currentUserId, title);
 
     if (existingHabit.isNotEmpty) {
       //if habit with this title exists
@@ -192,7 +204,7 @@ class HabitController extends ChangeNotifier {
     } else {
       //if habit doesn't exist, create it
       _habitRepo.createHabit(
-        userID,
+        _currentUserId,
         title,
         note,
         start,
@@ -205,8 +217,61 @@ class HabitController extends ChangeNotifier {
         quantity,
       );
 
-      allHabits = await loadAllHabits();
+      await _load();
+      notifyListeners();
     }
+  }
+
+  Future<void> updateHabit(
+    String habitId, {
+    String? newTitle,
+    String? newNote,
+    DateTime? newEndDate,
+    String? newFrequency,
+    bool? newReminder,
+    String? newReminderMessage,
+    String? newTargetType,
+    String? newCategory,
+    int? newQuantity,
+  }) async {
+    if (newTitle != null) {
+      await _habitRepo.updateHabitTitle(habitId, newTitle);
+    }
+
+    if (newNote != null) {
+      await _habitRepo.updateHabitNote(habitId, newNote);
+    }
+
+    if (newEndDate != null) {
+      await _habitRepo.updateHabitEnd(habitId, newEndDate);
+    }
+
+    if (newFrequency != null) {
+      await _habitRepo.updateHabitFrequency(habitId, newFrequency);
+    }
+
+    if (newReminder != null) {
+      await _habitRepo.updateHabitReminders(habitId, newReminder);
+    }
+
+    if (newReminderMessage != null) {
+      await _habitRepo.updateHabitReminderMessage(habitId, newReminderMessage);
+    }
+
+    if (newTargetType != null) {
+      await _habitRepo.updateHabitTargetType(habitId, newTargetType);
+    }
+
+    if (newCategory != null) {
+      await _habitRepo.updateHabitCategory(habitId, newCategory);
+    }
+
+    if (newQuantity != null) {
+      await _habitRepo.updateHabitQuantity(habitId, newQuantity);
+    }
+
+    await _load();
+    notifyListeners();
   }
 
   Future<List<Habit>> getAllHabits() async {
@@ -214,9 +279,9 @@ class HabitController extends ChangeNotifier {
   }
 
 //Habit View
-  Future<List<dynamic>> getHabit(String habitID) async {
+  Future<Habit> getHabit(String habitID) async {
     List<List<dynamic>> habitAllData =
-        await _habitRepo.selectHabitByID(currentUserId, habitID);
+        await _habitRepo.selectHabitByID(_currentUserId, habitID);
 
     if (habitAllData.length > 1) {
       //there are multiple habits with that habit_id
@@ -227,18 +292,40 @@ class HabitController extends ChangeNotifier {
       //results.length < 1
       debugPrint('Account does not exist in database.');
     }
+    if (habitAllData.isEmpty) {
+      throw Exception('No habit found with habit ID: $habitID');
+    }
+    if (habitAllData[0].length < 13) {
+      throw Exception('Insufficient data to create Habit object');
+    }
 
     //if there's only 1 habit by that id, it returns
     //if there's multiple, it only returns the first
-    return habitAllData[0];
+    Habit habit = Habit(
+      habitId: habitAllData[0][0],
+      userId: habitAllData[0][1],
+      title: habitAllData[0][2],
+      note: habitAllData[0][3],
+      startDate: habitAllData[0][4],
+      endDate: habitAllData[0][5],
+      frequency: habitAllData[0][6],
+      reminders: habitAllData[0][7],
+      reminderMessage: habitAllData[0][8],
+      targetType: habitAllData[0][9],
+      category: habitAllData[0][10],
+      quantity: habitAllData[0][11],
+      streak: habitAllData[0][12],
+    );
+
+    return habit;
   }
 
   Future<void> logActivity(String habitID, int? quantity) async {
     List<List<dynamic>> habits =
-        await _habitRepo.selectHabitByID(currentUserId, habitID);
+        await _habitRepo.selectHabitByID(_currentUserId, habitID);
 
     if (habits.length == 1) {
-      _habitRepo.createActivity(currentUserId, habitID, quantity);
+      _habitRepo.createActivity(_currentUserId, habitID, quantity);
     } else {
       duplicateHabitIDs(habits);
       debugPrint(
@@ -247,9 +334,16 @@ class HabitController extends ChangeNotifier {
     }
   }
 
+  Future<void> deleteHabit(String habitId) async {
+    await _habitRepo.deleteHabitCascade(habitId);
+
+    await _load();
+    notifyListeners();
+  }
+
   Future<void> deleteHabitByTitle(String title) async {
     List<List<dynamic>> habits =
-        await _habitRepo.selectHabitsByTitle(currentUserId, title);
+        await _habitRepo.selectHabitsByTitle(_currentUserId, title);
 
     if (habits.length == 1) {
       _habitRepo.deleteHabitCascade(title);

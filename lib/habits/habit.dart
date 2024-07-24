@@ -19,17 +19,15 @@ class Habit {
     required this.title,
     required this.note,
     required this.startDate,
-    DateTime? end,
+    this.endDate,
     required this.frequency,
     required this.reminders,
-    String? msg,
+    this.reminderMessage,
     required this.targetType,
     required this.category,
-    int? quan,
+    this.quantity,
     this.streak,
-  })  : endDate = end,
-        reminderMessage = msg,
-        quantity = quan;
+  });
 
   String getId() {
     return habitId;

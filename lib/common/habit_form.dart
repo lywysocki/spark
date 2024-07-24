@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:spark/common/common_dropdown.dart';
 import 'package:spark/common/common_duration.dart';
 import 'package:spark/common/common_habit_header.dart';
 import 'package:spark/common/common_reminder.dart';
 import 'package:spark/common/common_textfield.dart';
+import 'package:spark/habits/habit_controller.dart';
+import 'package:spark/habits/habit.dart';
 
 class NewHabitForm extends StatefulWidget {
   const NewHabitForm({
@@ -16,7 +19,9 @@ class NewHabitForm extends StatefulWidget {
     this.initialEnd,
     this.initialFrequency,
     this.initialReminders,
-    this.initialmessage,
+    this.initialMessage,
+    required this.edit,
+    this.habit,
   });
 
   final String? initialTitle;
@@ -27,7 +32,9 @@ class NewHabitForm extends StatefulWidget {
   final DateTime? initialEnd;
   final String? initialFrequency;
   final List<TimeOfDay>? initialReminders;
-  final String? initialmessage;
+  final String? initialMessage;
+  final bool edit;
+  final Habit? habit;
 
   @override
   State<NewHabitForm> createState() => _NewHabitFormState();
@@ -35,6 +42,7 @@ class NewHabitForm extends StatefulWidget {
 
 class _NewHabitFormState extends State<NewHabitForm> {
   final _formKey = GlobalKey<FormState>();
+  late HabitController _habitController;
   String habitRadio = 'positive';
   final List<TimeOfDay> reminders = [];
 
@@ -111,103 +119,188 @@ class _NewHabitFormState extends State<NewHabitForm> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+
+    _habitController = context.watch<HabitController>();
+
     reminders.addAll(widget.initialReminders ?? []);
     if (widget.initialCharge != null) {
       habitRadio = widget.initialCharge!;
     }
   }
 
+  void _submitForm() {
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+      _habitController.createNewHabit(
+        _title,
+        _notes,
+        _startDate,
+        _endDate,
+        _frequency,
+        _reminders,
+        _reminderMessage,
+        _targetType,
+        _category,
+        _quantity,
+      );
+    }
+  }
+
+  void _updateHabit() {
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+      _habitController.updateHabit(
+        widget.habit!.habitId,
+        newTitle: _title,
+        newNote: _notes,
+        newEndDate: _endDate,
+        newFrequency: _frequency,
+        newReminder: _reminders,
+        newReminderMessage: _reminderMessage,
+        newTargetType: _targetType,
+        newCategory: _category,
+        newQuantity: _quantity,
+      );
+    }
+  }
+
+  String _title = '';
+  String _notes = '';
+  DateTime _startDate = DateTime.now();
+  DateTime? _endDate;
+  String _frequency = 'Does not repeat';
+  final bool _reminders = false;
+  String? _reminderMessage;
+  final String _targetType = 'NO';
+  String _category = '';
+  int? _quantity;
+
   @override
   Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const CommonHabitHeader(
-            text: 'Title*',
-            bottomPadding: 0,
-            topPadding: 0,
-          ),
-          CommonTextfield(
-            hintText: 'Enter a title',
-            maxLength: 20,
-            initialValue: widget.initialTitle,
-          ),
-          const CommonHabitHeader(
-            text: 'Notes',
-            topPadding: 0,
-            bottomPadding: 0,
-          ),
-          CommonTextfield(
-            hintText: 'Enter optional notes',
-            maxLength: 100,
-            maxLines: 3,
-            initialValue: widget.initialNotes,
-          ),
-          const CommonHabitHeader(
-            text: 'Category*',
-            topPadding: 0,
-          ),
-          Row(
+    return Column(
+      children: [
+        Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Radio(
-                value: 'positive',
-                groupValue: habitRadio,
-                onChanged: (value) {
-                  habitRadio = value ?? 'positive';
-                  setState(() {});
-                },
+              const CommonHabitHeader(
+                text: 'Title*',
+                bottomPadding: 0,
+                topPadding: 0,
               ),
-              const Text('Positive habit'),
+              CommonTextfield(
+                hintText: 'Enter a title',
+                maxLength: 20,
+                initialValue: widget.initialTitle,
+                validator: (value) => value == null || value.isEmpty
+                    ? 'A title is required'
+                    : null,
+                onChanged: (value) => _title = value,
+              ),
+              const CommonHabitHeader(
+                text: 'Notes',
+                topPadding: 0,
+                bottomPadding: 0,
+              ),
+              CommonTextfield(
+                hintText: 'Enter optional notes',
+                maxLength: 100,
+                maxLines: 3,
+                initialValue: widget.initialNotes,
+                onChanged: (notes) => _notes = notes,
+              ),
+              const CommonHabitHeader(
+                text: 'Category*',
+                topPadding: 0,
+              ),
+              Row(
+                children: [
+                  Radio(
+                    value: 'positive',
+                    groupValue: habitRadio,
+                    onChanged: (value) {
+                      habitRadio = value ?? 'positive';
+                      setState(() {});
+                    },
+                  ),
+                  const Text('Positive habit'),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  Radio(
+                    value: 'negative',
+                    groupValue: habitRadio,
+                    onChanged: (value) {
+                      habitRadio = value ?? 'negative';
+                      setState(() {});
+                    },
+                  ),
+                  const Text('Negative habit'),
+                ],
+              ),
               const SizedBox(
-                width: 10,
+                height: 5,
               ),
-              Radio(
-                value: 'negative',
-                groupValue: habitRadio,
-                onChanged: (value) {
-                  habitRadio = value ?? 'negative';
-                  setState(() {});
-                },
+              CommonDropdown(
+                hintText: 'Select a category',
+                dropdownItems: categoryDropdownItems,
+                initialValue: widget.initialCategory,
+                onChanged: (value) => setState(() => _category = value),
               ),
-              const Text('Negative habit'),
+              const CommonHabitHeader(
+                text: 'Duration*',
+              ),
+              _SetDurationWidgets(
+                initialStart: widget.initialStart,
+                initialEnd: widget.initialEnd,
+                onStartDateSelected: (date) =>
+                    setState(() => _startDate = date),
+                onEndDateSelected: (date) => setState(() => _endDate = date),
+              ),
+              const CommonHabitHeader(
+                text: 'Frequency*',
+              ),
+              CommonDropdown(
+                hintText: 'Select a frequency',
+                dropdownItems: frequencyDropdownItems,
+                initialValue: widget.initialFrequency ??
+                    frequencyDropdownItems.first.value,
+                onChanged: (value) => setState(() => _frequency = value),
+              ),
+              const CommonHabitHeader(
+                text: 'Reminders',
+              ),
+              _SetRemindersWidgets(
+                reminders: reminders,
+                initialReminderMessage: widget.initialMessage,
+              ),
             ],
           ),
-          const SizedBox(
-            height: 5,
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 40.0, bottom: 20),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              FilledButton(
+                onPressed: () {
+                  widget.edit ? _updateHabit() : _submitForm();
+                  Navigator.pop(context);
+                },
+                child: const Text('Submit'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text('Close'),
+              ),
+            ],
           ),
-          CommonDropdown(
-            hintText: 'Select a category',
-            dropdownItems: categoryDropdownItems,
-            initialValue: widget.initialCategory,
-          ),
-          const CommonHabitHeader(
-            text: 'Duration*',
-          ),
-          _SetDurationWidgets(
-            initialStart: widget.initialStart,
-            initialEnd: widget.initialEnd,
-          ),
-          const CommonHabitHeader(
-            text: 'Frequency*',
-          ),
-          CommonDropdown(
-            hintText: 'Select a frequency',
-            dropdownItems: frequencyDropdownItems,
-            initialValue:
-                widget.initialFrequency ?? frequencyDropdownItems.first.value,
-          ),
-          const CommonHabitHeader(
-            text: 'Reminders',
-          ),
-          _SetRemindersWidgets(
-            reminders: reminders,
-            initialReminderMessage: widget.initialmessage,
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -239,6 +332,8 @@ class __SetRemindersWidgetsState extends State<_SetRemindersWidgets> {
                   time.format(context),
                 ),
                 onPress: () async {
+                  if (!mounted) return;
+
                   final editTime = (await showTimePicker(
                     context: context,
                     initialTime: TimeOfDay.now(),
@@ -256,6 +351,8 @@ class __SetRemindersWidgetsState extends State<_SetRemindersWidgets> {
                     barrierDismissible: false,
                     context: context,
                     builder: (context) {
+                      if (!mounted) return Container();
+
                       return _DeleteReminderDialog(
                         onDelete: () {
                           widget.reminders.removeWhere(
@@ -273,6 +370,7 @@ class __SetRemindersWidgetsState extends State<_SetRemindersWidgets> {
             CommonReminder(
               onLongPress: null,
               onPress: () async {
+                if (!mounted) return;
                 final time = (await showTimePicker(
                   context: context,
                   initialTime: TimeOfDay.now(),
@@ -301,10 +399,17 @@ class __SetRemindersWidgetsState extends State<_SetRemindersWidgets> {
 }
 
 class _SetDurationWidgets extends StatefulWidget {
-  const _SetDurationWidgets({this.initialStart, this.initialEnd});
+  const _SetDurationWidgets({
+    this.initialStart,
+    this.initialEnd,
+    required this.onStartDateSelected,
+    required this.onEndDateSelected,
+  });
 
   final DateTime? initialStart;
   final DateTime? initialEnd;
+  final Function(DateTime) onStartDateSelected;
+  final Function(DateTime) onEndDateSelected;
 
   @override
   State<_SetDurationWidgets> createState() => __SetDurationWidgetsState();
@@ -331,6 +436,7 @@ class __SetDurationWidgetsState extends State<_SetDurationWidgets> {
           headerText: 'Start date',
           date: startDate,
           onTap: () async {
+            if (!mounted) return;
             startDate = (await showDatePicker(
                   context: context,
                   initialDate: DateTime.now(),
@@ -338,6 +444,7 @@ class __SetDurationWidgetsState extends State<_SetDurationWidgets> {
                   lastDate: DateTime(DateTime.now().year + 100),
                 )) ??
                 DateTime.now();
+            widget.onStartDateSelected(startDate);
             if (endDate != null) {
               if (startDate.isAfter(endDate!)) {
                 endDate = null;
@@ -353,6 +460,7 @@ class __SetDurationWidgetsState extends State<_SetDurationWidgets> {
         CommonDuration(
           headerText: 'End date',
           onTap: () async {
+            if (!mounted) return;
             endDate = await showDatePicker(
               context: context,
               initialDate: startDate.isAfter(DateTime.now())
@@ -361,6 +469,9 @@ class __SetDurationWidgetsState extends State<_SetDurationWidgets> {
               firstDate: startDate,
               lastDate: DateTime(DateTime.now().year + 100),
             );
+            if (endDate != null) {
+              widget.onEndDateSelected(endDate!);
+            }
             setState(() {});
           },
           date: endDate,

@@ -137,59 +137,49 @@ class UserRepository extends ChangeNotifier {
     );
     try {
       const query = '''
-      WITH ranked_activities AS (
-        SELECT
-          h.*,
-          a.timestamp,
-          ROW_NUMBER() OVER (PARTITION BY a.habit_id, a.user_id ORDER BY a.timestamp) AS seq
-        FROM
-          activities a
-        JOIN
-          habits h ON a.habit_id = h.habit_id AND a.user_id = h.user_id
-        WHERE
-          a.user_id = @userId
-      ),
-      date_diffs AS (
-        SELECT
-          *,
-          CASE
-            WHEN frequency = 'daily' THEN timestamp - INTERVAL '1 day' * (seq - 1)
-            WHEN frequency = 'weekly' THEN timestamp - INTERVAL '1 week' * (seq - 1)
-            WHEN frequency = 'biweekly' THEN timestamp - INTERVAL '2 weeks' * (seq - 1)
-            WHEN frequency = 'monthly' THEN timestamp - INTERVAL '1 month' * (seq - 1)
-            ELSE timestamp -- default to daily if frequency is not recognized
-          END AS date_group
-        FROM
-          ranked_activities
-      ),
-      sequential_dates AS (
-        SELECT
+        WITH activity_gaps AS (
+          SELECT
+            a.activity_id,
+            a.user_id,
+            a.habit_id,
+            a.timestamp,
+            h.frequency,
+            LAG(a.timestamp) OVER (PARTITION BY a.user_id, a.habit_id ORDER BY a.timestamp) AS prev_timestamp
+          FROM activities a
+          JOIN habits h ON a.habit_id = h.habit_id
+          WHERE h.user_id = @userId
+        ),
+        consecutive_activities AS (
+          SELECT
+            activity_id,
+            user_id,
+            habit_id,
+            timestamp,
+            frequency,
+            prev_timestamp,
+            CASE
+              WHEN frequency = 'daily' AND prev_timestamp = timestamp - INTERVAL '1 day' THEN 1
+              WHEN frequency = 'weekly' AND prev_timestamp = timestamp - INTERVAL '1 week' THEN 1
+              WHEN frequency = 'biweekly' AND prev_timestamp = timestamp - INTERVAL '2 weeks' THEN 1
+              WHEN frequency = 'monthly' AND prev_timestamp = timestamp - INTERVAL '1 month' THEN 1
+              ELSE 0
+            END AS is_consecutive
+          FROM activity_gaps
+        ),
+        streaks AS (
+          SELECT
+            habit_id,
+            timestamp,
+            is_consecutive
+          FROM consecutive_activities
+          ORDER BY habit_id, timestamp
+        )
+        select 
           habit_id,
-          user_id,
-          title,
-          note,
-          start_date,
-          end_date,
-          frequency,
-          reminders,
-          reminder_message,
-          target_type,
-          category,
-          quantity,
-          COUNT(DISTINCT date_group) AS sequential_date_count
-        FROM
-          date_diffs
-        GROUP BY
-          habit_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity
-      )
-      SELECT
-        habit_id,
-        sequential_date_count
-      FROM
-        sequential_dates
-      ORDER BY
-        habit_id
-    ''';
+          sum(is_consecutive) + 1 as streak
+        from streaks
+        group by habit_id;
+      ''';
 
       final results = await databaseConnection
           .execute(Sql.named(query), parameters: {'userId': userId});

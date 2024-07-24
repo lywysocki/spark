@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:spark/common/common_tile.dart';
 import 'package:spark/habits/view_habit_screen.dart';
+import 'package:spark/habits/habit_controller.dart';
+import 'package:spark/user/user_controller.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -8,6 +12,9 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context).textTheme;
+    final userController = context.watch<UserController>();
+    final habitController = context.watch<HabitController>();
+
     return Scaffold(
       body: ListView(
         padding: const EdgeInsets.all(8.0),
@@ -23,7 +30,7 @@ class HomeScreen extends StatelessWidget {
                       width: 8,
                     ),
                     Text(
-                      'Tuesday, May 21st',
+                      DateFormat('EEEE, MMMM d').format(DateTime.now()),
                       style: theme.titleSmall,
                     ),
                   ],
@@ -32,7 +39,9 @@ class HomeScreen extends StatelessWidget {
                   height: 6,
                 ),
                 Text(
-                  'Hello, {User}!',
+                  userController.currentUserId != null
+                      ? 'Hello, ${userController.currentUser!.fName}!'
+                      : 'Hello',
                   style: theme.titleMedium,
                 ),
                 Text(
@@ -51,28 +60,29 @@ class HomeScreen extends StatelessWidget {
           ),
           Column(
             mainAxisSize: MainAxisSize.min,
-            children: List.generate(
-              2,
-              (int index) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4.0),
-                child: CommonCardTile(
-                  title: Text('Habit $index'),
-                  destination: ViewHabitScreen(
-                    habit: 'Habit $index',
-                  ),
-                  trailingWidget: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text('10'),
-                      SizedBox(
-                        width: 5,
+            children: habitController.todaysHabits
+                .map(
+                  (habit) => Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4.0),
+                    child: CommonCardTile(
+                      title: Text(habit.title),
+                      destination: ViewHabitScreen(
+                        habit: habit,
                       ),
-                      Icon(Icons.flare_outlined),
-                    ],
+                      trailingWidget: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text('${habit.streak}'),
+                          const SizedBox(
+                            width: 5,
+                          ),
+                          const Icon(Icons.flare_outlined),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
-              ),
-            ),
+                )
+                .toList(),
           ),
           const SizedBox(
             height: 14,
@@ -83,28 +93,29 @@ class HomeScreen extends StatelessWidget {
           ),
           Column(
             mainAxisSize: MainAxisSize.min,
-            children: List.generate(
-              2,
-              (int index) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4.0),
-                child: CommonCardTile(
-                  title: Text('Habit $index'),
-                  destination: ViewHabitScreen(
-                    habit: 'Habit $index',
-                  ),
-                  trailingWidget: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text('10'),
-                      SizedBox(
-                        width: 5,
+            children: habitController.tomorrowsHabits
+                .map(
+                  (habit) => Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4.0),
+                    child: CommonCardTile(
+                      title: Text(habit.title),
+                      destination: ViewHabitScreen(
+                        habit: habit,
                       ),
-                      Icon(Icons.flare_outlined),
-                    ],
+                      trailingWidget: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text('${habit.streak}'),
+                          const SizedBox(
+                            width: 5,
+                          ),
+                          const Icon(Icons.flare_outlined),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
-              ),
-            ),
+                )
+                .toList(),
           ),
           const SizedBox(
             height: 75,

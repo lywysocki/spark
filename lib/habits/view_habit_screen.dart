@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_calendar_carousel/classes/event.dart';
 import 'package:flutter_calendar_carousel/classes/event_list.dart';
+import 'package:provider/provider.dart';
 import 'package:spark/achievements/achievements_screen.dart';
 import 'package:spark/common/common_duration.dart';
 import 'package:spark/common/common_reminder.dart';
@@ -8,12 +9,17 @@ import 'package:spark/common/common_tile.dart';
 import 'package:spark/common/habit_form.dart';
 import 'package:flutter_calendar_carousel/flutter_calendar_carousel.dart'
     show CalendarCarousel;
+import 'package:spark/habits/habit_controller.dart';
+
+import 'habit.dart';
 
 class ViewHabitScreen extends StatefulWidget {
-  const ViewHabitScreen({super.key, required this.habit});
+  const ViewHabitScreen({
+    super.key,
+    required this.habit,
+  });
 
-  // TODO: change to habitId
-  final String habit;
+  final Habit habit;
 
   @override
   State<ViewHabitScreen> createState() => _ViewHabitScreenState();
@@ -21,6 +27,7 @@ class ViewHabitScreen extends StatefulWidget {
 
 class _ViewHabitScreenState extends State<ViewHabitScreen> {
   bool editMode = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,7 +36,7 @@ class _ViewHabitScreenState extends State<ViewHabitScreen> {
         backgroundColor: Colors.transparent,
         centerTitle: true,
         title: Text(
-          widget.habit,
+          widget.habit.title,
         ),
         leadingWidth: 68,
         leading: editMode
@@ -46,8 +53,6 @@ class _ViewHabitScreenState extends State<ViewHabitScreen> {
             child: Text(!editMode ? 'Edit' : 'Done'),
             onPressed: () {
               editMode = !editMode;
-
-              /// TODO: Update habit with new form inputs
               setState(() {});
             },
           ),
@@ -56,39 +61,39 @@ class _ViewHabitScreenState extends State<ViewHabitScreen> {
       body: ListView(
         children: [
           if (!editMode)
-            const Center(
+            Center(
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('10'),
-                  SizedBox(
+                  Text('${widget.habit.streak}'),
+                  const SizedBox(
                     width: 5,
                   ),
-                  Icon(Icons.flare_outlined),
+                  const Icon(Icons.flare_outlined),
                 ],
               ),
             ),
           Padding(
             padding: const EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 8.0),
             child: !editMode
-                ? _HabitInformation(
+                ? HabitInformation(
                     habit: widget.habit,
                   )
-
-                /// TODO: Replace these initial values with the current habit's real information
                 : NewHabitForm(
-                    initialTitle: widget.habit,
-                    initialNotes: 'Initial notes here',
+                    initialTitle: widget.habit.title,
+                    initialNotes: widget.habit.note,
                     initialCharge: 'negative',
-                    initialCategory: 'Education',
-                    initialStart: DateTime.now(),
-                    initialEnd: DateTime.now(),
-                    initialFrequency: 'Daily',
+                    initialCategory: widget.habit.category,
+                    initialStart: widget.habit.startDate,
+                    initialEnd: widget.habit.endDate ?? DateTime.now(),
+                    initialFrequency: widget.habit.frequency,
                     initialReminders: const [
                       TimeOfDay(hour: 10, minute: 30),
                       TimeOfDay(hour: 4, minute: 55),
-                    ],
-                    initialmessage: 'Reminder notez',
+                    ], // TODO: habit reminders are currently just a bool
+                    initialMessage: widget.habit.reminderMessage,
+                    edit: true,
+                    habit: widget.habit,
                   ),
           ),
         ],
@@ -97,14 +102,16 @@ class _ViewHabitScreenState extends State<ViewHabitScreen> {
   }
 }
 
-class _HabitInformation extends StatelessWidget {
-  const _HabitInformation({required this.habit});
+class HabitInformation extends StatelessWidget {
+  const HabitInformation({super.key, required this.habit});
+  final Habit habit;
 
-  final String habit;
   @override
   Widget build(BuildContext context) {
+    final _habitController = context.watch<HabitController>();
     TextStyle textStyle = Theme.of(context).textTheme.titleSmall!;
     const fakeHasEndDate = true;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -164,7 +171,9 @@ class _HabitInformation extends StatelessWidget {
             const SizedBox(
               height: 10,
             ),
-            const _CalendarView(),
+            _CalendarView(
+              habit: habit,
+            ),
             const SizedBox(
               height: 20,
             ),
@@ -177,6 +186,16 @@ class _HabitInformation extends StatelessWidget {
             const SizedBox(
               height: 25,
             ),
+            FilledButton(
+              onPressed: () {
+                _habitController.deleteHabit(habit.habitId);
+                Navigator.pop(context);
+              },
+              child: const Text('Delete'),
+            ),
+            const SizedBox(
+              height: 25,
+            ),
           ],
         ),
       ],
@@ -185,45 +204,40 @@ class _HabitInformation extends StatelessWidget {
 }
 
 class _CalendarView extends StatefulWidget {
-  const _CalendarView();
+  const _CalendarView({required this.habit});
+
+  final Habit habit;
 
   @override
   State<_CalendarView> createState() => _CalendarViewState();
 }
 
 class _CalendarViewState extends State<_CalendarView> {
-  /// TODO: replace with real habit start date
-  final DateTime _fakeStartDate = DateTime(2024, 6, 20);
-
   /// TODO: replace with habit activity for this habit
-  Map<DateTime, List<Event>> habitCompletions = {
-    DateTime(2024, 7, 1): [
-      Event(
-        date: DateTime(2024, 7, 1),
-        title: "Event 1",
-        description: "Description for Event 1",
-        location: "Location 1",
-        icon: null,
-        dot: null,
-        id: 1,
-      ),
-    ],
-    DateTime(2024, 7, 2): [
-      Event(
-        date: DateTime(2024, 7, 1),
-        title: "Event 2",
-        description: "Description for Event 1",
-        location: "Location 1",
-        icon: null,
-        dot: null,
-        id: 2,
-      ),
-    ],
-  };
-  List<DateTime> fakeCompletions = [
-    DateTime(2024, 7, 1),
-    DateTime(2024, 6, 30),
-  ];
+  Map<DateTime, List<Event>> habitCompletions = {};
+
+  void updateHabitCompletions() {
+    habitCompletions.clear();
+
+    int streak = widget.habit.streak ?? 0;
+
+    for (int i = 0; i < streak; i++) {
+      DateTime date = DateTime.now().subtract(Duration(days: i));
+      habitCompletions[date] = [
+        Event(
+          date: date,
+          title: "Completed",
+          description: "Habit completed on $date",
+          icon: null,
+          dot: null,
+          id: i,
+        ),
+      ];
+    }
+
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     ColorScheme colorScheme = Theme.of(context).colorScheme;
@@ -265,7 +279,7 @@ class _CalendarViewState extends State<_CalendarView> {
             DateTime day,
           ) {
             isSelectable = false;
-            if (day == _fakeStartDate) {
+            if (day == widget.habit.startDate) {
               return Center(
                 child: Icon(
                   Icons.golf_course_rounded,
