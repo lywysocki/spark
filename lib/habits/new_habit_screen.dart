@@ -22,26 +22,6 @@ class NewHabitScreen extends StatelessWidget {
               height: 15,
             ),
             const NewHabitForm(),
-            Padding(
-              padding: const EdgeInsets.only(top: 40.0, bottom: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  FilledButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: const Text('Submit'),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: const Text('Close'),
-                  ),
-                ],
-              ),
-            ),
           ],
         ),
       ),

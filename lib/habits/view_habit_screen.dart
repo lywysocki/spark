@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_calendar_carousel/classes/event.dart';
 import 'package:flutter_calendar_carousel/classes/event_list.dart';
+import 'package:provider/provider.dart';
 import 'package:spark/achievements/achievements_screen.dart';
 import 'package:spark/common/common_duration.dart';
 import 'package:spark/common/common_reminder.dart';
@@ -8,12 +9,19 @@ import 'package:spark/common/common_tile.dart';
 import 'package:spark/common/habit_form.dart';
 import 'package:flutter_calendar_carousel/flutter_calendar_carousel.dart'
     show CalendarCarousel;
+import 'package:spark/habits/habit_controller.dart';
+
+import 'habit.dart';
 
 class ViewHabitScreen extends StatefulWidget {
-  const ViewHabitScreen({super.key, required this.habit});
+  const ViewHabitScreen({
+    super.key,
+    required this.habitID,
+    required this.userID,
+  });
 
-  // TODO: change to habitId
-  final String habit;
+  final String habitID;
+  final String userID;
 
   @override
   State<ViewHabitScreen> createState() => _ViewHabitScreenState();
@@ -21,6 +29,21 @@ class ViewHabitScreen extends StatefulWidget {
 
 class _ViewHabitScreenState extends State<ViewHabitScreen> {
   bool editMode = false;
+  late HabitController _habitController;
+  late Habit habit;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    _habitController = context.watch<HabitController>();
+    getHabit();
+  }
+
+  Future<void> getHabit() async {
+    habit = await _habitController.getHabit(widget.habitID);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,7 +52,7 @@ class _ViewHabitScreenState extends State<ViewHabitScreen> {
         backgroundColor: Colors.transparent,
         centerTitle: true,
         title: Text(
-          widget.habit,
+          habit.title,
         ),
         leadingWidth: 68,
         leading: editMode
@@ -72,23 +95,23 @@ class _ViewHabitScreenState extends State<ViewHabitScreen> {
             padding: const EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 8.0),
             child: !editMode
                 ? _HabitInformation(
-                    habit: widget.habit,
+                    habit: habit,
                   )
 
                 /// TODO: Replace these initial values with the current habit's real information
                 : NewHabitForm(
-                    initialTitle: widget.habit,
-                    initialNotes: 'Initial notes here',
+                    initialTitle: habit.title,
+                    initialNotes: habit.note,
                     initialCharge: 'negative',
-                    initialCategory: 'Education',
-                    initialStart: DateTime.now(),
-                    initialEnd: DateTime.now(),
-                    initialFrequency: 'Daily',
+                    initialCategory: habit.category,
+                    initialStart: habit.startDate,
+                    initialEnd: habit.endDate ?? DateTime.now(),
+                    initialFrequency: habit.frequency,
                     initialReminders: const [
                       TimeOfDay(hour: 10, minute: 30),
                       TimeOfDay(hour: 4, minute: 55),
                     ],
-                    initialmessage: 'Reminder notez',
+                    initialMessage: habit.reminderMessage,
                   ),
           ),
         ],
@@ -99,8 +122,8 @@ class _ViewHabitScreenState extends State<ViewHabitScreen> {
 
 class _HabitInformation extends StatelessWidget {
   const _HabitInformation({required this.habit});
+  final Habit habit;
 
-  final String habit;
   @override
   Widget build(BuildContext context) {
     TextStyle textStyle = Theme.of(context).textTheme.titleSmall!;

@@ -54,17 +54,19 @@ class HabitController extends ChangeNotifier {
         title: row[2],
         note: row[3],
         startDate: row[4],
-        end: row[5],
+        endDate: row[5],
         frequency: row[6],
         reminders: row[7],
-        msg: row[8],
+        reminderMessage: row[8],
         targetType: row[9],
         category: row[10],
-        quan: row[11],
+        quantity: row[11],
         streak: row[12],
       );
       habits.add(h);
     }
+
+    print("All habits: $habits");
 
     return habits;
   }
@@ -103,18 +105,19 @@ class HabitController extends ChangeNotifier {
         title: row[2],
         note: row[3],
         startDate: row[4],
-        end: row[5],
+        endDate: row[5],
         frequency: row[6],
         reminders: row[7],
-        msg: row[8],
+        reminderMessage: row[8],
         targetType: row[9],
         category: row[10],
-        quan: row[11],
+        quantity: row[11],
         streak: row[12],
       );
       habits.add(h);
     }
 
+    print("today's habits: $habits");
     return habits;
   }
 
@@ -153,18 +156,19 @@ class HabitController extends ChangeNotifier {
         title: row[2],
         note: row[3],
         startDate: row[4],
-        end: row[5],
+        endDate: row[5],
         frequency: row[6],
         reminders: row[7],
-        msg: row[8],
+        reminderMessage: row[8],
         targetType: row[9],
         category: row[10],
-        quan: row[11],
+        quantity: row[11],
         streak: row[12],
       );
       habits.add(h);
     }
 
+    print("Tomorrow's habits: $habits");
     return habits;
   }
 
@@ -205,7 +209,10 @@ class HabitController extends ChangeNotifier {
         quantity,
       );
 
-      allHabits = await loadAllHabits();
+      print("habit created");
+      _load();
+      print("loaded");
+      notifyListeners();
     }
   }
 
@@ -214,7 +221,7 @@ class HabitController extends ChangeNotifier {
   }
 
 //Habit View
-  Future<List<dynamic>> getHabit(String habitID) async {
+  Future<Habit> getHabit(String habitID) async {
     List<List<dynamic>> habitAllData =
         await _habitRepo.selectHabitByID(currentUserId, habitID);
 
@@ -227,10 +234,32 @@ class HabitController extends ChangeNotifier {
       //results.length < 1
       debugPrint('Account does not exist in database.');
     }
+    if (habitAllData.isEmpty) {
+      throw Exception('No habit found with habit ID: $habitID');
+    }
+    if (habitAllData[0].length < 13) {
+      throw Exception('Insufficient data to create Habit object');
+    }
 
     //if there's only 1 habit by that id, it returns
     //if there's multiple, it only returns the first
-    return habitAllData[0];
+    Habit habit = Habit(
+      habitId: habitAllData[0][0],
+      userId: habitAllData[0][1],
+      title: habitAllData[0][2],
+      note: habitAllData[0][3],
+      startDate: habitAllData[0][4],
+      endDate: habitAllData[0][5],
+      frequency: habitAllData[0][6],
+      reminders: habitAllData[0][7],
+      reminderMessage: habitAllData[0][8],
+      targetType: habitAllData[0][9],
+      category: habitAllData[0][10],
+      quantity: habitAllData[0][11],
+      streak: habitAllData[0][12],
+    );
+
+    return habit;
   }
 
   Future<void> logActivity(String habitID, int? quantity) async {
