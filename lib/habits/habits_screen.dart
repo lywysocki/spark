@@ -102,7 +102,7 @@ class _HabitTilesState extends State<_HabitTiles> {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 4.0),
             child: CommonCardTile(
-              category: 'None',
+              category: habit.category,
               title: Text(habit.title),
               destination: ViewHabitScreen(
                 habit: habit,

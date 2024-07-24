@@ -17,14 +17,13 @@ class CommonCardTile extends StatelessWidget {
   final Widget? destination;
   final Widget? trailingWidget;
   final Widget? leadingWidget;
-  // TODO: pass in habitId and take category, title, and streak from there
   final String? category;
 
   Widget cardColorWrap(BuildContext context, String? category, Widget child) {
     final brightness = Theme.of(context).brightness;
     Color? cardColor;
     Color? borderColor;
-    switch (category) {
+    switch (category?.toLowerCase()) {
       case 'education':
         cardColor = redLight;
         borderColor = redDark;
