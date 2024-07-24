@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_calendar_carousel/classes/event.dart';
 import 'package:flutter_calendar_carousel/classes/event_list.dart';
+import 'package:provider/provider.dart';
 import 'package:spark/achievements/achievements_screen.dart';
 import 'package:spark/common/common_duration.dart';
 import 'package:spark/common/common_reminder.dart';
@@ -8,6 +9,7 @@ import 'package:spark/common/common_tile.dart';
 import 'package:spark/common/habit_form.dart';
 import 'package:flutter_calendar_carousel/flutter_calendar_carousel.dart'
     show CalendarCarousel;
+import 'package:spark/habits/habit_controller.dart';
 
 import 'habit.dart';
 
@@ -106,8 +108,10 @@ class HabitInformation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final _habitController = context.watch<HabitController>();
     TextStyle textStyle = Theme.of(context).textTheme.titleSmall!;
     const fakeHasEndDate = true;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -178,6 +182,16 @@ class HabitInformation extends StatelessWidget {
               title: Text('View Habit Achievements'),
               destination: AchievementsScreen(),
               trailingWidget: Icon(Icons.arrow_forward_ios_rounded),
+            ),
+            const SizedBox(
+              height: 25,
+            ),
+            FilledButton(
+              onPressed: () {
+                _habitController.deleteHabit(habit.habitId);
+                Navigator.pop(context);
+              },
+              child: const Text('Delete'),
             ),
             const SizedBox(
               height: 25,

@@ -340,6 +340,13 @@ class HabitController extends ChangeNotifier {
     }
   }
 
+  Future<void> deleteHabit(String habitId) async {
+    await _habitRepo.deleteHabitCascade(habitId);
+
+    await _load();
+    notifyListeners();
+  }
+
   Future<void> deleteHabitByTitle(String title) async {
     List<List<dynamic>> habits =
         await _habitRepo.selectHabitsByTitle(_currentUserId, title);
