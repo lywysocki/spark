@@ -18,8 +18,8 @@ void main() async {
   await windowManager.ensureInitialized();
 
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-    WindowManager.instance.setMinimumSize(const Size(400, 800));
-    WindowManager.instance.setMaximumSize(const Size(400, 800));
+    WindowManager.instance.setMinimumSize(const Size(395, 810));
+    WindowManager.instance.setMaximumSize(const Size(395, 810));
   }
 
   runApp(const MyApp());
