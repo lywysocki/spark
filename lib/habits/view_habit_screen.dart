@@ -83,7 +83,6 @@ class _ViewHabitScreenState extends State<ViewHabitScreen> {
                 : NewHabitForm(
                     initialTitle: widget.habit.title,
                     initialNotes: widget.habit.note,
-                    initialCharge: 'negative',
                     initialCategory: widget.habit.category,
                     initialStart: widget.habit.startDate,
                     initialEnd: widget.habit.endDate ?? DateTime.now(),

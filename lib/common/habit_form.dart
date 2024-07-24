@@ -13,7 +13,6 @@ class NewHabitForm extends StatefulWidget {
     super.key,
     this.initialTitle,
     this.initialNotes,
-    this.initialCharge,
     this.initialCategory,
     this.initialStart,
     this.initialEnd,
@@ -26,7 +25,6 @@ class NewHabitForm extends StatefulWidget {
 
   final String? initialTitle;
   final String? initialNotes;
-  final String? initialCharge;
   final String? initialCategory;
   final DateTime? initialStart;
   final DateTime? initialEnd;
@@ -43,7 +41,6 @@ class NewHabitForm extends StatefulWidget {
 class _NewHabitFormState extends State<NewHabitForm> {
   final _formKey = GlobalKey<FormState>();
   late HabitController _habitController;
-  String habitRadio = 'positive';
   final List<TimeOfDay> reminders = [];
 
   final categoryDropdownItems = [
@@ -123,9 +120,6 @@ class _NewHabitFormState extends State<NewHabitForm> {
     _habitController = context.watch<HabitController>();
 
     reminders.addAll(widget.initialReminders ?? []);
-    if (widget.initialCharge != null) {
-      habitRadio = widget.initialCharge!;
-    }
   }
 
   void _submitForm() {
@@ -214,31 +208,6 @@ class _NewHabitFormState extends State<NewHabitForm> {
               const CommonHabitHeader(
                 text: 'Category*',
                 topPadding: 0,
-              ),
-              Row(
-                children: [
-                  Radio(
-                    value: 'positive',
-                    groupValue: habitRadio,
-                    onChanged: (value) {
-                      habitRadio = value ?? 'positive';
-                      setState(() {});
-                    },
-                  ),
-                  const Text('Positive habit'),
-                  const SizedBox(
-                    width: 10,
-                  ),
-                  Radio(
-                    value: 'negative',
-                    groupValue: habitRadio,
-                    onChanged: (value) {
-                      habitRadio = value ?? 'negative';
-                      setState(() {});
-                    },
-                  ),
-                  const Text('Negative habit'),
-                ],
               ),
               const SizedBox(
                 height: 5,
