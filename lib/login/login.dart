@@ -6,7 +6,6 @@ import 'package:spark/common/common_habit_header.dart';
 import 'package:spark/common/common_loading.dart';
 import 'package:spark/common/common_textfield.dart';
 import 'package:spark/friends/friendship_controller.dart';
-import 'package:spark/habits/habit_controller.dart';
 import 'package:spark/main.dart';
 import 'package:spark/user/user_controller.dart';
 
