@@ -46,7 +46,7 @@ class HomeScreen extends StatelessWidget {
                   style: theme.titleMedium,
                 ),
                 Text(
-                  'Here is your daily summary!',
+                  'Here is your daily summary...',
                   style: theme.bodySmall,
                 ),
               ],
@@ -62,7 +62,7 @@ class HomeScreen extends StatelessWidget {
           habitController.todaysHabits.isEmpty
               ? const EmptyListWidget(
                   text:
-                      'Nothing to complete today...\nPress the big plus button to create a new habit!',
+                      'Nothing to complete today...\nPress the plus button on the bottom right of the screen to create a new habit!',
                 )
               : Column(
                   mainAxisSize: MainAxisSize.min,

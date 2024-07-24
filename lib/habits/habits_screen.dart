@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:spark/common/common_empty_list.dart';
 import 'package:spark/common/common_search_bar.dart';
 import 'package:spark/common/common_tile.dart';
 import 'package:spark/habits/habit.dart';
@@ -51,11 +52,16 @@ class _HabitsScreenState extends State<HabitsScreen> {
               });
             },
           ),
-          _HabitTiles(
-            currentSearch: currentSearch,
-            habits: _habitController.allHabits,
-            userID: userId,
-          ),
+          _habitController.allHabits.isEmpty
+              ? const EmptyListWidget(
+                  text:
+                      'You don\'t have any habits yet...\nPress the plus button on the bottom right of the screen to create a new habit!',
+                )
+              : _HabitTiles(
+                  currentSearch: currentSearch,
+                  habits: _habitController.allHabits,
+                  userID: userId,
+                ),
           const SizedBox(
             height: 75,
           ),
