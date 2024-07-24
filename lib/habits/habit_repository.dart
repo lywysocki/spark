@@ -157,32 +157,44 @@ class HabitRepository extends ChangeNotifier {
     );
     try {
       const query = '''
-      WITH ranked_activities AS (
-        SELECT
-          h.*,
-          a.timestamp,
-          ROW_NUMBER() OVER (PARTITION BY a.habit_id, a.user_id ORDER BY a.timestamp) AS seq
-        FROM
-          habits h
-        LEFT JOIN
-          activities a ON h.habit_id = a.habit_id AND h.user_id = a.user_id
-        WHERE
-          h.user_id = @userId
-      ),
-      date_diffs AS (
-        SELECT
-          *,
-          CASE
-            WHEN frequency = 'daily' THEN timestamp - INTERVAL '1 day' * (seq - 1)
-            WHEN frequency = 'weekly' THEN timestamp - INTERVAL '1 week' * (seq - 1)
-            WHEN frequency = 'biweekly' THEN timestamp - INTERVAL '2 weeks' * (seq - 1)
-            WHEN frequency = 'monthly' THEN timestamp - INTERVAL '1 month' * (seq - 1)
-            ELSE timestamp -- default to daily if frequency is not recognized
-          END AS date_group
-        FROM
-          ranked_activities
-      ),
-      sequential_dates AS (
+        WITH ranked_activities AS (
+          SELECT
+            h.*,
+            a.timestamp,
+            LAG(a.timestamp) OVER (PARTITION BY a.user_id, a.habit_id ORDER BY a.timestamp) AS prev_timestamp
+          FROM
+            habits h
+          LEFT JOIN
+            activities a ON h.habit_id = a.habit_id AND h.user_id = a.user_id
+          WHERE
+            h.user_id = @userId
+        ),
+        sequential_dates AS (
+          SELECT
+            habit_id,
+            user_id,
+            title,
+            note,
+            start_date,
+            end_date,
+            frequency,
+            reminders,
+            reminder_message,
+            target_type,
+            category,
+            quantity,
+            MAX(timestamp) AS most_recent_date,
+            CASE
+              WHEN frequency = 'daily' AND prev_timestamp = timestamp - INTERVAL '1 day' THEN 1
+              WHEN frequency = 'weekly' AND prev_timestamp = timestamp - INTERVAL '1 week' THEN 1
+              WHEN frequency = 'biweekly' AND prev_timestamp = timestamp - INTERVAL '2 weeks' THEN 1
+              WHEN frequency = 'monthly' AND prev_timestamp = timestamp - INTERVAL '1 month' THEN 1
+              ELSE 0
+            END AS is_consecutive        
+		      FROM ranked_activities
+          GROUP BY
+            habit_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity, timestamp, prev_timestamp
+        )
         SELECT
           habit_id,
           user_id,
@@ -196,33 +208,12 @@ class HabitRepository extends ChangeNotifier {
           target_type,
           category,
           quantity,
-          MAX(timestamp) AS most_recent_date,
-          COUNT(DISTINCT date_group) AS sequential_date_count
+          SUM(is_consecutive) + 1 as streak
         FROM
-          date_diffs
+          sequential_dates
         GROUP BY
-          habit_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity
-      )
-      SELECT
-        habit_id,
-        user_id,
-        title,
-        note,
-        start_date,
-        end_date,
-        frequency,
-        reminders,
-        reminder_message,
-        target_type,
-        category,
-        quantity,
-        sequential_date_count
-      FROM
-        sequential_dates
-      ORDER BY
-        habit_id,
-        user_id;
-    ''';
+            habit_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity
+      ''';
       List<List<dynamic>> results = await databaseConnection.execute(
         Sql.named(query),
         parameters: {
@@ -290,27 +281,14 @@ class HabitRepository extends ChangeNotifier {
       WITH ranked_activities AS (
         SELECT
           h.*,
-          a.timestamp,
-          ROW_NUMBER() OVER (PARTITION BY a.habit_id, a.user_id ORDER BY a.timestamp) AS seq
+		      a.timestamp,
+          LAG(a.timestamp) OVER (PARTITION BY a.user_id, a.habit_id ORDER BY a.timestamp) AS prev_timestamp
         FROM
           habits h
         LEFT JOIN
           activities a ON h.habit_id = a.habit_id AND h.user_id = a.user_id
         WHERE
           h.user_id = @userId
-      ),
-      date_diffs AS (
-        SELECT
-          *,
-          CASE
-            WHEN frequency = 'daily' THEN timestamp - INTERVAL '1 day' * (seq - 1)
-            WHEN frequency = 'weekly' THEN timestamp - INTERVAL '1 week' * (seq - 1)
-            WHEN frequency = 'biweekly' THEN timestamp - INTERVAL '2 weeks' * (seq - 1)
-            WHEN frequency = 'monthly' THEN timestamp - INTERVAL '1 month' * (seq - 1)
-            ELSE timestamp -- default to daily if frequency is not recognized
-          END AS date_group
-        FROM
-          ranked_activities
       ),
       sequential_dates AS (
         SELECT
@@ -327,15 +305,22 @@ class HabitRepository extends ChangeNotifier {
           category,
           quantity,
           MAX(timestamp) AS most_recent_activity,
-          COUNT(DISTINCT date_group) AS sequential_date_count
+          CASE
+              WHEN frequency = 'daily' AND prev_timestamp = timestamp - INTERVAL '1 day' THEN 1
+              WHEN frequency = 'weekly' AND prev_timestamp = timestamp - INTERVAL '1 week' THEN 1
+              WHEN frequency = 'biweekly' AND prev_timestamp = timestamp - INTERVAL '2 weeks' THEN 1
+              WHEN frequency = 'monthly' AND prev_timestamp = timestamp - INTERVAL '1 month' THEN 1
+              ELSE 0
+          END AS is_consecutive
         FROM
-          date_diffs
+          ranked_activities
         GROUP BY
-          habit_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity
+          habit_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity, timestamp, prev_timestamp
       ),
       due_habits AS (
         SELECT
           sequential_dates.*,
+          SUM(is_consecutive) +1 as streak,
           CASE
             WHEN frequency = 'daily' THEN most_recent_activity + INTERVAL '1 day'
             WHEN frequency = 'weekly' THEN most_recent_activity + INTERVAL '1 week'
@@ -344,6 +329,8 @@ class HabitRepository extends ChangeNotifier {
             ELSE most_recent_activity + INTERVAL '1 day' -- default to daily
           END AS next_due_date
         FROM sequential_dates
+		GROUP BY
+          habit_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity, most_recent_activity, is_consecutive
       )
       SELECT
         habit_id,
@@ -358,7 +345,7 @@ class HabitRepository extends ChangeNotifier {
         target_type,
         category,
         quantity,
-        sequential_date_count,
+        streak,
         next_due_date
       FROM
         due_habits
@@ -366,15 +353,14 @@ class HabitRepository extends ChangeNotifier {
         next_due_date::text like @date
         OR (next_due_date IS NULL AND start_date <= CURRENT_DATE)
       ORDER BY
-        habit_id,
-	      user_id;
+        habit_id, user_id;
     ''';
 
       List<List<dynamic>> results = await databaseConnection.execute(
         Sql.named(query),
         parameters: {
           'userId': userId,
-          'date': date,
+          'date': dateLike,
         },
       );
       return results;

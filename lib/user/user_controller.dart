@@ -83,7 +83,7 @@ class UserController extends ChangeNotifier {
 
     final streakResults = await _userRepo.selectUsersStreaks(currentUserId!);
     if (streakResults.isNotEmpty) {
-      final streaks = streakResults.map((row) => row[3]).toList();
+      final streaks = streakResults.map((row) => row[2]).toList();
       longestStreak = streaks.reduce((a, b) => a > b ? a : b);
     }
     final user = User(
