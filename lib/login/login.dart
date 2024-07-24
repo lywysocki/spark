@@ -79,7 +79,7 @@ class _UserFormFields extends StatefulWidget {
 
 class _UserFormFieldsState extends State<_UserFormFields> {
   FriendshipController? _friendshipController;
-  //HabitController? _habitController;
+  HabitController? _habitController;
   AchievementsController? _achievementsController;
   UserController? controller;
   final userFormKey = GlobalKey<FormState>();
@@ -97,7 +97,7 @@ class _UserFormFieldsState extends State<_UserFormFields> {
     userFormKey.currentState?.reset();
 
     _friendshipController = context.read<FriendshipController>();
-    // _habitController = context.read<HabitController>();
+    _habitController = context.read<HabitController>();
     _achievementsController = context.read<AchievementsController>();
   }
 
@@ -165,7 +165,7 @@ class _UserFormFieldsState extends State<_UserFormFields> {
     final userId = (await controller!.getCurrentUser()).userId;
 
     await _friendshipController!.updateUser(userId);
-    //await _habitController!.updateUser(userId);
+    await _habitController!.updateUser(userId);
     await _achievementsController!.updateUser(userId);
   }
 

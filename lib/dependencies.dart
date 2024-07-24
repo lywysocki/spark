@@ -18,10 +18,7 @@ class Dependencies extends StatelessWidget {
           create: (context) => UserController(),
         ),
         ChangeNotifierProvider(
-          create: (context) => HabitController(
-            //TODO: laura remove this
-            currentUserId: context.read<UserController>().currentUserId!,
-          ),
+          create: (context) => HabitController(),
         ),
         ChangeNotifierProvider(
           create: (context) => AchievementsController(),

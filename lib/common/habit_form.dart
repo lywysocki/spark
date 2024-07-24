@@ -127,7 +127,6 @@ class _NewHabitFormState extends State<NewHabitForm> {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
       _habitController.createNewHabit(
-        _habitController.currentUserId,
         _title,
         _notes,
         _startDate,
