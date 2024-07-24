@@ -100,7 +100,7 @@ class _HabitTilesState extends State<_HabitTiles> {
               title: Text(habit.title),
               destination: ViewHabitScreen(
                 habitID: habit.habitId,
-                userID: widget.userID,
+                userID: habit.userId,
               ),
               trailingWidget: const Row(
                 mainAxisSize: MainAxisSize.min,

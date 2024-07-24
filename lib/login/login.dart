@@ -9,6 +9,8 @@ import 'package:spark/friends/friendship_controller.dart';
 import 'package:spark/main.dart';
 import 'package:spark/user/user_controller.dart';
 
+import 'package:spark/habits/habit_controller.dart';
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
