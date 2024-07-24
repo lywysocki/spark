@@ -61,15 +61,15 @@ class _ViewHabitScreenState extends State<ViewHabitScreen> {
       body: ListView(
         children: [
           if (!editMode)
-            const Center(
+            Center(
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('10'),
-                  SizedBox(
+                  Text('${widget.habit.streak}'),
+                  const SizedBox(
                     width: 5,
                   ),
-                  Icon(Icons.flare_outlined),
+                  const Icon(Icons.flare_outlined),
                 ],
               ),
             ),

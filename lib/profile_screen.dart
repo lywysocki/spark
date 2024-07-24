@@ -50,16 +50,15 @@ class UserProfileScreen extends StatelessWidget {
                 const SizedBox(
                   height: 50,
                 ),
-                const CommonCardTile(
+                CommonCardTile(
                   category: '',
-                  title: Text('Highest Streak'),
+                  title: const Text('Highest Streak'),
                   trailingWidget: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      //TODO: highest streak
-                      Text('10'),
-                      SizedBox(width: 8),
-                      Icon(Icons.flare_outlined),
+                      Text('${controller.currentUser!.longestStreak}'),
+                      const SizedBox(width: 8),
+                      const Icon(Icons.flare_outlined),
                     ],
                   ),
                 ),
