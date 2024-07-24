@@ -147,7 +147,7 @@ class UserRepository extends ChangeNotifier {
             LAG(a.timestamp) OVER (PARTITION BY a.user_id, a.habit_id ORDER BY a.timestamp) AS prev_timestamp
           FROM activities a
           JOIN habits h ON a.habit_id = h.habit_id
-          WHERE h.user_id = 1
+          WHERE h.user_id = @userId
         ),
         consecutive_activities AS (
           SELECT
