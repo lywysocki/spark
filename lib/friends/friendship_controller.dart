@@ -38,12 +38,20 @@ class FriendshipController extends ChangeNotifier {
 
   //Create
   Future<void> sendFriendRequest(String username) async {
-    final results =
-        await _friendRepo.createFriendshipRequest(_currentUserId, username);
-    if (!results) {
-      throw "Could not send friend request.";
+    final exists = await _friendRepo.selectFriendshipByUsername(
+      _currentUserId,
+      username,
+    );
+    if (exists.isNotEmpty) {
+      throw "This friendship already exists";
+    } else {
+      final results =
+          await _friendRepo.createFriendshipRequest(_currentUserId, username);
+      if (!results) {
+        throw "Could not send friend request.";
+      }
+      await _load();
     }
-    await _load();
   }
 
   Future<List<Friend>> getPendingRequests() async {
