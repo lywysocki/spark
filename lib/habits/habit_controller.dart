@@ -81,7 +81,7 @@ class HabitController extends ChangeNotifier {
       habits.add(h);
     }
 
-    print("All habits: $habits");
+    debugPrint("All habits: $habits");
 
     return habits;
   }
@@ -90,7 +90,6 @@ class HabitController extends ChangeNotifier {
     final dateFormat = DateFormat('yyyy-MM-dd');
     DateTime now = DateTime.now();
     String today = dateFormat.format(now);
-    debugPrint(today);
 
     List<List<dynamic>> todaysHabitsAllData =
         await _habitRepo.selectHabitsByDate(_currentUserId, today);
@@ -132,7 +131,7 @@ class HabitController extends ChangeNotifier {
       habits.add(h);
     }
 
-    print("today's habits: $habits");
+    debugPrint("today's habits: $habits");
     return habits;
   }
 
@@ -140,7 +139,6 @@ class HabitController extends ChangeNotifier {
     final dateFormat = DateFormat('yyyy-MM-dd');
     DateTime tom = DateTime.now().add(const Duration(days: 1));
     String tomorrow = dateFormat.format(tom);
-    debugPrint(tomorrow);
 
     // Get tomorrow's habits
     List<List<dynamic>> tomorrowsHabitsAllData =
@@ -183,7 +181,7 @@ class HabitController extends ChangeNotifier {
       habits.add(h);
     }
 
-    print("Tomorrow's habits: $habits");
+    debugPrint("Tomorrow's habits: $habits");
     return habits;
   }
 
@@ -223,9 +221,9 @@ class HabitController extends ChangeNotifier {
         quantity,
       );
 
-      print("habit created");
+      debugPrint("habit created");
       await _load();
-      print("loaded");
+      debugPrint("loaded");
       notifyListeners();
     }
   }
