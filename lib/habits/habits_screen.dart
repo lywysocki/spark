@@ -99,17 +99,16 @@ class _HabitTilesState extends State<_HabitTiles> {
               category: 'None',
               title: Text(habit.title),
               destination: ViewHabitScreen(
-                habitID: habit.habitId,
-                userID: habit.userId,
+                habit: habit,
               ),
-              trailingWidget: const Row(
+              trailingWidget: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('10'),
-                  SizedBox(
+                  Text('${habit.streak}'),
+                  const SizedBox(
                     width: 5,
                   ),
-                  Icon(Icons.flare_outlined),
+                  const Icon(Icons.flare_outlined),
                 ],
               ),
             ),

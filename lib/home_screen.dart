@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:spark/common/common_tile.dart';
 import 'package:spark/habits/view_habit_screen.dart';
@@ -29,7 +30,7 @@ class HomeScreen extends StatelessWidget {
                       width: 8,
                     ),
                     Text(
-                      'Tuesday, May 21st',
+                      DateFormat('EEEE, MMMM d').format(DateTime.now()),
                       style: theme.titleSmall,
                     ),
                   ],
@@ -66,17 +67,16 @@ class HomeScreen extends StatelessWidget {
                     child: CommonCardTile(
                       title: Text(habit.title),
                       destination: ViewHabitScreen(
-                        habitID: habit.habitId,
-                        userID: habit.userId,
+                        habit: habit,
                       ),
-                      trailingWidget: const Row(
+                      trailingWidget: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text('10'),
-                          SizedBox(
+                          Text('${habit.streak}'),
+                          const SizedBox(
                             width: 5,
                           ),
-                          Icon(Icons.flare_outlined),
+                          const Icon(Icons.flare_outlined),
                         ],
                       ),
                     ),
@@ -100,17 +100,16 @@ class HomeScreen extends StatelessWidget {
                     child: CommonCardTile(
                       title: Text(habit.title),
                       destination: ViewHabitScreen(
-                        habitID: habit.habitId,
-                        userID: habit.userId,
+                        habit: habit,
                       ),
-                      trailingWidget: const Row(
+                      trailingWidget: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text('10'),
-                          SizedBox(
+                          Text('${habit.streak}'),
+                          const SizedBox(
                             width: 5,
                           ),
-                          Icon(Icons.flare_outlined),
+                          const Icon(Icons.flare_outlined),
                         ],
                       ),
                     ),
