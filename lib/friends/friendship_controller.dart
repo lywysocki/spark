@@ -112,13 +112,13 @@ class FriendshipController extends ChangeNotifier {
           title: hrow[1],
           note: hrow[2],
           startDate: hrow[3],
-          end: hrow[4],
+          endDate: hrow[4],
           frequency: hrow[5],
           reminders: hrow[6],
-          msg: hrow[7],
+          reminderMessage: hrow[7],
           targetType: hrow[8],
           category: hrow[9],
-          quan: hrow[10],
+          quantity: hrow[10],
         );
         sharedHabits.add(h);
       }
