@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:spark/dependencies.dart';
 import 'package:spark/friends/friends_screen.dart';
 import 'package:spark/habits/habits_screen.dart';
@@ -8,8 +10,18 @@ import 'package:spark/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:spark/theme.dart';
 import 'package:spark/util.dart';
+import 'package:window_manager/window_manager.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await windowManager.ensureInitialized();
+
+  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+    WindowManager.instance.setMinimumSize(const Size(395, 810));
+    WindowManager.instance.setMaximumSize(const Size(395, 810));
+  }
+
   runApp(const MyApp());
 }
 
