@@ -11,11 +11,22 @@ class AchievementsScreen extends StatefulWidget {
 }
 
 class _AchievementsScreenState extends State<AchievementsScreen> {
+  String currentSearch = '';
+
+  String getMedalLevel(int timesEarned) {
+    if (timesEarned >= 10) {
+      return 'gold';
+    } else if (timesEarned >= 5) {
+      return 'silver';
+    } else {
+      return 'bronze';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final controller = context.watch<AchievementsController>();
+    final achievementController = context.watch<AchievementsController>();
     final theme = Theme.of(context).textTheme;
-    String currentSearch = '';
 
     return Scaffold(
       appBar: AppBar(
@@ -46,7 +57,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
                     width: 8,
                   ),
                   const IconButton(
-                    onPressed: null,
+                    onPressed: null, // TODO(LW): add ability to filter
                     icon: Icon(Icons.filter_alt),
                   ),
                 ],
@@ -55,33 +66,35 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
             const SizedBox(
               height: 20.0,
             ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                child: GridView.builder(
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: MediaQuery.of(context).size.width ~/ 150,
-                    mainAxisSpacing: 32.0,
-                    crossAxisSpacing: 32.0,
+            achievementController.achievements.isEmpty
+                ? const Expanded(
+                    child: _EmptyAchievementsList(),
+                  )
+                : Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                      child: GridView.builder(
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount:
+                              MediaQuery.of(context).size.width ~/ 150,
+                          mainAxisSpacing: 32.0,
+                          crossAxisSpacing: 32.0,
+                        ),
+                        itemBuilder: (_, index) {
+                          final achievement =
+                              achievementController.achievements[index];
+
+                          return _BadgeIcon(
+                            timesEarned: achievement.quantity ?? 1,
+                            name: achievement.achievementTitle,
+                            medalLevel:
+                                getMedalLevel(achievement.quantity ?? 1),
+                          );
+                        },
+                        itemCount: achievementController.achievements.length,
+                      ),
+                    ),
                   ),
-
-                  /// TODO(LW): add in specific badge object
-                  itemBuilder: (_, index) => _BadgeIcon(
-                    /// TODO: fill with real value
-                    timesEarned: 10,
-
-                    /// TODO: fill with achievement name
-                    name: 'Achievement',
-
-                    /// TODO: fill with real value or leave null
-                    medalLevel: index % 3 == 0 ? 'silver' : null,
-                  ),
-
-                  /// TODO: fill with allAchievements.length
-                  itemCount: controller.achievements.length,
-                ),
-              ),
-            ),
           ],
         ),
       ),
@@ -97,14 +110,14 @@ class _BadgeIcon extends StatelessWidget {
   });
 
   final String name;
-  // bronze, silver, (default) gold
+  // (default) bronze, silver, gold
   final String? medalLevel;
   // if applicable
   final int? timesEarned;
 
   @override
   Widget build(BuildContext context) {
-    final medal = medalLevel ?? 'gold';
+    final medal = medalLevel ?? 'bronze';
     final theme = Theme.of(context).textTheme;
 
     return Card(
@@ -137,6 +150,35 @@ class _BadgeIcon extends StatelessWidget {
                 ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _EmptyAchievementsList extends StatelessWidget {
+  const _EmptyAchievementsList();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.all(50.0),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.sentiment_dissatisfied_rounded,
+              size: 50,
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Text(
+              'You haven\'t earned any achievements yet.\n Keep completing and maintaining habits to earn some!',
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
       ),
     );

@@ -159,7 +159,7 @@ class _FriendTilesState extends State<_FriendTiles> {
                         if (!friend.isPending)
                           PopupMenuButton(
                             elevation: 10,
-                            menuPadding: EdgeInsets.zero,
+                            padding: EdgeInsets.zero,
                             shape: const BeveledRectangleBorder(
                               borderRadius:
                                   BorderRadius.all(Radius.circular(4)),
