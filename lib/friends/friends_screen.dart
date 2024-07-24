@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:spark/common/common_empty_list.dart';
 import 'package:spark/common/common_loading.dart';
 import 'package:spark/common/common_search_bar.dart';
 import 'package:spark/common/common_tile.dart';
@@ -109,7 +110,10 @@ class _FriendTilesState extends State<_FriendTiles> {
           .contains(widget.currentSearch.toLowerCase()),
     );
     return displayFriends.isEmpty
-        ? const _EmptyFriendsList()
+        ? const EmptyListWidget(
+            text:
+                'You don\'t have any friends yet.\n Add a new friend to get started!',
+          )
         : Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -207,35 +211,6 @@ class _FriendTilesState extends State<_FriendTiles> {
                 ),
             ],
           );
-  }
-}
-
-class _EmptyFriendsList extends StatelessWidget {
-  const _EmptyFriendsList();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.all(50.0),
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.sentiment_dissatisfied_rounded,
-              size: 50,
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            Text(
-              'You don\'t have any friends yet.\n Add a new friend to get started!',
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }
 

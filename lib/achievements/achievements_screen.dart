@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart' hide SearchBar;
 import 'package:provider/provider.dart';
 import 'package:spark/achievements/achievements_controller.dart';
+import 'package:spark/common/common_empty_list.dart';
 import 'package:spark/common/common_search_bar.dart';
 
 class AchievementsScreen extends StatefulWidget {
@@ -68,7 +69,10 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
             ),
             achievementController.achievements.isEmpty
                 ? const Expanded(
-                    child: _EmptyAchievementsList(),
+                    child: EmptyListWidget(
+                      text:
+                          'You don\'t have any friends yet.\n Add a new friend to get started!',
+                    ),
                   )
                 : Expanded(
                     child: Padding(
