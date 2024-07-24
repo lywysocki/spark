@@ -228,6 +228,58 @@ class HabitController extends ChangeNotifier {
     }
   }
 
+  Future<void> updateHabit(
+    String habitId, {
+    String? newTitle,
+    String? newNote,
+    DateTime? newEndDate,
+    String? newFrequency,
+    bool? newReminder,
+    String? newReminderMessage,
+    String? newTargetType,
+    String? newCategory,
+    int? newQuantity,
+  }) async {
+    if (newTitle != null) {
+      await _habitRepo.updateHabitTitle(habitId, newTitle);
+    }
+
+    if (newNote != null) {
+      await _habitRepo.updateHabitNote(habitId, newNote);
+    }
+
+    if (newEndDate != null) {
+      await _habitRepo.updateHabitEnd(habitId, newEndDate);
+    }
+
+    if (newFrequency != null) {
+      await _habitRepo.updateHabitFrequency(habitId, newFrequency);
+    }
+
+    if (newReminder != null) {
+      await _habitRepo.updateHabitReminders(habitId, newReminder);
+    }
+
+    if (newReminderMessage != null) {
+      await _habitRepo.updateHabitReminderMessage(habitId, newReminderMessage);
+    }
+
+    if (newTargetType != null) {
+      await _habitRepo.updateHabitTargetType(habitId, newTargetType);
+    }
+
+    if (newCategory != null) {
+      await _habitRepo.updateHabitCategory(habitId, newCategory);
+    }
+
+    if (newQuantity != null) {
+      await _habitRepo.updateHabitQuantity(habitId, newQuantity);
+    }
+
+    await _load();
+    notifyListeners();
+  }
+
   Future<List<Habit>> getAllHabits() async {
     return allHabits;
   }

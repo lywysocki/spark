@@ -901,7 +901,7 @@ class HabitRepository extends ChangeNotifier {
     }
   }
 
-  Future<bool> updateHabitQuantity(String habitID, String newQuantity) async {
+  Future<bool> updateHabitQuantity(String habitID, int newQuantity) async {
     final databaseConnection = await Connection.open(
       Endpoint(
         host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host

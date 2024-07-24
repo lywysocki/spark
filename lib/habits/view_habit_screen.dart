@@ -51,8 +51,6 @@ class _ViewHabitScreenState extends State<ViewHabitScreen> {
             child: Text(!editMode ? 'Edit' : 'Done'),
             onPressed: () {
               editMode = !editMode;
-
-              /// TODO: Update habit with new form inputs
               setState(() {});
             },
           ),
@@ -76,7 +74,7 @@ class _ViewHabitScreenState extends State<ViewHabitScreen> {
           Padding(
             padding: const EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 8.0),
             child: !editMode
-                ? _HabitInformation(
+                ? HabitInformation(
                     habit: widget.habit,
                   )
                 : NewHabitForm(
@@ -92,6 +90,8 @@ class _ViewHabitScreenState extends State<ViewHabitScreen> {
                       TimeOfDay(hour: 4, minute: 55),
                     ], // TODO: habit reminders are currently just a bool
                     initialMessage: widget.habit.reminderMessage,
+                    edit: true,
+                    habit: widget.habit,
                   ),
           ),
         ],
@@ -100,8 +100,8 @@ class _ViewHabitScreenState extends State<ViewHabitScreen> {
   }
 }
 
-class _HabitInformation extends StatelessWidget {
-  const _HabitInformation({required this.habit});
+class HabitInformation extends StatelessWidget {
+  const HabitInformation({super.key, required this.habit});
   final Habit habit;
 
   @override

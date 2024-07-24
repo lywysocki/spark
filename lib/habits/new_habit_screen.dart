@@ -21,7 +21,9 @@ class NewHabitScreen extends StatelessWidget {
             const SizedBox(
               height: 15,
             ),
-            const NewHabitForm(),
+            const NewHabitForm(
+              edit: false,
+            ),
           ],
         ),
       ),

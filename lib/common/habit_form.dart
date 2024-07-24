@@ -6,6 +6,7 @@ import 'package:spark/common/common_habit_header.dart';
 import 'package:spark/common/common_reminder.dart';
 import 'package:spark/common/common_textfield.dart';
 import 'package:spark/habits/habit_controller.dart';
+import 'package:spark/habits/habit.dart';
 
 class NewHabitForm extends StatefulWidget {
   const NewHabitForm({
@@ -19,6 +20,8 @@ class NewHabitForm extends StatefulWidget {
     this.initialFrequency,
     this.initialReminders,
     this.initialMessage,
+    required this.edit,
+    this.habit,
   });
 
   final String? initialTitle;
@@ -30,6 +33,8 @@ class NewHabitForm extends StatefulWidget {
   final String? initialFrequency;
   final List<TimeOfDay>? initialReminders;
   final String? initialMessage;
+  final bool edit;
+  final Habit? habit;
 
   @override
   State<NewHabitForm> createState() => _NewHabitFormState();
@@ -141,7 +146,25 @@ class _NewHabitFormState extends State<NewHabitForm> {
     }
   }
 
-  late String _title;
+  void _updateHabit() {
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+      _habitController.updateHabit(
+        widget.habit!.habitId,
+        newTitle: _title,
+        newNote: _notes,
+        newEndDate: _endDate,
+        newFrequency: _frequency,
+        newReminder: _reminders,
+        newReminderMessage: _reminderMessage,
+        newTargetType: _targetType,
+        newCategory: _category,
+        newQuantity: _quantity,
+      );
+    }
+  }
+
+  String _title = '';
   String _notes = '';
   DateTime _startDate = DateTime.now();
   DateTime? _endDate;
@@ -149,7 +172,7 @@ class _NewHabitFormState extends State<NewHabitForm> {
   final bool _reminders = false;
   String? _reminderMessage;
   final String _targetType = 'NO';
-  late String _category;
+  String _category = '';
   int? _quantity;
 
   @override
@@ -263,8 +286,7 @@ class _NewHabitFormState extends State<NewHabitForm> {
             children: [
               FilledButton(
                 onPressed: () {
-                  _submitForm();
-                  print("form submitted");
+                  widget.edit ? _updateHabit() : _submitForm();
                   Navigator.pop(context);
                 },
                 child: const Text('Submit'),
