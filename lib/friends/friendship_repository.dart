@@ -131,6 +131,48 @@ class FriendshipRepository extends ChangeNotifier {
     }
   }
 
+  Future<List<List<dynamic>>> selectFriendshipByUsername(
+    String userId1,
+    String username2,
+  ) async {
+    final databaseConnection = await Connection.open(
+      Endpoint(
+        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
+        //port: 5432, // port
+        database: 'spark', // database name
+        username: 'postgres', // username
+        password: 'get\$park3d!', // password
+      ),
+    );
+    try {
+      List<List<dynamic>> idResult = await databaseConnection.execute(
+        Sql.named('select user_id from users where username = @username'),
+        parameters: {'username': username2},
+      );
+      if (idResult.length > 1) {
+        debugPrint('Error: Duplicate usernames');
+        return [];
+      }
+      int friendID = idResult[0][0];
+
+      final results = await databaseConnection.execute(
+        Sql.named('''SELECT * FROM friendships
+        WHERE (user1_id = @id1 AND user2_id = @id2) OR (user1_id = @id2 AND user2_id = @id1)'''),
+        parameters: {
+          'id1': userId1,
+          'id2': friendID,
+        },
+      );
+
+      return results;
+    } catch (e) {
+      debugPrint('Error: ${e.toString()}');
+      return List.empty();
+    } finally {
+      await databaseConnection.close();
+    }
+  }
+
   Future<List<List<dynamic>>> selectPendingRequests(String userID) async {
     final databaseConnection = await Connection.open(
       Endpoint(
