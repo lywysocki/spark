@@ -328,7 +328,6 @@ class HabitController extends ChangeNotifier {
 
     if (habits.length == 1) {
       _habitRepo.createActivity(_currentUserId, habitID, quantity);
-      debugPrint("activity created in controller");
     } else {
       duplicateHabitIDs(habits);
       debugPrint(
