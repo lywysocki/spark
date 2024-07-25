@@ -77,7 +77,7 @@ class HabitController extends ChangeNotifier {
         reminderMessage: row[8],
         targetType: row[9],
         category: row[10],
-        reminderTimes: row[11],
+        reminderTimes: stringListToTimeOfDayList(row[11]),
         streak: row[12],
       );
       habits.add(h);
@@ -125,7 +125,7 @@ class HabitController extends ChangeNotifier {
         reminderMessage: row[8],
         targetType: row[9],
         category: row[10],
-        reminderTimes: row[11],
+        reminderTimes: stringListToTimeOfDayList(row[11]),
         streak: row[12],
       );
       habits.add(h);
@@ -174,7 +174,7 @@ class HabitController extends ChangeNotifier {
         reminderMessage: row[8],
         targetType: row[9],
         category: row[10],
-        reminderTimes: row[11],
+        reminderTimes: stringListToTimeOfDayList(row[11]),
         streak: row[12],
       );
       habits.add(h);
@@ -216,7 +216,7 @@ class HabitController extends ChangeNotifier {
         reminderMessage,
         targetType,
         category,
-        reminderTimes,
+        timeOfDayListToStringList(reminderTimes),
       );
 
       await _load();
@@ -269,7 +269,10 @@ class HabitController extends ChangeNotifier {
     }
 
     if (newReminderTimes != null) {
-      await _habitRepo.updateHabitReminderTimes(habitId, newReminderTimes);
+      await _habitRepo.updateHabitReminderTimes(
+        habitId,
+        timeOfDayListToStringList(newReminderTimes),
+      );
     }
 
     await _load();
@@ -315,7 +318,7 @@ class HabitController extends ChangeNotifier {
       reminderMessage: habitAllData[0][8],
       targetType: habitAllData[0][9],
       category: habitAllData[0][10],
-      reminderTimes: habitAllData[0][11],
+      reminderTimes: stringListToTimeOfDayList(habitAllData[0][11]),
       streak: habitAllData[0][12],
     );
 
@@ -359,7 +362,7 @@ class HabitController extends ChangeNotifier {
         reminderMessage: row[8],
         targetType: row[9],
         category: row[10],
-        reminderTimes: row[11],
+        reminderTimes: stringListToTimeOfDayList(row[11]),
         streak: row[12],
       );
       habits.add(h);
@@ -471,4 +474,30 @@ class HabitController extends ChangeNotifier {
       debugPrint('${result.toString()} \n');
     }
   }
+}
+
+List<TimeOfDay>? stringListToTimeOfDayList(List<String>? sTime) {
+  if (sTime == null) {
+    return [];
+  }
+  List<TimeOfDay>? times = [];
+  for (var t in sTime) {
+    TimeOfDay time = TimeOfDay(
+      hour: int.parse(t.split(":")[0]),
+      minute: int.parse(t.split(":")[1]),
+    );
+    times.add(time);
+  }
+  return times;
+}
+
+List<String>? timeOfDayListToStringList(List<TimeOfDay>? times) {
+  if (times == null) {
+    return [];
+  }
+  List<String>? strings = [];
+  for (var t in times) {
+    strings.add(t.toString());
+  }
+  return strings;
 }

@@ -118,7 +118,7 @@ class FriendshipController extends ChangeNotifier {
           reminderMessage: hrow[7],
           targetType: hrow[8],
           category: hrow[9],
-          reminderTimes: hrow[10],
+          reminderTimes: stringListToTimeOfDayList(hrow[10]),
         );
         sharedHabits.add(h);
       }
@@ -142,4 +142,30 @@ class FriendshipController extends ChangeNotifier {
 
     await _load();
   }
+}
+
+List<TimeOfDay>? stringListToTimeOfDayList(List<String>? sTime) {
+  if (sTime == null) {
+    return [];
+  }
+  List<TimeOfDay>? times = [];
+  for (var t in sTime) {
+    TimeOfDay time = TimeOfDay(
+      hour: int.parse(t.split(":")[0]),
+      minute: int.parse(t.split(":")[1]),
+    );
+    times.add(time);
+  }
+  return times;
+}
+
+List<String>? timeOfDayListToStringList(List<TimeOfDay>? times) {
+  if (times == null) {
+    return [];
+  }
+  List<String>? strings = [];
+  for (var t in times) {
+    strings.add(t.toString());
+  }
+  return strings;
 }

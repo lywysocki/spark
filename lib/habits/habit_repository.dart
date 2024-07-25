@@ -17,7 +17,7 @@ class HabitRepository extends ChangeNotifier {
     String? reminderMessage,
     String targetType,
     String category,
-    List<TimeOfDay>? reminderTimes,
+    List<String>? reminderTimes,
   ) async {
     final databaseConnection = await Connection.open(
       Endpoint(
@@ -100,7 +100,7 @@ class HabitRepository extends ChangeNotifier {
     String? reminderMessage,
     required String targetType,
     required String category,
-    List<TimeOfDay>? reminderTimes,
+    List<String>? reminderTimes,
   }) async {
     final databaseConnection = await Connection.open(
       Endpoint(
@@ -951,7 +951,7 @@ class HabitRepository extends ChangeNotifier {
 
   Future<bool> updateHabitReminderTimes(
     String habitID,
-    List<TimeOfDay>? newReminderTimes,
+    List<String>? newReminderTimes,
   ) async {
     final databaseConnection = await Connection.open(
       Endpoint(
