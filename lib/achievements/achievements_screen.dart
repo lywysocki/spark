@@ -92,7 +92,10 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: loading
-            ? const CommonLoadingWidget()
+            ? const Padding(
+                padding: EdgeInsets.symmetric(vertical: 140.0),
+                child: CommonLoadingWidget(),
+              )
             : Column(
                 children: [
                   Padding(
