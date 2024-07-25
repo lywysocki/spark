@@ -246,12 +246,13 @@ class _NewHabitFormState extends State<NewHabitForm> {
                 },
                 child: const Text('Submit'),
               ),
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: const Text('Close'),
-              ),
+              if (!widget.edit)
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Close'),
+                ),
             ],
           ),
         ),
