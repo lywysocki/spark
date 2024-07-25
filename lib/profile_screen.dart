@@ -21,6 +21,17 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   final List<Habit> sharedHabits = [];
 
   @override
+  void initState() {
+    super.initState();
+    initialize();
+  }
+
+  Future<void> initialize() async {
+    final controller = context.read<UserController>();
+    await controller.load();
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
