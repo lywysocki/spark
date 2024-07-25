@@ -19,7 +19,7 @@ Spark is designed to help users establish and track their habits. Users can crea
 
 - **Language:** Dart
 - **Framework:** Flutter
-- **Backend:** PostgreSQL
+- **Backend:** PostgreSQL (Hosted on AWS)
 - **Design Tools:** Figma
 
 ## How to Run
@@ -29,9 +29,6 @@ Spark is designed to help users establish and track their habits. Users can crea
 Required:
 - Flutter SDK: [Install Flutter](https://flutter.dev/docs/get-started/install)
 - Dart: Included with Flutter SDK
-
-Optional:
-- PostgreSQL: [Install PostgreSQL](https://www.postgresql.org/download/)
 
 ### Installation
 
@@ -46,10 +43,6 @@ Optional:
     flutter pub get
     ```
 
-3. **Set up the PostgreSQL database (Admins only):**
-   - Create a new database in PostgreSQL.
-   - Update the `lib/config.dart` file with your database credentials.
-
 ### Running the App
 
 1. **Run the Flutter app:**
@@ -57,15 +50,10 @@ Optional:
     flutter run
     ```
 
-2. **Ensure the PostgreSQL server is running (Admins only):**
-    ```sh
-    sudo service postgresql start
-    ```
-
 ### Version Release
 
 1. **Download the release APK:**
-   - Go to the [Releases](https://github.com/your-username/spark/releases) page.
+   - Go to the [Releases](https://github.com/lywysocki/spark/releases) page.
    - Download the latest APK file.
 
 2. **Install the APK on your device:**
