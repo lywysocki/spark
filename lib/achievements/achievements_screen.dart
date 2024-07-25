@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart' hide SearchBar;
 import 'package:provider/provider.dart';
+import 'package:spark/achievements/achievement.dart';
 import 'package:spark/achievements/achievements_controller.dart';
+import 'package:spark/common/common_empty_list.dart';
+import 'package:spark/common/common_loading.dart';
 import 'package:spark/common/common_search_bar.dart';
 
 class AchievementsScreen extends StatefulWidget {
-  const AchievementsScreen({super.key});
+  const AchievementsScreen({super.key, this.userId});
+
+  final String? userId;
 
   @override
   State<AchievementsScreen> createState() => _AchievementsScreenState();
@@ -12,6 +17,8 @@ class AchievementsScreen extends StatefulWidget {
 
 class _AchievementsScreenState extends State<AchievementsScreen> {
   String currentSearch = '';
+  List<Achievement> achievements = [];
+  bool loading = false;
 
   String getMedalLevel(int timesEarned) {
     if (timesEarned >= 10) {
@@ -24,8 +31,27 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+
+    achievements.clear();
+    getAchievements();
+  }
+
+  Future<void> getAchievements() async {
+    loading = true;
+    final achievementController = context.read<AchievementsController>();
+    await achievementController.load();
+    achievements = widget.userId != null
+        ? await achievementController.getAchievements(userId: widget.userId)
+        : achievementController.achievements;
+
+    loading = false;
+    setState(() {});
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final achievementController = context.watch<AchievementsController>();
     final theme = Theme.of(context).textTheme;
 
     return Scaffold(
@@ -41,62 +67,62 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Row(
+        child: loading
+            ? const CommonLoadingWidget()
+            : Column(
                 children: [
-                  Expanded(
-                    child: CommonSearchBar(
-                      currentSearch: (item) =>
-                          setState(() => currentSearch = item),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: CommonSearchBar(
+                            currentSearch: (item) =>
+                                setState(() => currentSearch = item),
+                          ),
+                        ),
+                        const SizedBox(
+                          width: 8,
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(
-                    width: 8,
+                    height: 20.0,
                   ),
-                  const IconButton(
-                    onPressed: null, // TODO(LW): add ability to filter
-                    icon: Icon(Icons.filter_alt),
-                  ),
+                  achievements.isEmpty
+                      ? const EmptyListWidget(
+                          text:
+                              'You haven\'t earned any achievements yet.\n Keep completing and maintaining habits to earn some!',
+                        )
+                      : Expanded(
+                          child: Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 20.0),
+                            child: GridView.builder(
+                              gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount:
+                                    MediaQuery.of(context).size.width ~/ 150,
+                                mainAxisSpacing: 32.0,
+                                crossAxisSpacing: 32.0,
+                              ),
+                              itemBuilder: (_, index) {
+                                final achievement = achievements[index];
+
+                                return _BadgeIcon(
+                                  timesEarned: achievement.quantity ?? 1,
+                                  name: achievement.achievementTitle,
+                                  medalLevel:
+                                      getMedalLevel(achievement.quantity ?? 1),
+                                );
+                              },
+                              itemCount: achievements.length,
+                            ),
+                          ),
+                        ),
                 ],
               ),
-            ),
-            const SizedBox(
-              height: 20.0,
-            ),
-            achievementController.achievements.isEmpty
-                ? const Expanded(
-                    child: _EmptyAchievementsList(),
-                  )
-                : Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                      child: GridView.builder(
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount:
-                              MediaQuery.of(context).size.width ~/ 150,
-                          mainAxisSpacing: 32.0,
-                          crossAxisSpacing: 32.0,
-                        ),
-                        itemBuilder: (_, index) {
-                          final achievement =
-                              achievementController.achievements[index];
-
-                          return _BadgeIcon(
-                            timesEarned: achievement.quantity ?? 1,
-                            name: achievement.achievementTitle,
-                            medalLevel:
-                                getMedalLevel(achievement.quantity ?? 1),
-                          );
-                        },
-                        itemCount: achievementController.achievements.length,
-                      ),
-                    ),
-                  ),
-          ],
-        ),
       ),
     );
   }
@@ -150,35 +176,6 @@ class _BadgeIcon extends StatelessWidget {
                 ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _EmptyAchievementsList extends StatelessWidget {
-  const _EmptyAchievementsList();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.all(50.0),
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.sentiment_dissatisfied_rounded,
-              size: 50,
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            Text(
-              'You haven\'t earned any achievements yet.\n Keep completing and maintaining habits to earn some!',
-              textAlign: TextAlign.center,
-            ),
-          ],
         ),
       ),
     );

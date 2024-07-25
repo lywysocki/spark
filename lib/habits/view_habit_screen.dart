@@ -9,6 +9,7 @@ import 'package:spark/common/common_tile.dart';
 import 'package:spark/common/habit_form.dart';
 import 'package:flutter_calendar_carousel/flutter_calendar_carousel.dart'
     show CalendarCarousel;
+import 'package:spark/friends/friendship_controller.dart';
 import 'package:spark/habits/habit_controller.dart';
 
 import 'habit.dart';
@@ -108,7 +109,9 @@ class HabitInformation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final _habitController = context.watch<HabitController>();
+    final friendController = context.watch<FriendshipController>();
+
+    final habitController = context.watch<HabitController>();
     TextStyle textStyle = Theme.of(context).textTheme.titleSmall!;
     const fakeHasEndDate = true;
 
@@ -184,14 +187,81 @@ class HabitInformation extends StatelessWidget {
               trailingWidget: Icon(Icons.arrow_forward_ios_rounded),
             ),
             const SizedBox(
+              height: 5,
+            ),
+            Theme(
+              data: Theme.of(context).copyWith(
+                dividerColor: Colors.transparent,
+                hoverColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+                splashColor: Colors.transparent,
+              ),
+              child: CommonCardTile(
+                category: 'white',
+                title: ExpansionTile(
+                  childrenPadding: const EdgeInsetsDirectional.symmetric(
+                    horizontal: 15,
+                    vertical: 5,
+                  ),
+                  shape: null,
+                  tilePadding: EdgeInsets.zero,
+                  title: const Text('Share Habit with Friends'),
+                  children: [
+                    for (final friend in friendController.allFriends)
+                      Column(
+                        children: [
+                          const Divider(),
+                          InkWell(
+                            onTap: () async {
+                              SnackBar content = SnackBar(
+                                duration: const Duration(seconds: 3),
+                                content: Text(
+                                  'Habit shared with ${friend.username}',
+                                ),
+                              );
+                              try {
+                                habitController.createSharedHabit(
+                                  habit: habit,
+                                  friendUserId: friend.userId,
+                                );
+                              } catch (e) {
+                                content = SnackBar(
+                                  duration: const Duration(seconds: 3),
+                                  content: Text(
+                                    e.toString(),
+                                  ),
+                                );
+                              }
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                content,
+                              );
+                            },
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  friend.username,
+                                ),
+                                const Icon(Icons.send_rounded),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    const Divider(),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(
               height: 25,
             ),
-            FilledButton(
+            TextButton(
               onPressed: () {
-                _habitController.deleteHabit(habit.habitId);
+                habitController.deleteHabit(habit.habitId);
                 Navigator.pop(context);
               },
-              child: const Text('Delete'),
+              child: const Text('Delete habit'),
             ),
             const SizedBox(
               height: 25,

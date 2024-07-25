@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:spark/common/common_empty_list.dart';
 import 'package:spark/common/common_tile.dart';
 import 'package:spark/habits/view_habit_screen.dart';
 import 'package:spark/habits/habit_controller.dart';
@@ -45,7 +46,7 @@ class HomeScreen extends StatelessWidget {
                   style: theme.titleMedium,
                 ),
                 Text(
-                  'Here is your daily summary!',
+                  'Here is your daily summary...',
                   style: theme.bodySmall,
                 ),
               ],
@@ -58,32 +59,38 @@ class HomeScreen extends StatelessWidget {
             'Today\'s Habits',
             style: theme.titleMedium,
           ),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: habitController.todaysHabits
-                .map(
-                  (habit) => Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4.0),
-                    child: CommonCardTile(
-                      title: Text(habit.title),
-                      destination: ViewHabitScreen(
-                        habit: habit,
-                      ),
-                      trailingWidget: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text('${habit.streak}'),
-                          const SizedBox(
-                            width: 5,
-                          ),
-                          const Icon(Icons.flare_outlined),
-                        ],
-                      ),
-                    ),
-                  ),
+          habitController.todaysHabits.isEmpty
+              ? const EmptyListWidget(
+                  text:
+                      'Nothing to complete today...\nPress the plus button on the bottom right of the screen to create a new habit!',
                 )
-                .toList(),
-          ),
+              : Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: habitController.todaysHabits
+                      .map(
+                        (habit) => Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4.0),
+                          child: CommonCardTile(
+                            category: habit.category,
+                            title: Text(habit.title),
+                            destination: ViewHabitScreen(
+                              habit: habit,
+                            ),
+                            trailingWidget: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text('${habit.streak}'),
+                                const SizedBox(
+                                  width: 5,
+                                ),
+                                const Icon(Icons.flare_outlined),
+                              ],
+                            ),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                ),
           const SizedBox(
             height: 14,
           ),
@@ -91,32 +98,35 @@ class HomeScreen extends StatelessWidget {
             'Upcoming Habits',
             style: theme.titleMedium,
           ),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: habitController.tomorrowsHabits
-                .map(
-                  (habit) => Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4.0),
-                    child: CommonCardTile(
-                      title: Text(habit.title),
-                      destination: ViewHabitScreen(
-                        habit: habit,
-                      ),
-                      trailingWidget: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text('${habit.streak}'),
-                          const SizedBox(
-                            width: 5,
+          habitController.tomorrowsHabits.isEmpty
+              ? const EmptyListWidget(text: 'Nothing to complete tomorrow...')
+              : Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: habitController.tomorrowsHabits
+                      .map(
+                        (habit) => Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4.0),
+                          child: CommonCardTile(
+                            category: habit.category,
+                            title: Text(habit.title),
+                            destination: ViewHabitScreen(
+                              habit: habit,
+                            ),
+                            trailingWidget: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text('${habit.streak}'),
+                                const SizedBox(
+                                  width: 5,
+                                ),
+                                const Icon(Icons.flare_outlined),
+                              ],
+                            ),
                           ),
-                          const Icon(Icons.flare_outlined),
-                        ],
-                      ),
-                    ),
-                  ),
-                )
-                .toList(),
-          ),
+                        ),
+                      )
+                      .toList(),
+                ),
           const SizedBox(
             height: 75,
           ),

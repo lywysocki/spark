@@ -4,19 +4,53 @@ import 'package:provider/provider.dart';
 import 'package:spark/achievements/achievements_screen.dart';
 import 'package:spark/common/common_tile.dart';
 import 'package:spark/friends/friend.dart';
+import 'package:spark/habits/habit.dart';
+import 'package:spark/habits/habit_controller.dart';
 import 'package:spark/user/user_controller.dart';
 
-class UserProfileScreen extends StatelessWidget {
+class UserProfileScreen extends StatefulWidget {
   const UserProfileScreen({super.key, this.friend});
 
   final Friend? friend;
 
   @override
+  State<UserProfileScreen> createState() => _UserProfileScreenState();
+}
+
+class _UserProfileScreenState extends State<UserProfileScreen> {
+  final List<Habit> sharedHabits = [];
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    if (widget.friend != null) {
+      getSharedHabits();
+    }
+  }
+
+  Future<void> getSharedHabits() async {
+    final habitController = context.read<HabitController>();
+    final controller = context.read<UserController>();
+
+    sharedHabits.addAll(
+      await habitController.getSharedHabits(
+        userId: controller.currentUserId!,
+        friendUserId: widget.friend!.userId,
+      ),
+    );
+    setState(() {});
+  }
+
+  @override
   Widget build(BuildContext context) {
     final controller = context.watch<UserController>();
+
     return Stack(
       children: [
         Container(
+          // height: MediaQuery.sizeOf(context).height,
+          //width: MediaQuery.sizeOf(context).width,
           margin: const EdgeInsets.only(top: 120),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surface,
@@ -28,79 +62,135 @@ class UserProfileScreen extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(
-                  height: 90,
-                ),
-                Center(
-                  child: Text(
-                    friend?.getName() ?? controller.currentUser!.getName(),
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                ),
-                Center(
-                  child: Text(
-                    friend != null
-                        ? ''
-                        : 'Joined ${DateFormat('MMMM y').format(controller.currentUser!.joined)}',
-                    style: Theme.of(context).textTheme.labelSmall,
-                  ),
-                ),
-                const SizedBox(
-                  height: 50,
-                ),
-                CommonCardTile(
-                  category: '',
-                  title: const Text('Highest Streak'),
-                  trailingWidget: Row(
-                    mainAxisSize: MainAxisSize.min,
+                Flexible(
+                  child: ListView(
                     children: [
-                      Text('${controller.currentUser!.longestStreak}'),
-                      const SizedBox(width: 8),
-                      const Icon(Icons.flare_outlined),
+                      const SizedBox(
+                        height: 90,
+                      ),
+                      Center(
+                        child: Text(
+                          widget.friend?.getName() ??
+                              controller.currentUser!.getName(),
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                      ),
+                      Center(
+                        child: Text(
+                          widget.friend != null
+                              ? ''
+                              : 'Joined ${DateFormat('MMMM y').format(controller.currentUser!.joined)}',
+                          style: Theme.of(context).textTheme.labelSmall,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 50,
+                      ),
+                      if (widget.friend == null)
+                        CommonCardTile(
+                          category: '',
+                          title: const Text('Highest Streak'),
+                          trailingWidget: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                '${controller.currentUser!.longestStreak}',
+                              ),
+                              const SizedBox(width: 8),
+                              const Icon(Icons.flare_outlined),
+                            ],
+                          ),
+                        ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      CommonCardTile(
+                        category: 'None',
+                        title: const Text('View All Achievements'),
+                        destination: AchievementsScreen(
+                          userId: widget.friend?.userId,
+                        ),
+                        trailingWidget:
+                            const Icon(Icons.arrow_forward_ios_rounded),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      if (widget.friend != null)
+                        Theme(
+                          data: Theme.of(context).copyWith(
+                            dividerColor: Colors.transparent,
+                            hoverColor: Colors.transparent,
+                            highlightColor: Colors.transparent,
+                            splashColor: Colors.transparent,
+                          ),
+                          child: CommonCardTile(
+                            title: ExpansionTile(
+                              childrenPadding:
+                                  const EdgeInsetsDirectional.symmetric(
+                                horizontal: 15,
+                                vertical: 5,
+                              ),
+                              shape: null,
+                              tilePadding: EdgeInsets.zero,
+                              title: const Text('Shared Habits'),
+                              children: [
+                                for (final habit in sharedHabits)
+                                  Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      const Divider(),
+                                      Text(
+                                        habit.title,
+                                      ),
+                                    ],
+                                  ),
+                                if (sharedHabits.isNotEmpty) const Divider(),
+                                if (sharedHabits.isEmpty)
+                                  const Text('No shared habits...'),
+                              ],
+                            ),
+                          ),
+                        ),
+                      const SizedBox(
+                        height: 40,
+                      ),
+                      TextButton(
+                        child: const Text('Logout'),
+                        onPressed: () {
+                          controller.currentUserId = null;
+                          controller.currentUser = null;
+                          Navigator.popAndPushNamed(
+                            context,
+                            '/',
+                          );
+                        },
+                      ),
+                      TextButton(
+                        child: const Text('Delete account'),
+                        onPressed: () {
+                          /// TODO: delete user account
+                          Navigator.popUntil(
+                            context,
+                            ModalRoute.withName('/'),
+                          );
+                        },
+                      ),
                     ],
                   ),
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                const CommonCardTile(
-                  category: 'None',
-                  title: Text('View All Achievements'),
-                  destination: AchievementsScreen(),
-                  trailingWidget: Icon(Icons.arrow_forward_ios_rounded),
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                const Spacer(),
-                TextButton(
-                  child: const Text('Logout'),
-                  onPressed: () {
-                    controller.currentUserId = null;
-                    controller.currentUser = null;
-                    Navigator.popAndPushNamed(
-                      context,
-                      '/',
-                    );
-                  },
-                ),
-                TextButton(
-                  child: const Text('Delete account'),
-                  onPressed: () {
-                    /// TODO: delete user account
-                    Navigator.popUntil(
-                      context,
-                      ModalRoute.withName('/'),
-                    );
-                  },
                 ),
               ],
             ),
           ),
         ),
         Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const SizedBox(
