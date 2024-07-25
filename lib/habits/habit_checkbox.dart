@@ -9,10 +9,12 @@ class HabitCheckbox extends StatefulWidget {
     required this.habitId,
     required this.userId,
     this.quantity,
+    required this.habitTitle,
   });
 
   final String habitId;
   final String userId;
+  final String habitTitle;
   final int? quantity;
 
   @override
@@ -32,13 +34,16 @@ class _HabitCheckboxState extends State<HabitCheckbox> {
     checkActivities().then((value) {
       loading = false;
       setState(() {
-        debugPrint('$isChecked');
+        debugPrint(
+          '${widget.userId} - Habit: ${widget.habitTitle}: ${widget.habitId}, Checked?: $isChecked',
+        );
       });
     });
   }
 
   Future<void> checkActivities() async {
     isChecked = await _habitController.hasActivityLoggedToday(widget.habitId);
+    debugPrint("$isChecked");
   }
 
   @override
@@ -51,16 +56,20 @@ class _HabitCheckboxState extends State<HabitCheckbox> {
         : Checkbox(
             value: isChecked,
             onChanged: (newValue) async {
-              setState(() {
-                isChecked = newValue!;
-              });
+              isChecked = newValue!;
 
               if (isChecked) {
                 await _habitController.logActivity(
-                    widget.habitId, widget.quantity);
+                  widget.habitId,
+                  widget.quantity,
+                );
+                debugPrint("LOG ACTIVITY");
               } else {
+                await _habitController.deleteActivity(widget.habitId);
                 debugPrint("DELETE ACTIVITY");
               }
+
+              setState(() {});
             },
           );
   }

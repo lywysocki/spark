@@ -328,6 +328,7 @@ class HabitController extends ChangeNotifier {
 
     if (habits.length == 1) {
       _habitRepo.createActivity(_currentUserId, habitID, quantity);
+      debugPrint("activity created in controller");
     } else {
       duplicateHabitIDs(habits);
       debugPrint(
@@ -387,13 +388,20 @@ class HabitController extends ChangeNotifier {
     if (hasListeners) notifyListeners();
   }
 
+  Future<void> deleteActivity(String habitId) async {
+    final dateFormat = DateFormat('yyyy-MM-dd');
+    DateTime now = DateTime.now();
+    String today = dateFormat.format(now);
+
+    await _habitRepo.deleteActivity(habitId, _currentUserId, today);
+  }
+
   Future<bool> hasActivityLoggedToday(String habitId) async {
     final dateFormat = DateFormat('yyyy-MM-dd');
     DateTime now = DateTime.now();
     String today = dateFormat.format(now);
 
-    List<Activity> activitiesForHabit =
-        await getActivities(_currentUserId, habitId);
+    List<Activity> activitiesForHabit = await getActivities(habitId);
 
     bool loggedToday = activitiesForHabit.any((activity) {
       DateTime activityDate = activity.timestamp;
@@ -404,9 +412,9 @@ class HabitController extends ChangeNotifier {
     return loggedToday;
   }
 
-  Future<List<Activity>> getActivities(String habitId, String userId) async {
+  Future<List<Activity>> getActivities(String habitId) async {
     List<List<dynamic>> allActivities =
-        await _habitRepo.getActivity(_currentUserId, habitId);
+        await _habitRepo.getActivity(habitId, _currentUserId);
 
     List<Activity> activities = [];
 

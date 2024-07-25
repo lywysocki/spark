@@ -1057,7 +1057,11 @@ class HabitRepository extends ChangeNotifier {
     }
   }
 
-  Future<bool> deleteActivity(String activityID) async {
+  Future<bool> deleteActivity(
+    String habitID,
+    String userID,
+    String date,
+  ) async {
     final databaseConnection = await Connection.open(
       Endpoint(
         host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
@@ -1068,10 +1072,16 @@ class HabitRepository extends ChangeNotifier {
       ),
     );
     try {
+      String dateLike = '$date %';
+
       await databaseConnection.execute(
-        Sql.named('DELETE FROM activities WHERE activity_id = @id'),
+        Sql.named(
+          'DELETE FROM activities WHERE habit_id = @habitId AND user_id = @userId AND timestamp::text LIKE @date',
+        ),
         parameters: {
-          'id': activityID,
+          'habitId': habitID,
+          'userId': userID,
+          'date': dateLike,
         },
       );
       return true;
