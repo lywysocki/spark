@@ -7,25 +7,26 @@ import 'package:spark/achievements/achievement.dart';
 class AchievementsController extends ChangeNotifier {
   AchievementsController() {
     if (_currentUserId.isNotEmpty) {
-      _load();
+      load();
     }
   }
   String _currentUserId = '';
 
   final AchievementsRepository _achievementsRepo = AchievementsRepository();
 
-  List<Achievement> _achievements = [];
+  final List<Achievement> _achievements = [];
 
   List<Achievement> get achievements => _achievements;
 
-  Future<void> _load() async {
-    _achievements = await getAchievements();
+  Future<void> load() async {
+    _achievements.clear();
+    _achievements.addAll(await getAchievements());
     if (hasListeners) notifyListeners();
   }
 
   Future<void> updateUser(String newUserId) async {
     _currentUserId = newUserId;
-    await _load();
+    await load();
   }
 
   Future<void> setAchievement(
@@ -41,7 +42,7 @@ class AchievementsController extends ChangeNotifier {
     );
   }
 
-  Future<List<Achievement>> getAchievements() async {
+  Future<List<Achievement>> getAchievements({String? userId}) async {
     /// Returned Items:
     /// achievementID,
     /// userID,
@@ -50,7 +51,7 @@ class AchievementsController extends ChangeNotifier {
     /// time,
     /// quantity
     final userAchievements =
-        await _achievementsRepo.selectAchievements(_currentUserId);
+        await _achievementsRepo.selectAchievements(userId ?? _currentUserId);
 
     List<Achievement> mappedAchievements = userAchievements
         .map(

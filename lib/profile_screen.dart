@@ -90,20 +90,21 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                       const SizedBox(
                         height: 50,
                       ),
-                      CommonCardTile(
-                        category: '',
-                        title: const Text('Highest Streak'),
-                        trailingWidget: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              '${controller.currentUser!.longestStreak}',
-                            ),
-                            const SizedBox(width: 8),
-                            const Icon(Icons.flare_outlined),
-                          ],
+                      if (widget.friend == null)
+                        CommonCardTile(
+                          category: '',
+                          title: const Text('Highest Streak'),
+                          trailingWidget: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                '${controller.currentUser!.longestStreak}',
+                              ),
+                              const SizedBox(width: 8),
+                              const Icon(Icons.flare_outlined),
+                            ],
+                          ),
                         ),
-                      ),
                       const SizedBox(
                         height: 10,
                       ),
