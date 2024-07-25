@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:postgres/postgres.dart';
 import 'package:spark/friends/friendship_repository.dart';
 import 'package:spark/friends/friend.dart';
 import 'package:spark/habits/habit.dart';
@@ -106,6 +107,12 @@ class FriendshipController extends ChangeNotifier {
       final List<Habit> sharedHabits = [];
 
       for (var hrow in sharedHabitsData) {
+        final List<Time> times = row[11];
+        final List<DateTime> reminders = times
+            .map(
+              (e) => e.utcDateTime,
+            )
+            .toList();
         Habit h = Habit(
           habitId: hrow[0].toString(),
           userId: _currentUserId, //not in query
@@ -118,7 +125,7 @@ class FriendshipController extends ChangeNotifier {
           reminderMessage: hrow[7],
           targetType: hrow[8],
           category: hrow[9],
-          reminderTimes: hrow[10],
+          reminderTimes: reminders,
         );
         sharedHabits.add(h);
       }
