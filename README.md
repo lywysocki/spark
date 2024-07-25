@@ -29,6 +29,7 @@ Spark is designed to help users establish and track their habits. Users can crea
 Required:
 - Flutter SDK: [Install Flutter](https://flutter.dev/docs/get-started/install)
 - Dart: Included with Flutter SDK
+
 Optional:
 - PostgreSQL: [Install PostgreSQL](https://www.postgresql.org/download/)
 
