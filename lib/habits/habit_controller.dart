@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:spark/habits/habit_repository.dart';
 import 'package:spark/habits/habit.dart';
 
-//habits: habit_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity
+//habits: habit_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category
 //activities: user_id, habit_id, timestamp, quanity
 class HabitController extends ChangeNotifier {
   HabitController();
@@ -56,7 +56,6 @@ class HabitController extends ChangeNotifier {
         reminder_message,
         target_type,
         category,
-        quantity,
         streak
       */
 
@@ -75,8 +74,7 @@ class HabitController extends ChangeNotifier {
         reminderMessage: row[8],
         targetType: row[9],
         category: row[10],
-        quantity: row[11],
-        streak: row[12],
+        streak: row[11],
       );
       habits.add(h);
     }
@@ -103,7 +101,6 @@ class HabitController extends ChangeNotifier {
         reminder_message,
         target_type,
         category,
-        quantity,
         sequential_date_count,
         most_recent_activity,
         next_due_date <- all will have the same date, the second parameter in the function call
@@ -123,8 +120,7 @@ class HabitController extends ChangeNotifier {
         reminderMessage: row[8],
         targetType: row[9],
         category: row[10],
-        quantity: row[11],
-        streak: row[12],
+        streak: row[11],
       );
       habits.add(h);
     }
@@ -152,7 +148,6 @@ class HabitController extends ChangeNotifier {
         reminder_message,
         target_type,
         category,
-        quantity,
         sequential_date_count,
         most_recent_activity,
         next_due_date <- all will have the same date, the second parameter in the function call
@@ -172,7 +167,6 @@ class HabitController extends ChangeNotifier {
         reminderMessage: row[8],
         targetType: row[9],
         category: row[10],
-        quantity: row[11],
         streak: row[12],
       );
       habits.add(h);
@@ -192,7 +186,6 @@ class HabitController extends ChangeNotifier {
     String? reminderMessage,
     String targetType,
     String category,
-    int? quantity,
   ) async {
     //check if user has a habit like this already?
     List<List<dynamic>> existingHabit =
@@ -214,7 +207,6 @@ class HabitController extends ChangeNotifier {
         reminderMessage,
         targetType,
         category,
-        quantity,
       );
 
       await _load();
@@ -232,7 +224,6 @@ class HabitController extends ChangeNotifier {
     String? newReminderMessage,
     String? newTargetType,
     String? newCategory,
-    int? newQuantity,
   }) async {
     if (newTitle != null) {
       await _habitRepo.updateHabitTitle(habitId, newTitle);
@@ -264,10 +255,6 @@ class HabitController extends ChangeNotifier {
 
     if (newCategory != null) {
       await _habitRepo.updateHabitCategory(habitId, newCategory);
-    }
-
-    if (newQuantity != null) {
-      await _habitRepo.updateHabitQuantity(habitId, newQuantity);
     }
 
     await _load();
@@ -313,19 +300,18 @@ class HabitController extends ChangeNotifier {
       reminderMessage: habitAllData[0][8],
       targetType: habitAllData[0][9],
       category: habitAllData[0][10],
-      quantity: habitAllData[0][11],
-      streak: habitAllData[0][12],
+      streak: habitAllData[0][11],
     );
 
     return habit;
   }
 
-  Future<void> logActivity(String habitID, int? quantity) async {
+  Future<void> logActivity(String habitID) async {
     List<List<dynamic>> habits =
         await _habitRepo.selectHabitByID(_currentUserId, habitID);
 
     if (habits.length == 1) {
-      _habitRepo.createActivity(_currentUserId, habitID, quantity);
+      _habitRepo.createActivity(_currentUserId, habitID);
     } else {
       duplicateHabitIDs(habits);
       debugPrint(
@@ -371,7 +357,6 @@ class HabitController extends ChangeNotifier {
         'reminder_message': habits[i][8],
         'target_type': habits[i][9],
         'category': habits[i][10],
-        'quantity': habits[i][11],
       };
       debugPrint('${result.toString()} \n');
     }

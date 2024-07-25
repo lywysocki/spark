@@ -17,7 +17,6 @@ class HabitRepository extends ChangeNotifier {
     String? reminderMessage,
     String targetType,
     String category,
-    int? quantity,
   ) async {
     final databaseConnection = await Connection.open(
       Endpoint(
@@ -31,8 +30,8 @@ class HabitRepository extends ChangeNotifier {
     try {
       await databaseConnection.execute(
         Sql.named(
-            'INSERT INTO habits (user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity) '
-            'VALUES (@user_id, @title, @note, @start_date, @end_date, @frequency, @reminders, @reminder_message, @target_type, @category, @quantity)'),
+            'INSERT INTO habits (user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category) '
+            'VALUES (@user_id, @title, @note, @start_date, @end_date, @frequency, @reminders, @reminder_message, @target_type, @category)'),
         parameters: {
           'user_id': userID,
           'title': title,
@@ -44,7 +43,6 @@ class HabitRepository extends ChangeNotifier {
           'reminder_message': reminderMessage,
           'target_type': targetType,
           'category': category,
-          'quantity': quantity,
         },
       );
       return true;
@@ -68,7 +66,6 @@ class HabitRepository extends ChangeNotifier {
     String? reminderMessage,
     String targetType,
     String category,
-    int? quantity,
   ) async {
     final databaseConnection = await Connection.open(
       Endpoint(
@@ -82,8 +79,8 @@ class HabitRepository extends ChangeNotifier {
     try {
       await databaseConnection.execute(
         Sql.named(
-            'INSERT INTO habits (habit_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity) '
-            'VALUES (@habit_id @user_id, @title, @note, @start_date, @end_date, @frequency, @reminders, @reminder_message, @target_type, @category, @quantity)'),
+            'INSERT INTO habits (habit_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category) '
+            'VALUES (@habit_id @user_id, @title, @note, @start_date, @end_date, @frequency, @reminders, @reminder_message, @target_type, @category)'),
         parameters: {
           'habit_id': habitID,
           'user_id': userID,
@@ -96,7 +93,6 @@ class HabitRepository extends ChangeNotifier {
           'reminder_message': reminderMessage,
           'target_type': targetType,
           'category': category,
-          'quantity': quantity,
         },
       );
       return true;
@@ -111,7 +107,6 @@ class HabitRepository extends ChangeNotifier {
   Future<bool> createActivity(
     String userID,
     String habitID,
-    int? quantity,
   ) async {
     final databaseConnection = await Connection.open(
       Endpoint(
@@ -125,14 +120,12 @@ class HabitRepository extends ChangeNotifier {
     try {
       DateTime now = DateTime.now(); //system date and timestamp
       await databaseConnection.execute(
-        Sql.named(
-            'INSERT INTO activities (user_id, habit_id, timestamp, quantity) '
-            'VALUES (@user_id, @habit_id, @timestamp, @quantity)'),
+        Sql.named('INSERT INTO activities (user_id, habit_id, timestamp) '
+            'VALUES (@user_id, @habit_id, @timestamp)'),
         parameters: {
           'user_id': userID,
           'habit_id': habitID,
           'timestamp': DateFormat('yyyy-MM-dd hh:mm:ss').format(now),
-          'quantity': quantity,
         },
       );
       return true;
@@ -182,7 +175,6 @@ class HabitRepository extends ChangeNotifier {
             reminder_message,
             target_type,
             category,
-            quantity,
             MAX(timestamp) AS most_recent_date,
             CASE
               WHEN frequency = 'daily' AND prev_timestamp = timestamp - INTERVAL '1 day' THEN 1
@@ -193,7 +185,7 @@ class HabitRepository extends ChangeNotifier {
             END AS is_consecutive        
 		      FROM ranked_activities
           GROUP BY
-            habit_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity, timestamp, prev_timestamp
+            habit_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, timestamp, prev_timestamp
         )
         SELECT
           habit_id,
@@ -207,7 +199,6 @@ class HabitRepository extends ChangeNotifier {
           reminder_message,
           target_type,
           category,
-          quantity,
           CASE
             WHEN SUM(is_consecutive) = 0 THEN 0
             else SUM(is_consecutive) + 1 
@@ -215,7 +206,7 @@ class HabitRepository extends ChangeNotifier {
         FROM
           sequential_dates
         GROUP BY
-            habit_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity
+            habit_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category
       ''';
       List<List<dynamic>> results = await databaseConnection.execute(
         Sql.named(query),
@@ -303,7 +294,6 @@ class HabitRepository extends ChangeNotifier {
             reminder_message,
             target_type,
             category,
-            quantity,
             CASE
               WHEN frequency = 'daily' AND prev_timestamp = timestamp - INTERVAL '1 day' THEN 1
               WHEN frequency = 'weekly' AND prev_timestamp = timestamp - INTERVAL '1 week' THEN 1
@@ -314,7 +304,7 @@ class HabitRepository extends ChangeNotifier {
         FROM
           ranked_activities
         GROUP BY
-          habit_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity, timestamp, prev_timestamp
+          habit_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, timestamp, prev_timestamp
       ),
       streaks AS (
         SELECT 
@@ -329,13 +319,12 @@ class HabitRepository extends ChangeNotifier {
           reminder_message,
           target_type,
           category,
-          quantity,
           CASE
             WHEN SUM(is_consecutive) = 0 THEN 0
             ELSE SUM(is_consecutive)+1 
           END AS streak
         FROM sequential_dates
-        GROUP BY habit_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity
+        GROUP BY habit_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category
       ),
       habit_activity AS (
         SELECT
@@ -358,7 +347,6 @@ class HabitRepository extends ChangeNotifier {
           reminder_message,
           target_type,
           category,
-          quantity,
           streak,
           CASE
             WHEN frequency = 'Does not repeat' THEN start_date
@@ -369,7 +357,7 @@ class HabitRepository extends ChangeNotifier {
             ELSE most_recent_activity + INTERVAL '1 day' -- default to daily
           END AS next_due_date
         FROM habit_activity
-        GROUP BY habit_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity, streak, most_recent_activity
+        GROUP BY habit_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, streak, most_recent_activity
       )
       SELECT * FROM due_dates
       WHERE next_due_date::text LIKE @date OR (next_due_date IS NULL AND start_date <= CURRENT_DATE);
@@ -513,7 +501,6 @@ class HabitRepository extends ChangeNotifier {
         h1.reminder_message,
         h1.target_type,
         h1.category,
-        h1.quantity,
       FROM habits as h1
       JOIN habits as h2
         on h1.habit_id = h2.habit_id
@@ -909,35 +896,6 @@ class HabitRepository extends ChangeNotifier {
         parameters: {
           'id': habitID,
           'category': newCategory,
-        },
-      );
-      return true;
-    } catch (e) {
-      debugPrint('Error: ${e.toString()}');
-      return false;
-    } finally {
-      await databaseConnection.close();
-    }
-  }
-
-  Future<bool> updateHabitQuantity(String habitID, int newQuantity) async {
-    final databaseConnection = await Connection.open(
-      Endpoint(
-        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
-        //port: 5432, // port
-        database: 'spark', // database name
-        username: 'postgres', // username
-        password: 'get\$park3d!', // password
-      ),
-    );
-    try {
-      await databaseConnection.execute(
-        Sql.named(
-          'UPDATE habits SET quantity = @quantity WHERE habit_id = @id',
-        ),
-        parameters: {
-          'id': habitID,
-          'quantity': newQuantity,
         },
       );
       return true;

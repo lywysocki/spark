@@ -10,7 +10,6 @@ class Habit {
   String? reminderMessage;
   final String targetType;
   final String category;
-  int? quantity;
   int? streak;
 
   Habit({
@@ -25,7 +24,6 @@ class Habit {
     this.reminderMessage,
     required this.targetType,
     required this.category,
-    this.quantity,
     this.streak,
   });
 
@@ -67,10 +65,6 @@ class Habit {
 
   String getCategory() {
     return category;
-  }
-
-  int? getQuantity() {
-    return quantity;
   }
 
   int? getStreak() {
