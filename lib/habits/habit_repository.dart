@@ -208,7 +208,10 @@ class HabitRepository extends ChangeNotifier {
           target_type,
           category,
           quantity,
-          SUM(is_consecutive) + 1 as streak
+          CASE
+            WHEN SUM(is_consecutive) = 0 THEN 0
+            else SUM(is_consecutive) + 1 
+          END as streak
         FROM
           sequential_dates
         GROUP BY
@@ -319,8 +322,12 @@ class HabitRepository extends ChangeNotifier {
       due_habits AS (
         SELECT
           sequential_dates.*,
-          SUM(is_consecutive) +1 as streak,
           CASE
+            WHEN SUM(is_consecutive) = 0 THEN 0
+            ELSE SUM(is_consecutive) + 1
+          END as streak,
+          CASE
+            WHEN frequency = 'Does not repeat' THEN start_date
             WHEN frequency = 'daily' THEN most_recent_activity + INTERVAL '1 day'
             WHEN frequency = 'weekly' THEN most_recent_activity + INTERVAL '1 week'
             WHEN frequency = 'biweekly' THEN most_recent_activity + INTERVAL '2 weeks'
@@ -929,7 +936,7 @@ class HabitRepository extends ChangeNotifier {
     }
   }
 
-  Future<bool> deleteHabitCascade(String habitID) async {
+  Future<bool> deleteHabitCascade(String habitID, userID) async {
     final databaseConnection = await Connection.open(
       Endpoint(
         host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
@@ -941,21 +948,30 @@ class HabitRepository extends ChangeNotifier {
     );
     try {
       await databaseConnection.execute(
-        Sql.named('DELETE FROM habits WHERE habit_id = @id'),
+        Sql.named(
+          'DELETE FROM habits WHERE habit_id = @habitId and user_id = @userId',
+        ),
         parameters: {
-          'id': habitID,
+          'habitId': habitID,
+          'userId': userID,
         },
       );
       await databaseConnection.execute(
-        Sql.named('DELETE FROM activities WHERE habit_id = @id'),
+        Sql.named(
+          'DELETE FROM activities WHERE habit_id = @habitId and user_id = @userId',
+        ),
         parameters: {
-          'id': habitID,
+          'habitId': habitID,
+          'userId': userID,
         },
       );
       await databaseConnection.execute(
-        Sql.named('DELETE FROM achievements WHERE habit_id = @id'),
+        Sql.named(
+          'DELETE FROM achievements WHERE habit_id = @habitId and user_id = @userId',
+        ),
         parameters: {
-          'id': habitID,
+          'habitId': habitID,
+          'userId': userID,
         },
       );
       return true;
