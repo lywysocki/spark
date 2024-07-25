@@ -9,7 +9,7 @@ Spark is a habit tracking mobile application designed to help users build and ma
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
   - [Running the App](#running-the-app)
-- [Version Release](#version-release)
+  - [Version Release](#version-release)
 
 ## Description
 
@@ -61,7 +61,7 @@ Optional:
     sudo service postgresql start
     ```
 
-### Running the Version Release
+### Version Release
 
 1. **Download the release APK:**
    - Go to the [Releases](https://github.com/your-username/spark/releases) page.
