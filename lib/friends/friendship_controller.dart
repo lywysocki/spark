@@ -12,20 +12,14 @@ class FriendshipController extends ChangeNotifier {
   List<Friend> allFriends = [];
   List<Friend> pendingRequests = [];
 
-  bool loading = false;
-
   String _currentUserId = '';
 
-  Future<void> _load() async {
-    loading = true;
-
+  Future<void> load() async {
     allFriends.clear();
     allFriends = await getAllFriends();
 
     pendingRequests.clear();
     pendingRequests = await getPendingRequests();
-
-    loading = false;
 
     if (!hasListeners) return;
     notifyListeners();
@@ -33,7 +27,7 @@ class FriendshipController extends ChangeNotifier {
 
   Future<void> updateUser(String newUserId) async {
     _currentUserId = newUserId;
-    await _load();
+    await load();
   }
 
   //Create
@@ -50,7 +44,7 @@ class FriendshipController extends ChangeNotifier {
       if (!results) {
         throw "Could not send friend request.";
       }
-      await _load();
+      await load();
     }
   }
 
@@ -134,12 +128,12 @@ class FriendshipController extends ChangeNotifier {
     String state = 'established';
     await _friendRepo.updateFriendshipState(otherUser, _currentUserId, state);
 
-    await _load();
+    await load();
   }
 
   Future<void> rejectRequest(String otherUser) async {
     await _friendRepo.deleteFriendships(otherUser, _currentUserId);
 
-    await _load();
+    await load();
   }
 }
