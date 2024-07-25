@@ -116,16 +116,18 @@ class _HomeScreenState extends State<HomeScreen> {
                                 await initialize();
                               },
                             ),
-                            trailingWidget: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text('${habit.streak}'),
-                                const SizedBox(
-                                  width: 5,
-                                ),
-                                const Icon(Icons.flare_outlined),
-                              ],
-                            ),
+                            trailingWidget: habit.frequency != 'Does not repeat'
+                                ? Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text('${habit.streak}'),
+                                      const SizedBox(
+                                        width: 5,
+                                      ),
+                                      const Icon(Icons.flare_outlined),
+                                    ],
+                                  )
+                                : const SizedBox(),
                           ),
                         ),
                       )
