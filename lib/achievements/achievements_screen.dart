@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart' hide SearchBar;
 import 'package:provider/provider.dart';
 import 'package:spark/achievements/achievement.dart';
@@ -46,6 +47,23 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
         ? await achievementController.getAchievements(userId: widget.userId)
         : achievementController.achievements;
 
+    final tempNames = [];
+    final List<Achievement> singleAchievements = [];
+    for (final a in achievements) {
+      if (!tempNames.contains(a.achievementTitle)) {
+        singleAchievements.add(a);
+        tempNames.add(a.achievementTitle);
+      } else {
+        final update = singleAchievements.firstWhereOrNull(
+          (element) => element.achievementTitle == a.achievementTitle,
+        );
+        update?.earned();
+      }
+    }
+
+    achievements.clear();
+    achievements.addAll(singleAchievements);
+
     loading = false;
     setState(() {});
   }
@@ -53,7 +71,13 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context).textTheme;
-
+    final displayAchievements = achievements
+        .where(
+          (element) => element.achievementTitle
+              .toLowerCase()
+              .contains(currentSearch.toLowerCase()),
+        )
+        .toList();
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 70,
@@ -108,16 +132,16 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
                                 crossAxisSpacing: 32.0,
                               ),
                               itemBuilder: (_, index) {
-                                final achievement = achievements[index];
+                                final achievement = displayAchievements[index];
 
                                 return _BadgeIcon(
-                                  timesEarned: achievement.quantity ?? 1,
+                                  timesEarned: achievement.quantity,
                                   name: achievement.achievementTitle,
                                   medalLevel:
                                       getMedalLevel(achievement.quantity ?? 1),
                                 );
                               },
-                              itemCount: achievements.length,
+                              itemCount: displayAchievements.length,
                             ),
                           ),
                         ),
@@ -158,6 +182,7 @@ class _BadgeIcon extends StatelessWidget {
               Text(
                 name,
                 style: theme.titleMedium,
+                textAlign: TextAlign.center,
               ),
               const SizedBox(
                 height: 5.0,
