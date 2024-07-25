@@ -158,29 +158,56 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                             ),
                           ),
                         const SizedBox(
-                          height: 40,
+                          height: 70,
                         ),
-                        TextButton(
-                          child: const Text('Logout'),
-                          onPressed: () {
-                            controller.currentUserId = null;
-                            controller.currentUser = null;
-                            Navigator.popAndPushNamed(
-                              context,
-                              '/',
-                            );
-                          },
+                        if (widget.friend == null)
+                          TextButton(
+                            child: const Text('Logout'),
+                            onPressed: () {
+                              controller.currentUserId = null;
+                              controller.currentUser = null;
+                              Navigator.popAndPushNamed(
+                                context,
+                                '/',
+                              );
+                            },
+                          ),
+                        const SizedBox(
+                          height: 10,
                         ),
-                        TextButton(
-                          child: const Text('Delete account'),
-                          onPressed: () {
-                            /// TODO: delete user account
-                            Navigator.popUntil(
-                              context,
-                              ModalRoute.withName('/'),
-                            );
-                          },
-                        ),
+                        if (widget.friend == null)
+                          TextButton(
+                            child: const Text('Delete account'),
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: const Text('Are you sure?'),
+                                  content: const Text(
+                                    'This action cannot be undone.',
+                                  ),
+                                  actions: [
+                                    FilledButton(
+                                      onPressed: () {
+                                        controller.deleteUser();
+                                        Navigator.popUntil(
+                                          context,
+                                          ModalRoute.withName('/'),
+                                        );
+                                      },
+                                      child: const Text('Delete account'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                      child: const Text('Cancel'),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
                       ],
                     ),
                   ),

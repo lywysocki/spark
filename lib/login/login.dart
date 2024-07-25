@@ -133,6 +133,7 @@ class _UserFormFieldsState extends State<_UserFormFields> {
         lName: lName,
       );
       await updateControllers();
+      userFormKey.currentState?.reset();
 
       return null;
     } catch (e) {
@@ -152,6 +153,7 @@ class _UserFormFieldsState extends State<_UserFormFields> {
         pass: password!,
       );
       await updateControllers();
+      userFormKey.currentState?.reset();
 
       return null;
     } catch (e) {

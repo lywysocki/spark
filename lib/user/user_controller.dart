@@ -125,6 +125,14 @@ class UserController extends ChangeNotifier {
     await login(username: username, pass: pass);
   }
 
+  Future<void> deleteUser() async {
+    final result = await _userRepo.deleteUser(currentUserId!);
+    if (result) {
+      currentUser = null;
+      currentUser = null;
+    }
+  }
+
   void duplicateLogins(List<dynamic> ids) async {
     debugPrint("Duplicate user fields: \n");
     List<Map<String, dynamic>> allDuplicates = [];
