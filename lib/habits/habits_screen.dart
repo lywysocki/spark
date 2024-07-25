@@ -30,7 +30,6 @@ class _HabitsScreenState extends State<HabitsScreen> {
 
     _userController = context.watch<UserController>();
     userId = _userController.currentUserId!;
-
     _habitController = context.watch<HabitController>();
   }
 

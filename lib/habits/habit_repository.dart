@@ -1028,7 +1028,7 @@ class HabitRepository extends ChangeNotifier {
     }
   }
 
-  Future<bool> deleteActivity(String activityID) async {
+  Future<List<List<dynamic>>> getActivity(String habitId, String userId) async {
     final databaseConnection = await Connection.open(
       Endpoint(
         host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
@@ -1039,10 +1039,49 @@ class HabitRepository extends ChangeNotifier {
       ),
     );
     try {
-      await databaseConnection.execute(
-        Sql.named('DELETE FROM activities WHERE activity_id = @id'),
+      List<List<dynamic>> results = await databaseConnection.execute(
+        Sql.named(
+          'SELECT * FROM activities WHERE habit_id = @habitId and user_id = @userId',
+        ),
         parameters: {
-          'id': activityID,
+          'habitId': habitId,
+          'userId': userId,
+        },
+      );
+      return results;
+    } catch (e) {
+      debugPrint('Error: ${e.toString()}');
+      return List.empty();
+    } finally {
+      await databaseConnection.close();
+    }
+  }
+
+  Future<bool> deleteActivity(
+    String habitID,
+    String userID,
+    String date,
+  ) async {
+    final databaseConnection = await Connection.open(
+      Endpoint(
+        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
+        //port: 5432, // port
+        database: 'spark', // database name
+        username: 'postgres', // username
+        password: 'get\$park3d!', // password
+      ),
+    );
+    try {
+      String dateLike = '$date %';
+
+      await databaseConnection.execute(
+        Sql.named(
+          'DELETE FROM activities WHERE habit_id = @habitId AND user_id = @userId AND timestamp::text LIKE @date',
+        ),
+        parameters: {
+          'habitId': habitID,
+          'userId': userID,
+          'date': dateLike,
         },
       );
       return true;

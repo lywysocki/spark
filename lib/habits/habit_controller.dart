@@ -3,6 +3,8 @@ import 'package:intl/intl.dart';
 import 'package:spark/habits/habit_repository.dart';
 import 'package:spark/habits/habit.dart';
 
+import 'activity.dart';
+
 //habits: habit_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity
 //activities: user_id, habit_id, timestamp, quanity
 class HabitController extends ChangeNotifier {
@@ -383,6 +385,49 @@ class HabitController extends ChangeNotifier {
     );
 
     if (hasListeners) notifyListeners();
+  }
+
+  Future<void> deleteActivity(String habitId) async {
+    final dateFormat = DateFormat('yyyy-MM-dd');
+    DateTime now = DateTime.now();
+    String today = dateFormat.format(now);
+
+    await _habitRepo.deleteActivity(habitId, _currentUserId, today);
+  }
+
+  Future<bool> hasActivityLoggedToday(String habitId) async {
+    final dateFormat = DateFormat('yyyy-MM-dd');
+    DateTime now = DateTime.now();
+    String today = dateFormat.format(now);
+
+    List<Activity> activitiesForHabit = await getActivities(habitId);
+
+    bool loggedToday = activitiesForHabit.any((activity) {
+      DateTime activityDate = activity.timestamp;
+      String formattedActivityDate = dateFormat.format(activityDate);
+      return formattedActivityDate == today;
+    });
+
+    return loggedToday;
+  }
+
+  Future<List<Activity>> getActivities(String habitId) async {
+    List<List<dynamic>> allActivities =
+        await _habitRepo.getActivity(habitId, _currentUserId);
+
+    List<Activity> activities = [];
+
+    for (var row in allActivities) {
+      Activity a = Activity(
+        activityId: row[0].toString(),
+        userId: row[1].toString(),
+        habitId: row[2].toString(),
+        timestamp: row[3],
+        quantity: row[4],
+      );
+      activities.add(a);
+    }
+    return activities;
   }
 
   Future<void> deleteHabit(String habitId) async {

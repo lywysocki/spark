@@ -7,6 +7,8 @@ import 'package:spark/habits/view_habit_screen.dart';
 import 'package:spark/habits/habit_controller.dart';
 import 'package:spark/user/user_controller.dart';
 
+import 'habits/habit_checkbox.dart';
+
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -75,6 +77,10 @@ class HomeScreen extends StatelessWidget {
                             title: Text(habit.title),
                             destination: ViewHabitScreen(
                               habit: habit,
+                            ),
+                            leadingWidget: HabitCheckbox(
+                              habitId: habit.habitId,
+                              userId: userController.currentUser!.userId,
                             ),
                             trailingWidget: Row(
                               mainAxisSize: MainAxisSize.min,
