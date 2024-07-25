@@ -21,8 +21,8 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
   List<Achievement> achievements = [];
   bool loading = false;
 
-  String getMedalLevel(int timesEarned) {
-    if (timesEarned >= 10) {
+  String getMedalLevel(int? timesEarned) {
+    if (timesEarned == null || timesEarned >= 10) {
       return 'gold';
     } else if (timesEarned >= 5) {
       return 'silver';
@@ -141,7 +141,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
                                   timesEarned: achievement.quantity,
                                   name: achievement.achievementTitle,
                                   medalLevel:
-                                      getMedalLevel(achievement.quantity ?? 1),
+                                      getMedalLevel(achievement.quantity),
                                 );
                               },
                               itemCount: displayAchievements.length,

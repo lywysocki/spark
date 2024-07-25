@@ -16,7 +16,7 @@ class Achievement {
   int? quantity;
 
   void earned() {
-    quantity ??= 1;
+    if (quantity == null) return;
     quantity = quantity! + 1;
   }
 }
