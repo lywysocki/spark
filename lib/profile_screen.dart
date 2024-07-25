@@ -21,6 +21,17 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   final List<Habit> sharedHabits = [];
 
   @override
+  void initState() {
+    super.initState();
+    initialize();
+  }
+
+  Future<void> initialize() async {
+    final controller = context.read<UserController>();
+    await controller.load();
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
@@ -226,13 +237,14 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             Container(
               width: 150,
               height: 150,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.inversePrimary,
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.person,
                 size: 90,
+                color: Theme.of(context).colorScheme.primary,
               ),
             ),
           ],

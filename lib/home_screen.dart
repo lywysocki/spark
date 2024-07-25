@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:spark/common/common_empty_list.dart';
+import 'package:spark/common/common_streak_widget.dart';
 import 'package:spark/common/common_tile.dart';
 import 'package:spark/habits/habit.dart';
 import 'package:spark/habits/view_habit_screen.dart';
@@ -116,15 +117,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                 await initialize();
                               },
                             ),
-                            trailingWidget: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text('${habit.streak}'),
-                                const SizedBox(
-                                  width: 5,
-                                ),
-                                const Icon(Icons.flare_outlined),
-                              ],
+                            trailingWidget: HabitStreakWidget(
+                              habit: habit,
                             ),
                           ),
                         ),
@@ -152,15 +146,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             destination: ViewHabitScreen(
                               habit: habit,
                             ),
-                            trailingWidget: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text('${habit.streak}'),
-                                const SizedBox(
-                                  width: 5,
-                                ),
-                                const Icon(Icons.flare_outlined),
-                              ],
+                            trailingWidget: HabitStreakWidget(
+                              habit: habit,
                             ),
                           ),
                         ),

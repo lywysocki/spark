@@ -19,6 +19,11 @@ class UserController extends ChangeNotifier {
   final int _lNameIndex = 6;
   final int _joinedIndex = 7;
 
+  Future<void> load() async {
+    currentUser = await getCurrentUser();
+    if (hasListeners) notifyListeners();
+  }
+
   Future<void> login({required String username, required String pass}) async {
     if (username.length <= 1 || pass.length <= 1) {
       throw "Username or password invalid";

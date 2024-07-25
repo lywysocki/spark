@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:spark/common/common_empty_list.dart';
 import 'package:spark/common/common_loading.dart';
 import 'package:spark/common/common_search_bar.dart';
+import 'package:spark/common/common_streak_widget.dart';
 import 'package:spark/common/common_tile.dart';
 import 'package:spark/habits/habit.dart';
 import 'package:spark/habits/view_habit_screen.dart';
@@ -143,15 +144,8 @@ class _HabitTilesState extends State<_HabitTiles> {
               destination: ViewHabitScreen(
                 habit: habit,
               ),
-              trailingWidget: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text('${habit.streak}'),
-                  const SizedBox(
-                    width: 5,
-                  ),
-                  const Icon(Icons.flare_outlined),
-                ],
+              trailingWidget: HabitStreakWidget(
+                habit: habit,
               ),
             ),
           ),
