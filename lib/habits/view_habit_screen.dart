@@ -212,8 +212,7 @@ class HabitInformation extends StatelessWidget {
                         children: [
                           const Divider(),
                           InkWell(
-                            onTap: () {
-                              String? error;
+                            onTap: () async {
                               SnackBar content = SnackBar(
                                 duration: const Duration(seconds: 3),
                                 content: Text(
@@ -226,14 +225,10 @@ class HabitInformation extends StatelessWidget {
                                   friendUserId: friend.userId,
                                 );
                               } catch (e) {
-                                error = e.toString();
-                              }
-
-                              if (error != null) {
                                 content = SnackBar(
                                   duration: const Duration(seconds: 3),
                                   content: Text(
-                                    error,
+                                    e.toString(),
                                   ),
                                 );
                               }

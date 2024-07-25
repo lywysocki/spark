@@ -382,8 +382,7 @@ class HabitController extends ChangeNotifier {
       category: habit.category,
     );
 
-    await _load();
-    notifyListeners();
+    if (hasListeners) notifyListeners();
   }
 
   Future<void> deleteHabit(String habitId) async {
