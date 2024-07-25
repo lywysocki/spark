@@ -133,7 +133,9 @@ class _FriendTilesState extends State<_FriendTiles> {
                         backgroundColor:
                             Theme.of(context).colorScheme.tertiaryContainer,
                       ),
-                      body: const UserProfileScreen(),
+                      body: UserProfileScreen(
+                        friend: friend,
+                      ),
                     ),
                     trailingWidget: Row(
                       mainAxisSize: MainAxisSize.min,

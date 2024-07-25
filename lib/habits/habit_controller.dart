@@ -334,6 +334,58 @@ class HabitController extends ChangeNotifier {
     }
   }
 
+  Future<List<Habit>> getSharedHabits({
+    required String userId,
+    required String friendUserId,
+  }) async {
+    final results = await _habitRepo.getSharedHabits(
+      userId: userId,
+      friendUserId: friendUserId,
+    );
+
+    List<Habit> habits = [];
+    for (var row in results) {
+      Habit h = Habit(
+        habitId: row[0].toString(),
+        userId: row[1].toString(),
+        title: row[2],
+        note: row[3],
+        startDate: row[4],
+        endDate: row[5],
+        frequency: row[6],
+        reminders: row[7],
+        reminderMessage: row[8],
+        targetType: row[9],
+        category: row[10],
+        quantity: row[11],
+        streak: row[12],
+      );
+      habits.add(h);
+    }
+
+    return habits;
+  }
+
+  Future<void> createSharedHabit({
+    required Habit habit,
+    required String friendUserId,
+  }) async {
+    await _habitRepo.createSharedHabit(
+      habitId: habit.habitId,
+      friendUserId: friendUserId,
+      title: habit.title,
+      note: habit.note,
+      start: habit.startDate,
+      frequency: habit.frequency,
+      reminders: habit.reminders,
+      targetType: habit.targetType,
+      category: habit.category,
+    );
+
+    await _load();
+    notifyListeners();
+  }
+
   Future<void> deleteHabit(String habitId) async {
     await _habitRepo.deleteHabitCascade(habitId);
 

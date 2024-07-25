@@ -56,20 +56,52 @@ class HabitRepository extends ChangeNotifier {
     }
   }
 
-  Future<bool> createSharedHabit(
-    String habitID,
-    String userID,
-    String title,
-    String note,
-    DateTime start,
+  Future<List<List<dynamic>>> getSharedHabits({
+    required String userId,
+    required String friendUserId,
+  }) async {
+    final databaseConnection = await Connection.open(
+      Endpoint(
+        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
+        //port: 5432, // port
+        database: 'spark', // database name
+        username: 'postgres', // username
+        password: 'get\$park3d!', // password
+      ),
+    );
+    try {
+      List<List<dynamic>> results = await databaseConnection.execute(
+        Sql.named(
+          'SELECT* FROM habits yours LEFT JOIN habits mine on yours.habit_id = mine.habit_id WHERE yours.user_id = @friendUserId AND mine.user_id = @userId;',
+        ),
+        parameters: {
+          'userId': userId,
+          'friendUserId': friendUserId,
+        },
+      );
+      return results;
+    } catch (e) {
+      debugPrint('Error: ${e.toString()}');
+      return List.empty();
+    } finally {
+      databaseConnection.close();
+    }
+  }
+
+  Future<bool> createSharedHabit({
+    required String habitId,
+    required String friendUserId,
+    required String title,
+    required String note,
+    required DateTime start,
     DateTime? end,
-    String frequency,
-    bool reminders,
+    required String frequency,
+    required bool reminders,
     String? reminderMessage,
-    String targetType,
-    String category,
+    required String targetType,
+    required String category,
     int? quantity,
-  ) async {
+  }) async {
     final databaseConnection = await Connection.open(
       Endpoint(
         host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
@@ -83,13 +115,13 @@ class HabitRepository extends ChangeNotifier {
       await databaseConnection.execute(
         Sql.named(
             'INSERT INTO habits (habit_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity) '
-            'VALUES (@habit_id @user_id, @title, @note, @start_date, @end_date, @frequency, @reminders, @reminder_message, @target_type, @category, @quantity)'),
+            'VALUES (@habit_id, @user_id, @title, @note, @start_date, @end_date, @frequency, @reminders, @reminder_message, @target_type, @category, @quantity)'),
         parameters: {
-          'habit_id': habitID,
-          'user_id': userID,
+          'habit_id': habitId,
+          'user_id': friendUserId,
           'title': title,
           'note': note,
-          'start_date': start,
+          'start_date': DateTime.now(),
           'end_date': end,
           'frequency': frequency,
           'reminders': reminders,

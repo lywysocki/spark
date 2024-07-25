@@ -5,7 +5,9 @@ import 'package:spark/common/common_empty_list.dart';
 import 'package:spark/common/common_search_bar.dart';
 
 class AchievementsScreen extends StatefulWidget {
-  const AchievementsScreen({super.key});
+  const AchievementsScreen({super.key, this.userId});
+
+  final String? userId;
 
   @override
   State<AchievementsScreen> createState() => _AchievementsScreenState();
