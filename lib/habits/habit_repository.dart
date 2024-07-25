@@ -361,6 +361,7 @@ class HabitRepository extends ChangeNotifier {
           quantity,
           streak,
           CASE
+            WHEN frequency = 'Does not repeat' THEN start_date
             WHEN frequency = 'daily' THEN most_recent_activity + INTERVAL '1 day'
             WHEN frequency = 'weekly' THEN most_recent_activity + INTERVAL '1 week'
             WHEN frequency = 'biweekly' THEN most_recent_activity + INTERVAL '2 weeks'
