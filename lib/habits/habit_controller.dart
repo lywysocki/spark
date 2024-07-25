@@ -335,7 +335,7 @@ class HabitController extends ChangeNotifier {
   }
 
   Future<void> deleteHabit(String habitId) async {
-    await _habitRepo.deleteHabitCascade(habitId);
+    await _habitRepo.deleteHabitCascade(habitId, _currentUserId);
 
     await _load();
     notifyListeners();
@@ -346,7 +346,7 @@ class HabitController extends ChangeNotifier {
         await _habitRepo.selectHabitsByTitle(_currentUserId, title);
 
     if (habits.length == 1) {
-      _habitRepo.deleteHabitCascade(title);
+      _habitRepo.deleteHabitCascade(title, _currentUserId);
       allHabits = await loadAllHabits();
     } else {
       duplicateHabitIDs(habits);
