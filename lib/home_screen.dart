@@ -3,20 +3,51 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:spark/common/common_empty_list.dart';
 import 'package:spark/common/common_tile.dart';
+import 'package:spark/habits/habit.dart';
 import 'package:spark/habits/view_habit_screen.dart';
 import 'package:spark/habits/habit_controller.dart';
 import 'package:spark/user/user_controller.dart';
 
 import 'habits/habit_checkbox.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  bool loading = false;
+  final List<Habit> todaysHabits = [];
+  final List<Habit> tomorrowsHabits = [];
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final habitController = context.watch<HabitController>();
+    todaysHabits.clear();
+    todaysHabits.addAll(habitController.todaysHabits);
+
+    tomorrowsHabits.clear();
+    tomorrowsHabits.addAll(habitController.tomorrowsHabits);
+  }
+
+  Future<void> initialize() async {
+    loading = true;
+    setState(() {});
+
+    final controller = context.read<HabitController>();
+    await controller.load();
+
+    loading = false;
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context).textTheme;
     final userController = context.watch<UserController>();
-    final habitController = context.watch<HabitController>();
 
     return Scaffold(
       body: ListView(
@@ -61,14 +92,14 @@ class HomeScreen extends StatelessWidget {
             'Today\'s Habits',
             style: theme.titleMedium,
           ),
-          habitController.todaysHabits.isEmpty
+          todaysHabits.isEmpty
               ? const EmptyListWidget(
                   text:
                       'Nothing to complete today...\nPress the plus button on the bottom right of the screen to create a new habit!',
                 )
               : Column(
                   mainAxisSize: MainAxisSize.min,
-                  children: habitController.todaysHabits
+                  children: todaysHabits
                       .map(
                         (habit) => Padding(
                           padding: const EdgeInsets.symmetric(vertical: 4.0),
@@ -81,6 +112,9 @@ class HomeScreen extends StatelessWidget {
                             leadingWidget: HabitCheckbox(
                               habitId: habit.habitId,
                               userId: userController.currentUser!.userId,
+                              onChanged: () async {
+                                await initialize();
+                              },
                             ),
                             trailingWidget: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -104,11 +138,11 @@ class HomeScreen extends StatelessWidget {
             'Upcoming Habits',
             style: theme.titleMedium,
           ),
-          habitController.tomorrowsHabits.isEmpty
+          tomorrowsHabits.isEmpty
               ? const EmptyListWidget(text: 'Nothing to complete tomorrow...')
               : Column(
                   mainAxisSize: MainAxisSize.min,
-                  children: habitController.tomorrowsHabits
+                  children: tomorrowsHabits
                       .map(
                         (habit) => Padding(
                           padding: const EdgeInsets.symmetric(vertical: 4.0),

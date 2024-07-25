@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:spark/common/common_empty_list.dart';
+import 'package:spark/common/common_loading.dart';
 import 'package:spark/common/common_search_bar.dart';
 import 'package:spark/common/common_tile.dart';
 import 'package:spark/habits/habit.dart';
@@ -19,18 +20,38 @@ class HabitsScreen extends StatefulWidget {
 }
 
 class _HabitsScreenState extends State<HabitsScreen> {
-  late HabitController _habitController;
   late UserController _userController;
+  final List<Habit> allHabits = [];
   late String userId;
   String currentSearch = '';
+  bool loading = true;
 
   @override
-  void didChangeDependencies() {
+  void didChangeDependencies() async {
     super.didChangeDependencies();
 
-    _userController = context.watch<UserController>();
+    loading = true;
+    setState(() {});
+
+    final habitController = context.watch<HabitController>();
+    allHabits.clear();
+    allHabits.addAll(habitController.allHabits);
+    _userController = context.read<UserController>();
     userId = _userController.currentUserId!;
-    _habitController = context.watch<HabitController>();
+
+    loading = false;
+    setState(() {});
+  }
+
+  Future<void> initialize() async {
+    loading = true;
+    setState(() {});
+
+    final controller = context.read<HabitController>();
+    await controller.load();
+
+    loading = false;
+    setState(() {});
   }
 
   @override
@@ -39,9 +60,20 @@ class _HabitsScreenState extends State<HabitsScreen> {
       body: ListView(
         padding: const EdgeInsets.all(8.0),
         children: [
-          Text(
-            'Habits',
-            style: Theme.of(context).textTheme.titleMedium,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Habits',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              IconButton(
+                icon: const Icon(Icons.replay_rounded),
+                onPressed: () async {
+                  await initialize();
+                },
+              ),
+            ],
           ),
           CommonSearchBar(
             hintText: 'Search habits',
@@ -51,16 +83,21 @@ class _HabitsScreenState extends State<HabitsScreen> {
               });
             },
           ),
-          _habitController.allHabits.isEmpty
-              ? const EmptyListWidget(
-                  text:
-                      'You don\'t have any habits yet...\nPress the plus button on the bottom right of the screen to create a new habit!',
+          loading
+              ? const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 100.0),
+                  child: CommonLoadingWidget(),
                 )
-              : _HabitTiles(
-                  currentSearch: currentSearch,
-                  habits: _habitController.allHabits,
-                  userID: userId,
-                ),
+              : allHabits.isEmpty
+                  ? const EmptyListWidget(
+                      text:
+                          'You don\'t have any habits yet...\nPress the plus button on the bottom right of the screen to create a new habit!',
+                    )
+                  : _HabitTiles(
+                      currentSearch: currentSearch,
+                      habits: allHabits,
+                      userID: userId,
+                    ),
           const SizedBox(
             height: 75,
           ),

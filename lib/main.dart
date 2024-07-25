@@ -77,6 +77,9 @@ class _MyHomePageState extends State<MyHomePage> {
         child: const Icon(Icons.add),
       ),
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
+        scrolledUnderElevation: 10,
         automaticallyImplyLeading: false,
         title: Padding(
           padding: const EdgeInsets.only(top: 5.0),

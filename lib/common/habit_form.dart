@@ -82,34 +82,20 @@ class _NewHabitFormState extends State<NewHabitForm> {
       ),
     ),
     const DropdownMenuItem<String>(
-      value: '3x daily',
-      child: Text(
-        '3x daily',
-      ),
-    ),
-    const DropdownMenuItem<String>(
-      value: '2x daily',
-      child: Text('2x daily'),
-    ),
-    const DropdownMenuItem<String>(
-      value: 'Daily',
+      value: 'daily',
       child: Text('Daily'),
     ),
     const DropdownMenuItem<String>(
-      value: 'Every other day',
-      child: Text('Every other day'),
+      value: 'weekly',
+      child: Text('Weekly'),
     ),
     const DropdownMenuItem<String>(
-      value: 'Once a week',
-      child: Text('Once a week'),
+      value: 'biweekly',
+      child: Text('Bi-Weekly'),
     ),
     const DropdownMenuItem<String>(
-      value: 'Once a month',
-      child: Text('Once a month'),
-    ),
-    const DropdownMenuItem<String>(
-      value: 'Annually',
-      child: Text('Annually'),
+      value: 'monthly',
+      child: Text('Monthly'),
     ),
   ];
 
@@ -122,10 +108,10 @@ class _NewHabitFormState extends State<NewHabitForm> {
     reminders.addAll(widget.initialReminders ?? []);
   }
 
-  void _submitForm() {
+  Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      _habitController.createNewHabit(
+      await _habitController.createNewHabit(
         _title,
         _notes,
         _startDate,
@@ -140,10 +126,10 @@ class _NewHabitFormState extends State<NewHabitForm> {
     }
   }
 
-  void _updateHabit() {
+  Future<void> _updateHabit() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      _habitController.updateHabit(
+      await _habitController.updateHabit(
         widget.habit!.habitId,
         newTitle: _title,
         newNote: _notes,
