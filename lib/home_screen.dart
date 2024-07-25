@@ -48,7 +48,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context).textTheme;
     final userController = context.watch<UserController>();
-    final habitController = context.watch<HabitController>();
 
     return Scaffold(
       body: ListView(
@@ -100,7 +99,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 )
               : Column(
                   mainAxisSize: MainAxisSize.min,
-                  children: habitController.todaysHabits
+                  children: todaysHabits
                       .map(
                         (habit) => Padding(
                           padding: const EdgeInsets.symmetric(vertical: 4.0),
@@ -113,6 +112,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             leadingWidget: HabitCheckbox(
                               habitId: habit.habitId,
                               userId: userController.currentUser!.userId,
+                              onChanged: () async {
+                                await initialize();
+                              },
                             ),
                             trailingWidget: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -140,7 +142,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ? const EmptyListWidget(text: 'Nothing to complete tomorrow...')
               : Column(
                   mainAxisSize: MainAxisSize.min,
-                  children: habitController.tomorrowsHabits
+                  children: tomorrowsHabits
                       .map(
                         (habit) => Padding(
                           padding: const EdgeInsets.symmetric(vertical: 4.0),
