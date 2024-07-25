@@ -135,7 +135,7 @@ class _NewHabitFormState extends State<NewHabitForm> {
         _reminderMessage,
         _targetType,
         _category,
-        _quantity,
+        _reminderTimes,
       );
     }
   }
@@ -153,7 +153,7 @@ class _NewHabitFormState extends State<NewHabitForm> {
         newReminderMessage: _reminderMessage,
         newTargetType: _targetType,
         newCategory: _category,
-        newQuantity: _quantity,
+        newReminderTimes: _reminderTimes,
       );
     }
   }
@@ -165,9 +165,9 @@ class _NewHabitFormState extends State<NewHabitForm> {
   String _frequency = 'Does not repeat';
   final bool _reminders = false;
   String? _reminderMessage;
-  final String _targetType = 'NO';
+  final String _targetType = 'Boolean';
   String _category = '';
-  int? _quantity;
+  final List<TimeOfDay> _reminderTimes = [];
 
   @override
   Widget build(BuildContext context) {

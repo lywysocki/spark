@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 class Habit {
   final String habitId;
   final String userId;
@@ -10,7 +12,7 @@ class Habit {
   String? reminderMessage;
   final String targetType;
   final String category;
-  int? quantity;
+  List<TimeOfDay>? reminderTimes;
   int? streak;
 
   Habit({
@@ -25,7 +27,7 @@ class Habit {
     this.reminderMessage,
     required this.targetType,
     required this.category,
-    this.quantity,
+    this.reminderTimes,
     this.streak,
   });
 
@@ -69,8 +71,8 @@ class Habit {
     return category;
   }
 
-  int? getQuantity() {
-    return quantity;
+  List<TimeOfDay>? getReminderTimes() {
+    return reminderTimes;
   }
 
   int? getStreak() {
