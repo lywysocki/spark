@@ -1028,6 +1028,35 @@ class HabitRepository extends ChangeNotifier {
     }
   }
 
+  Future<List<List<dynamic>>> getActivity(String habitId, String userId) async {
+    final databaseConnection = await Connection.open(
+      Endpoint(
+        host: 'spark.cn2s64yow311.us-east-1.rds.amazonaws.com', // host
+        //port: 5432, // port
+        database: 'spark', // database name
+        username: 'postgres', // username
+        password: 'get\$park3d!', // password
+      ),
+    );
+    try {
+      List<List<dynamic>> results = await databaseConnection.execute(
+        Sql.named(
+          'SELECT * FROM activities WHERE habit_id = @habitId and user_id = @userId',
+        ),
+        parameters: {
+          'habitId': habitId,
+          'userId': userId,
+        },
+      );
+      return results;
+    } catch (e) {
+      debugPrint('Error: ${e.toString()}');
+      return List.empty();
+    } finally {
+      await databaseConnection.close();
+    }
+  }
+
   Future<bool> deleteActivity(String activityID) async {
     final databaseConnection = await Connection.open(
       Endpoint(
