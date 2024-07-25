@@ -20,12 +20,6 @@ class _FriendsScreenState extends State<FriendsScreen> {
   String currentSearch = '';
   bool loading = false;
 
-  @override
-  void initState() {
-    super.initState();
-    initialize();
-  }
-
   Future<void> initialize() async {
     loading = true;
     setState(() {});
@@ -53,8 +47,8 @@ class _FriendsScreenState extends State<FriendsScreen> {
               ),
               IconButton(
                 icon: const Icon(Icons.replay_rounded),
-                onPressed: () {
-                  initialize();
+                onPressed: () async {
+                  await initialize();
                 },
               ),
             ],

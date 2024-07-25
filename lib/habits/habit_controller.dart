@@ -20,13 +20,13 @@ class HabitController extends ChangeNotifier {
 
   Future<void> load() async {
     allHabits.clear();
-    allHabits = await loadAllHabits();
+    allHabits.addAll(await loadAllHabits());
 
     todaysHabits.clear();
-    todaysHabits = await getTodaysHabits();
+    todaysHabits.addAll(await getTodaysHabits());
 
     tomorrowsHabits.clear();
-    tomorrowsHabits = await getTomorrowsHabits();
+    tomorrowsHabits.addAll(await getTomorrowsHabits());
 
     if (!hasListeners) return;
     notifyListeners();
@@ -216,7 +216,6 @@ class HabitController extends ChangeNotifier {
       );
 
       await load();
-      notifyListeners();
     }
   }
 

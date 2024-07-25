@@ -20,28 +20,27 @@ class HabitsScreen extends StatefulWidget {
 }
 
 class _HabitsScreenState extends State<HabitsScreen> {
-  late HabitController _habitController;
   late UserController _userController;
+  final List<Habit> allHabits = [];
   late String userId;
   String currentSearch = '';
-  bool loading = false;
+  bool loading = true;
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void didChangeDependencies() {
+  void didChangeDependencies() async {
     super.didChangeDependencies();
 
     loading = true;
+    setState(() {});
 
-    _userController = context.watch<UserController>();
+    final habitController = context.watch<HabitController>();
+    allHabits.clear();
+    allHabits.addAll(habitController.allHabits);
+    _userController = context.read<UserController>();
     userId = _userController.currentUserId!;
-    _habitController = context.watch<HabitController>();
 
     loading = false;
+    setState(() {});
   }
 
   Future<void> initialize() async {
@@ -70,8 +69,8 @@ class _HabitsScreenState extends State<HabitsScreen> {
               ),
               IconButton(
                 icon: const Icon(Icons.replay_rounded),
-                onPressed: () {
-                  initialize();
+                onPressed: () async {
+                  await initialize();
                 },
               ),
             ],
@@ -89,14 +88,14 @@ class _HabitsScreenState extends State<HabitsScreen> {
                   padding: EdgeInsets.symmetric(vertical: 100.0),
                   child: CommonLoadingWidget(),
                 )
-              : _habitController.allHabits.isEmpty
+              : allHabits.isEmpty
                   ? const EmptyListWidget(
                       text:
                           'You don\'t have any habits yet...\nPress the plus button on the bottom right of the screen to create a new habit!',
                     )
                   : _HabitTiles(
                       currentSearch: currentSearch,
-                      habits: _habitController.allHabits,
+                      habits: allHabits,
                       userID: userId,
                     ),
           const SizedBox(

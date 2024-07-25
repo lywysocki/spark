@@ -379,19 +379,7 @@ class HabitRepository extends ChangeNotifier {
       ),
       due_dates AS (
         SELECT 
-          habit_id,
-          user_id,
-          title,
-          note,
-          start_date,
-          end_date,
-          frequency,
-          reminders,
-          reminder_message,
-          target_type,
-          category,
-          quantity,
-          streak,
+          *,
           CASE
             WHEN frequency = 'Does not repeat' THEN start_date
             WHEN frequency = 'daily' THEN most_recent_activity + INTERVAL '1 day'
@@ -403,8 +391,27 @@ class HabitRepository extends ChangeNotifier {
         FROM habit_activity
         GROUP BY habit_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity, streak, most_recent_activity
       )
-      SELECT * FROM due_dates
-      WHERE next_due_date::text LIKE @date OR (next_due_date IS NULL AND start_date <= CURRENT_DATE);
+      SELECT 
+        habit_id,
+        user_id,
+        title,
+        note,
+        start_date,
+        end_date,
+        frequency,
+        reminders,
+        reminder_message,
+        target_type,
+        category,
+        quantity,
+        streak,
+        next_due_date
+      FROM due_dates
+      WHERE next_due_date::text LIKE @date 
+      OR (next_due_date IS NULL AND start_date <= CURRENT_DATE)
+      OR (most_recent_activity::text LIKE @date)
+      GROUP BY
+        habit_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity, streak, next_due_date;
     ''';
 
       List<List<dynamic>> results = await databaseConnection.execute(
