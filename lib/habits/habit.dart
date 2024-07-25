@@ -12,7 +12,7 @@ class Habit {
   String? reminderMessage;
   final String targetType;
   final String category;
-  List<DateTime>? reminderTimes;
+  List<TimeOfDay>? reminderTimes;
   int? streak;
 
   Habit({
@@ -72,7 +72,7 @@ class Habit {
   }
 
   List<TimeOfDay>? getReminderTimes() {
-    return reminderTimes?.map((e) => TimeOfDay.fromDateTime(e)).toList();
+    return reminderTimes;
   }
 
   int? getStreak() {

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:postgres/postgres.dart';
 import 'package:spark/habits/habit_repository.dart';
 import 'package:spark/habits/habit.dart';
 
@@ -21,15 +20,13 @@ class HabitController extends ChangeNotifier {
   List<Habit> todaysHabits = [];
   List<Habit> tomorrowsHabits = [];
 
-  Future<void> load() async {
+  Future<void> _load() async {
     loading = true;
 
     allHabits.clear();
     allHabits = await loadAllHabits();
-
     todaysHabits.clear();
     todaysHabits = await getTodaysHabits();
-
     tomorrowsHabits.clear();
     tomorrowsHabits = await getTomorrowsHabits();
 
@@ -41,7 +38,7 @@ class HabitController extends ChangeNotifier {
 
   Future<void> updateUser(String newUserId) async {
     _currentUserId = newUserId;
-    await load();
+    await _load();
   }
 
 //Homepage methods
@@ -68,12 +65,6 @@ class HabitController extends ChangeNotifier {
     List<Habit> habits = [];
     //convert rows to a Habit and add to list
     for (var row in allHabitsAllData) {
-      final List<Time> times = row[11];
-      final List<DateTime> reminders = times
-          .map(
-            (e) => e.utcDateTime,
-          )
-          .toList();
       Habit h = Habit(
         habitId: row[0].toString(),
         userId: row[1].toString(),
@@ -86,7 +77,7 @@ class HabitController extends ChangeNotifier {
         reminderMessage: row[8],
         targetType: row[9],
         category: row[10],
-        reminderTimes: reminders,
+        reminderTimes: row[11],
         streak: row[12],
       );
       habits.add(h);
@@ -122,12 +113,6 @@ class HabitController extends ChangeNotifier {
 
     List<Habit> habits = [];
     for (var row in todaysHabitsAllData) {
-      final List<Time> times = row[11];
-      final List<DateTime> reminders = times
-          .map(
-            (e) => e.utcDateTime,
-          )
-          .toList();
       Habit h = Habit(
         habitId: row[0].toString(),
         userId: row[1].toString(),
@@ -140,7 +125,7 @@ class HabitController extends ChangeNotifier {
         reminderMessage: row[8],
         targetType: row[9],
         category: row[10],
-        reminderTimes: reminders,
+        reminderTimes: row[11],
         streak: row[12],
       );
       habits.add(h);
@@ -177,12 +162,6 @@ class HabitController extends ChangeNotifier {
 
     List<Habit> habits = [];
     for (var row in tomorrowsHabitsAllData) {
-      final List<Time> times = row[11];
-      final List<DateTime> reminders = times
-          .map(
-            (e) => e.utcDateTime,
-          )
-          .toList();
       Habit h = Habit(
         habitId: row[0].toString(),
         userId: row[1].toString(),
@@ -195,7 +174,7 @@ class HabitController extends ChangeNotifier {
         reminderMessage: row[8],
         targetType: row[9],
         category: row[10],
-        reminderTimes: reminders,
+        reminderTimes: row[11],
         streak: row[12],
       );
       habits.add(h);
@@ -240,7 +219,7 @@ class HabitController extends ChangeNotifier {
         reminderTimes,
       );
 
-      await load();
+      await _load();
       notifyListeners();
     }
   }
@@ -293,7 +272,7 @@ class HabitController extends ChangeNotifier {
       await _habitRepo.updateHabitReminderTimes(habitId, newReminderTimes);
     }
 
-    await load();
+    await _load();
     notifyListeners();
   }
 
@@ -322,13 +301,6 @@ class HabitController extends ChangeNotifier {
       throw Exception('Insufficient data to create Habit object');
     }
 
-    final List<Time> times = habitAllData[0][11];
-    final List<DateTime> reminders = times
-        .map(
-          (e) => e.utcDateTime,
-        )
-        .toList();
-
     //if there's only 1 habit by that id, it returns
     //if there's multiple, it only returns the first
     Habit habit = Habit(
@@ -343,7 +315,7 @@ class HabitController extends ChangeNotifier {
       reminderMessage: habitAllData[0][8],
       targetType: habitAllData[0][9],
       category: habitAllData[0][10],
-      reminderTimes: reminders,
+      reminderTimes: habitAllData[0][11],
       streak: habitAllData[0][12],
     );
 
@@ -375,12 +347,6 @@ class HabitController extends ChangeNotifier {
 
     List<Habit> habits = [];
     for (var row in results) {
-      final List<Time> times = row[11];
-      final List<DateTime> reminders = times
-          .map(
-            (e) => e.utcDateTime,
-          )
-          .toList();
       Habit h = Habit(
         habitId: row[0].toString(),
         userId: row[1].toString(),
@@ -393,7 +359,7 @@ class HabitController extends ChangeNotifier {
         reminderMessage: row[8],
         targetType: row[9],
         category: row[10],
-        reminderTimes: reminders,
+        reminderTimes: row[11],
         streak: row[12],
       );
       habits.add(h);
@@ -466,7 +432,7 @@ class HabitController extends ChangeNotifier {
   Future<void> deleteHabit(String habitId) async {
     await _habitRepo.deleteHabitCascade(habitId, _currentUserId);
 
-    await load();
+    await _load();
     notifyListeners();
   }
 
