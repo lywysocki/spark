@@ -78,7 +78,7 @@ class _ViewHabitScreenState extends State<ViewHabitScreen> {
                     initialStart: widget.habit.startDate,
                     initialEnd: widget.habit.endDate,
                     initialFrequency: widget.habit.frequency,
-                    initialReminders: const [], // TODO: habit reminders
+                    initialReminders: widget.habit.reminderTimes,
                     initialMessage: widget.habit.reminderMessage,
                     edit: true,
                     habit: widget.habit,

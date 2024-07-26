@@ -101,9 +101,8 @@ class HabitController extends ChangeNotifier {
         reminder_message,
         target_type,
         category,
+        streak,
         reminder_times,
-        sequential_date_count,
-        most_recent_activity,
         next_due_date <- all will have the same date, the second parameter in the function call
       */
 
@@ -121,8 +120,8 @@ class HabitController extends ChangeNotifier {
         reminderMessage: row[8],
         targetType: row[9],
         category: row[10],
-        reminderTimes: stringListToTimeOfDayList(row[11]),
-        streak: row[12],
+        streak: row[11],
+        reminderTimes: stringListToTimeOfDayList(row[12]),
       );
       habits.add(h);
     }
@@ -170,8 +169,8 @@ class HabitController extends ChangeNotifier {
         reminderMessage: row[8],
         targetType: row[9],
         category: row[10],
-        reminderTimes: stringListToTimeOfDayList(row[11]),
-        streak: row[12],
+        streak: row[11],
+        reminderTimes: stringListToTimeOfDayList(row[12]),
       );
       habits.add(h);
     }

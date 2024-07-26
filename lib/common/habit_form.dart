@@ -153,7 +153,7 @@ class _NewHabitFormState extends State<NewHabitForm> {
   String? _reminderMessage;
   final String _targetType = 'Boolean';
   String _category = '';
-  final List<TimeOfDay> _reminderTimes = [];
+  List<TimeOfDay> _reminderTimes = [];
 
   @override
   Widget build(BuildContext context) {
@@ -230,6 +230,7 @@ class _NewHabitFormState extends State<NewHabitForm> {
               _SetRemindersWidgets(
                 reminders: reminders,
                 initialReminderMessage: widget.initialMessage,
+                onChanged: (times) => setState(() => _reminderTimes = times),
               ),
             ],
           ),
@@ -265,16 +266,26 @@ class _SetRemindersWidgets extends StatefulWidget {
   const _SetRemindersWidgets({
     required this.reminders,
     this.initialReminderMessage,
+    required this.onChanged,
   });
 
   final List<TimeOfDay> reminders;
   final String? initialReminderMessage;
+  final Function(List<TimeOfDay>) onChanged;
 
   @override
   State<_SetRemindersWidgets> createState() => __SetRemindersWidgetsState();
 }
 
 class __SetRemindersWidgetsState extends State<_SetRemindersWidgets> {
+  List<TimeOfDay>? reminderTimes;
+
+  @override
+  void initState() {
+    super.initState();
+    reminderTimes = widget.reminders;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
