@@ -10,6 +10,7 @@ Spark is a habit tracking mobile application designed to help users build and ma
   - [Installation](#installation)
   - [Running the App](#running-the-app)
   - [Version Release](#version-release)
+- [License](#License)
 
 ## Description
 
@@ -73,3 +74,7 @@ To update to the latest version, pull the changes from the repository and run th
 git pull origin main
 flutter pub get
 flutter run
+
+#License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
