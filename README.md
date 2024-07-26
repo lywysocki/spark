@@ -74,6 +74,7 @@ To update to the latest version, pull the changes from the repository and run th
 git pull origin main
 flutter pub get
 flutter run
+```
 
 #License
 
