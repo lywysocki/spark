@@ -8,10 +8,13 @@ class HabitCheckbox extends StatefulWidget {
     super.key,
     required this.habitId,
     required this.userId,
+    required this.onChanged,
   });
 
   final String habitId;
   final String userId;
+  final VoidCallback onChanged;
+
   @override
   State<HabitCheckbox> createState() => _HabitCheckboxState();
 }
@@ -55,6 +58,8 @@ class _HabitCheckboxState extends State<HabitCheckbox> {
               } else {
                 await _habitController.deleteActivity(widget.habitId);
               }
+
+              widget.onChanged();
 
               setState(() {});
             },

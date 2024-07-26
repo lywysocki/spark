@@ -13,5 +13,10 @@ class Achievement {
   final String habitId;
   final String achievementTitle;
   final DateTime time;
-  final int? quantity;
+  int? quantity;
+
+  void earned() {
+    if (quantity == null) return;
+    quantity = quantity! + 1;
+  }
 }

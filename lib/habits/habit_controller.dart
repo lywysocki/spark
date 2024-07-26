@@ -12,25 +12,21 @@ class HabitController extends ChangeNotifier {
 
   final HabitRepository _habitRepo = HabitRepository();
 
-  bool loading = false;
-
   String _currentUserId = '';
 
   List<Habit> allHabits = [];
   List<Habit> todaysHabits = [];
   List<Habit> tomorrowsHabits = [];
 
-  Future<void> _load() async {
-    loading = true;
-
+  Future<void> load() async {
     allHabits.clear();
-    allHabits = await loadAllHabits();
-    todaysHabits.clear();
-    todaysHabits = await getTodaysHabits();
-    tomorrowsHabits.clear();
-    tomorrowsHabits = await getTomorrowsHabits();
+    allHabits.addAll(await loadAllHabits());
 
-    loading = false;
+    todaysHabits.clear();
+    todaysHabits.addAll(await getTodaysHabits());
+
+    tomorrowsHabits.clear();
+    tomorrowsHabits.addAll(await getTomorrowsHabits());
 
     if (!hasListeners) return;
     notifyListeners();
@@ -38,7 +34,7 @@ class HabitController extends ChangeNotifier {
 
   Future<void> updateUser(String newUserId) async {
     _currentUserId = newUserId;
-    await _load();
+    await load();
   }
 
 //Homepage methods
@@ -219,8 +215,7 @@ class HabitController extends ChangeNotifier {
         timeOfDayListToStringList(reminderTimes),
       );
 
-      await _load();
-      notifyListeners();
+      await load();
     }
   }
 
@@ -275,7 +270,7 @@ class HabitController extends ChangeNotifier {
       );
     }
 
-    await _load();
+    await load();
     notifyListeners();
   }
 
@@ -435,7 +430,7 @@ class HabitController extends ChangeNotifier {
   Future<void> deleteHabit(String habitId) async {
     await _habitRepo.deleteHabitCascade(habitId, _currentUserId);
 
-    await _load();
+    await load();
     notifyListeners();
   }
 

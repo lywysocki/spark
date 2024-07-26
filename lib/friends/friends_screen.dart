@@ -18,6 +18,19 @@ class FriendsScreen extends StatefulWidget {
 
 class _FriendsScreenState extends State<FriendsScreen> {
   String currentSearch = '';
+  bool loading = false;
+
+  Future<void> initialize() async {
+    loading = true;
+    setState(() {});
+
+    final controller = context.read<FriendshipController>();
+    await controller.load();
+
+    loading = false;
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     final controller = context.watch<FriendshipController>();
@@ -25,9 +38,20 @@ class _FriendsScreenState extends State<FriendsScreen> {
       body: ListView(
         padding: const EdgeInsets.all(8.0),
         children: [
-          Text(
-            'Friends',
-            style: Theme.of(context).textTheme.titleMedium,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Friends',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              IconButton(
+                icon: const Icon(Icons.replay_rounded),
+                onPressed: () async {
+                  await initialize();
+                },
+              ),
+            ],
           ),
           CommonSearchBar(
             hintText: 'Search friends',
@@ -37,7 +61,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
               });
             },
           ),
-          controller.loading
+          loading
               ? const Padding(
                   padding: EdgeInsets.symmetric(vertical: 80.0),
                   child: Center(
@@ -46,11 +70,15 @@ class _FriendsScreenState extends State<FriendsScreen> {
                 )
               : _FriendTiles(
                   currentSearch: currentSearch,
+                  loadingChanged: () {
+                    loading = !loading;
+                    setState(() {});
+                  },
                 ),
           const SizedBox(
             height: 15,
           ),
-          if (!controller.loading)
+          if (!loading)
             Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -81,9 +109,13 @@ class _FriendsScreenState extends State<FriendsScreen> {
 }
 
 class _FriendTiles extends StatefulWidget {
-  const _FriendTiles({required this.currentSearch});
+  const _FriendTiles({
+    required this.currentSearch,
+    required this.loadingChanged,
+  });
 
   final String currentSearch;
+  final VoidCallback loadingChanged;
 
   @override
   State<_FriendTiles> createState() => _FriendTilesState();
@@ -143,8 +175,11 @@ class _FriendTilesState extends State<_FriendTiles> {
                         if (friend.isPending)
                           IconButton(
                             onPressed: () async {
+                              widget.loadingChanged();
+
                               await controller!.acceptRequest(friend.userId);
-                              setState(() {});
+
+                              widget.loadingChanged();
                             },
                             icon: const Icon(
                               Icons.check_rounded,
@@ -154,8 +189,11 @@ class _FriendTilesState extends State<_FriendTiles> {
                         if (friend.isPending)
                           IconButton(
                             onPressed: () async {
+                              widget.loadingChanged();
+
                               await controller!.rejectRequest(friend.userId);
-                              setState(() {});
+
+                              widget.loadingChanged();
                             },
                             icon: const Icon(
                               Icons.close_rounded,

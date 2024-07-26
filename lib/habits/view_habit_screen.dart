@@ -40,18 +40,9 @@ class _ViewHabitScreenState extends State<ViewHabitScreen> {
           widget.habit.title,
         ),
         leadingWidth: 68,
-        leading: editMode
-            ? TextButton(
-                child: const Text('Cancel'),
-                onPressed: () {
-                  editMode = !editMode;
-                  setState(() {});
-                },
-              )
-            : null,
         actions: [
           TextButton(
-            child: Text(!editMode ? 'Edit' : 'Done'),
+            child: Text(!editMode ? 'Edit' : 'Cancel'),
             onPressed: () {
               editMode = !editMode;
               setState(() {});
@@ -85,12 +76,9 @@ class _ViewHabitScreenState extends State<ViewHabitScreen> {
                     initialNotes: widget.habit.note,
                     initialCategory: widget.habit.category,
                     initialStart: widget.habit.startDate,
-                    initialEnd: widget.habit.endDate ?? DateTime.now(),
+                    initialEnd: widget.habit.endDate,
                     initialFrequency: widget.habit.frequency,
-                    initialReminders: const [
-                      TimeOfDay(hour: 10, minute: 30),
-                      TimeOfDay(hour: 4, minute: 55),
-                    ], // TODO: habit reminders are currently just a bool
+                    initialReminders: const [], // TODO: habit reminders
                     initialMessage: widget.habit.reminderMessage,
                     edit: true,
                     habit: widget.habit,
@@ -112,7 +100,6 @@ class HabitInformation extends StatelessWidget {
 
     final habitController = context.watch<HabitController>();
     TextStyle textStyle = Theme.of(context).textTheme.titleSmall!;
-    const fakeHasEndDate = true;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -131,7 +118,9 @@ class HabitInformation extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    ' Repeats Daily',
+                    habit.frequency.contains('not')
+                        ? 'Frequency:\n  ${habit.frequency}'
+                        : 'Frequency:\n  Repeats ${habit.frequency}',
                     style: textStyle,
                   ),
                   const SizedBox(
@@ -141,20 +130,20 @@ class HabitInformation extends StatelessWidget {
                     children: [
                       CommonDuration(
                         headerText: 'Started',
-                        onTap: null,
-                        date: DateTime.now(),
+                        onTap: () {},
+                        date: habit.startDate,
                       ),
-                      if (fakeHasEndDate)
+                      if (habit.endDate != null)
                         const Padding(
                           padding:
                               EdgeInsets.only(top: 15.0, left: 20, right: 20),
                           child: Text('-'),
                         ),
-                      if (fakeHasEndDate)
+                      if (habit.endDate != null)
                         CommonDuration(
                           headerText: 'Ends',
-                          onTap: null,
-                          date: DateTime.now(),
+                          onTap: () {},
+                          date: habit.endDate,
                         ),
                     ],
                   ),
@@ -165,7 +154,8 @@ class HabitInformation extends StatelessWidget {
                   const CommonReminder(
                     onLongPress: null,
                     onPress: null,
-                    child: Text('10:30 AM'),
+                    //TODO: habit reminders
+                    child: Text(''),
                   ),
                 ],
               ),

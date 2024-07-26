@@ -19,6 +19,11 @@ class UserController extends ChangeNotifier {
   final int _lNameIndex = 6;
   final int _joinedIndex = 7;
 
+  Future<void> load() async {
+    currentUser = await getCurrentUser();
+    if (hasListeners) notifyListeners();
+  }
+
   Future<void> login({required String username, required String pass}) async {
     if (username.length <= 1 || pass.length <= 1) {
       throw "Username or password invalid";
@@ -123,6 +128,14 @@ class UserController extends ChangeNotifier {
       last: lName,
     );
     await login(username: username, pass: pass);
+  }
+
+  Future<void> deleteUser() async {
+    final result = await _userRepo.deleteUser(currentUserId!);
+    if (result) {
+      currentUser = null;
+      currentUser = null;
+    }
   }
 
   void duplicateLogins(List<dynamic> ids) async {
