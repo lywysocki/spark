@@ -486,12 +486,12 @@ List<TimeOfDay>? stringListToTimeOfDayList(List<String>? sTime) {
 }
 
 List<String>? timeOfDayListToStringList(List<TimeOfDay>? times) {
-  if (times == null) {
+  if (times == []) {
     return [];
   }
   List<String>? strings = [];
-  for (var t in times) {
-    strings.add(t.toString());
+  for (var t in times!) {
+    strings.add(t.toString().substring(10, 15));
   }
   return strings;
 }

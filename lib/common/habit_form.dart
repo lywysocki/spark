@@ -41,7 +41,6 @@ class NewHabitForm extends StatefulWidget {
 class _NewHabitFormState extends State<NewHabitForm> {
   final _formKey = GlobalKey<FormState>();
   late HabitController _habitController;
-  final List<TimeOfDay> reminders = [];
 
   final categoryDropdownItems = [
     const DropdownMenuItem<String>(
@@ -105,7 +104,7 @@ class _NewHabitFormState extends State<NewHabitForm> {
 
     _habitController = context.watch<HabitController>();
 
-    reminders.addAll(widget.initialReminders ?? []);
+    _reminderTimes.addAll(widget.initialReminders ?? []);
   }
 
   Future<void> _submitForm() async {
@@ -153,7 +152,7 @@ class _NewHabitFormState extends State<NewHabitForm> {
   String? _reminderMessage;
   final String _targetType = 'Boolean';
   String _category = '';
-  List<TimeOfDay> _reminderTimes = [];
+  final List<TimeOfDay> _reminderTimes = [];
 
   @override
   Widget build(BuildContext context) {
@@ -228,9 +227,10 @@ class _NewHabitFormState extends State<NewHabitForm> {
                 text: 'Reminders',
               ),
               _SetRemindersWidgets(
-                reminders: reminders,
+                reminders: _reminderTimes,
                 initialReminderMessage: widget.initialMessage,
-                onChanged: (times) => setState(() => _reminderTimes = times),
+                reminderCreated: (time) =>
+                    setState(() => _reminderTimes.add(time)),
               ),
             ],
           ),
@@ -266,12 +266,12 @@ class _SetRemindersWidgets extends StatefulWidget {
   const _SetRemindersWidgets({
     required this.reminders,
     this.initialReminderMessage,
-    required this.onChanged,
+    required this.reminderCreated,
   });
 
   final List<TimeOfDay> reminders;
   final String? initialReminderMessage;
-  final Function(List<TimeOfDay>) onChanged;
+  final Function(TimeOfDay) reminderCreated;
 
   @override
   State<_SetRemindersWidgets> createState() => __SetRemindersWidgetsState();
