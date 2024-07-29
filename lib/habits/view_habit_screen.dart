@@ -94,12 +94,42 @@ class HabitInformation extends StatelessWidget {
   const HabitInformation({super.key, required this.habit});
   final Habit habit;
 
+  Widget buildReminder(String text) {
+    return CommonReminder(
+      onLongPress: null,
+      onPress: null,
+      child: Text(text),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final friendController = context.watch<FriendshipController>();
 
     final habitController = context.watch<HabitController>();
     TextStyle textStyle = Theme.of(context).textTheme.titleSmall!;
+
+    List<Widget> reminders = [];
+    for (int i = 0; i < habit.reminderTimes!.length; i++) {
+      if (i == 2) {
+        if (habit.reminderTimes!.length > 3) {
+          reminders.add(buildReminder('+${habit.reminderTimes!.length - 2}'));
+          break;
+        } else {
+          reminders.add(
+            buildReminder(
+              habit.reminderTimes![i].toString().substring(10, 15),
+            ),
+          );
+          break;
+        }
+      }
+      reminders.add(
+        buildReminder(
+          habit.reminderTimes![i].toString().substring(10, 15),
+        ),
+      );
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -151,12 +181,13 @@ class HabitInformation extends StatelessWidget {
                     ' Reminders',
                     style: textStyle,
                   ),
-                  const CommonReminder(
-                    onLongPress: null,
-                    onPress: null,
-                    //TODO: habit reminders
-                    child: Text(''),
-                  ),
+                  habit.reminderTimes!.isEmpty
+                      ? const CommonReminder(
+                          onLongPress: null,
+                          onPress: null,
+                          child: Text(''),
+                        )
+                      : Row(children: reminders),
                 ],
               ),
             ),
