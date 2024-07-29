@@ -237,7 +237,7 @@ class FriendshipRepository extends ChangeNotifier {
         h1.reminder_message,
         h1.target_type,
         h1.category,
-        h1.quantity
+        h1.reminder_times
       FROM habits as h1
       JOIN habits as h2
         on h1.habit_id = h2.habit_id

@@ -5,7 +5,7 @@ import 'package:spark/habits/habit.dart';
 
 import 'activity.dart';
 
-//habits: habit_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, quantity
+//habits: habit_id, user_id, title, note, start_date, end_date, frequency, reminders, reminder_message, target_type, category, reminder_times
 //activities: user_id, habit_id, timestamp, quanity
 class HabitController extends ChangeNotifier {
   HabitController();
@@ -54,7 +54,7 @@ class HabitController extends ChangeNotifier {
         reminder_message,
         target_type,
         category,
-        quantity,
+        reminder_times,
         streak
       */
 
@@ -73,7 +73,7 @@ class HabitController extends ChangeNotifier {
         reminderMessage: row[8],
         targetType: row[9],
         category: row[10],
-        quantity: row[11],
+        reminderTimes: stringListToTimeOfDayList(row[11]),
         streak: row[12],
       );
       habits.add(h);
@@ -101,9 +101,8 @@ class HabitController extends ChangeNotifier {
         reminder_message,
         target_type,
         category,
-        quantity,
-        sequential_date_count,
-        most_recent_activity,
+        streak,
+        reminder_times,
         next_due_date <- all will have the same date, the second parameter in the function call
       */
 
@@ -121,8 +120,8 @@ class HabitController extends ChangeNotifier {
         reminderMessage: row[8],
         targetType: row[9],
         category: row[10],
-        quantity: row[11],
-        streak: row[12],
+        streak: row[11],
+        reminderTimes: stringListToTimeOfDayList(row[12]),
       );
       habits.add(h);
     }
@@ -150,7 +149,7 @@ class HabitController extends ChangeNotifier {
         reminder_message,
         target_type,
         category,
-        quantity,
+        reminder_times,
         sequential_date_count,
         most_recent_activity,
         next_due_date <- all will have the same date, the second parameter in the function call
@@ -170,8 +169,8 @@ class HabitController extends ChangeNotifier {
         reminderMessage: row[8],
         targetType: row[9],
         category: row[10],
-        quantity: row[11],
-        streak: row[12],
+        streak: row[11],
+        reminderTimes: stringListToTimeOfDayList(row[12]),
       );
       habits.add(h);
     }
@@ -190,7 +189,7 @@ class HabitController extends ChangeNotifier {
     String? reminderMessage,
     String targetType,
     String category,
-    int? quantity,
+    List<TimeOfDay>? reminderTimes,
   ) async {
     //check if user has a habit like this already?
     List<List<dynamic>> existingHabit =
@@ -212,7 +211,7 @@ class HabitController extends ChangeNotifier {
         reminderMessage,
         targetType,
         category,
-        quantity,
+        timeOfDayListToStringList(reminderTimes),
       );
 
       await load();
@@ -229,7 +228,7 @@ class HabitController extends ChangeNotifier {
     String? newReminderMessage,
     String? newTargetType,
     String? newCategory,
-    int? newQuantity,
+    List<TimeOfDay>? newReminderTimes,
   }) async {
     if (newTitle != null) {
       await _habitRepo.updateHabitTitle(habitId, newTitle);
@@ -263,8 +262,11 @@ class HabitController extends ChangeNotifier {
       await _habitRepo.updateHabitCategory(habitId, newCategory);
     }
 
-    if (newQuantity != null) {
-      await _habitRepo.updateHabitQuantity(habitId, newQuantity);
+    if (newReminderTimes != null) {
+      await _habitRepo.updateHabitReminderTimes(
+        habitId,
+        timeOfDayListToStringList(newReminderTimes),
+      );
     }
 
     await load();
@@ -310,19 +312,19 @@ class HabitController extends ChangeNotifier {
       reminderMessage: habitAllData[0][8],
       targetType: habitAllData[0][9],
       category: habitAllData[0][10],
-      quantity: habitAllData[0][11],
+      reminderTimes: stringListToTimeOfDayList(habitAllData[0][11]),
       streak: habitAllData[0][12],
     );
 
     return habit;
   }
 
-  Future<void> logActivity(String habitID, int? quantity) async {
+  Future<void> logActivity(String habitID) async {
     List<List<dynamic>> habits =
         await _habitRepo.selectHabitByID(_currentUserId, habitID);
 
     if (habits.length == 1) {
-      _habitRepo.createActivity(_currentUserId, habitID, quantity);
+      _habitRepo.createActivity(_currentUserId, habitID);
     } else {
       duplicateHabitIDs(habits);
       debugPrint(
@@ -354,7 +356,7 @@ class HabitController extends ChangeNotifier {
         reminderMessage: row[8],
         targetType: row[9],
         category: row[10],
-        quantity: row[11],
+        reminderTimes: stringListToTimeOfDayList(row[11]),
         streak: row[12],
       );
       habits.add(h);
@@ -418,7 +420,6 @@ class HabitController extends ChangeNotifier {
         userId: row[1].toString(),
         habitId: row[2].toString(),
         timestamp: row[3],
-        quantity: row[4],
       );
       activities.add(a);
     }
@@ -462,9 +463,35 @@ class HabitController extends ChangeNotifier {
         'reminder_message': habits[i][8],
         'target_type': habits[i][9],
         'category': habits[i][10],
-        'quantity': habits[i][11],
+        'reminder_times': habits[i][11],
       };
       debugPrint('${result.toString()} \n');
     }
   }
+}
+
+List<TimeOfDay>? stringListToTimeOfDayList(List<String>? sTime) {
+  if (sTime == null) {
+    return [];
+  }
+  List<TimeOfDay>? times = [];
+  for (var t in sTime) {
+    TimeOfDay time = TimeOfDay(
+      hour: int.parse(t.split(":")[0]),
+      minute: int.parse(t.split(":")[1]),
+    );
+    times.add(time);
+  }
+  return times;
+}
+
+List<String>? timeOfDayListToStringList(List<TimeOfDay>? times) {
+  if (times == []) {
+    return [];
+  }
+  List<String>? strings = [];
+  for (var t in times!) {
+    strings.add(t.toString().substring(10, 15));
+  }
+  return strings;
 }
