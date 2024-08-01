@@ -31,6 +31,10 @@ class _HabitCheckboxState extends State<HabitCheckbox> {
     _habitController = context.watch<HabitController>();
     checkActivities().then((value) {
       loading = false;
+
+      if (!mounted) {
+        return;
+      }
       setState(() {});
     });
   }

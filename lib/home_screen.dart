@@ -36,12 +36,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> initialize() async {
     loading = true;
-    setState(() {});
 
     final controller = context.read<HabitController>();
     await controller.load();
 
     loading = false;
+    if (!mounted) {
+      return;
+    }
     setState(() {});
   }
 
