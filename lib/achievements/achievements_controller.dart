@@ -47,7 +47,7 @@ class AchievementsController extends ChangeNotifier {
     debugPrint('First Habit Achievement Exists: $firstHabitAchievement');
     if (hasAHabit && !firstHabitAchievement) {
       debugPrint('Creating "First Habit!" Achievement');
-      await setAchievement(habits.first.habitId, 'First Habit!', 1);
+      await setAchievement(habits.first.habitId, 'First Habit!', null);
     }
 
     //Check for
