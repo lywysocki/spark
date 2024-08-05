@@ -50,7 +50,35 @@ class AchievementsController extends ChangeNotifier {
       await setAchievement(habits.first.habitId, 'First Habit!', null);
     }
 
-    //Check for
+    //Check for Streak-based Achievements
+    for (final habit in habits) {
+      final currentStreak = habit.streak ?? 0;
+
+      final streakMilestones = {
+        7: '1-Week Streak!',
+        30: '1-Month Streak!',
+        180: '6-Month Streak!',
+        365: 'Year Long Streak!',
+      };
+
+      for (final milestone in streakMilestones.keys) {
+        if (currentStreak == milestone) {
+          final achievementTitle = streakMilestones[milestone]!;
+          final alreadyAchieved = (await getAchievements()).any(
+            (achievement) =>
+                achievement.achievementTitle == achievementTitle &&
+                achievement.habitId == habit.habitId,
+          );
+
+          if (!alreadyAchieved) {
+            await setAchievement(habit.habitId, achievementTitle, 1);
+          } else {
+            // TODO: Need to add in ability to update streak # for achievements
+            break;
+          }
+        }
+      }
+    }
 
     await load();
   }
