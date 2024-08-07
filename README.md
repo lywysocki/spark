@@ -58,12 +58,10 @@ Required:
    - Go to the [Releases](https://github.com/lywysocki/spark/releases) page.
    - Download the latest file named as "vx.x.x.zip"
 
-2. **Unzip the downloaded file:**
-   - Unzip the file.
-   - Inside the unzipped folder, find the file named "vx.x.x.exe"
+2. **Unzip the downloaded file**
 
 3. **Run the App:**
-   - Double click the "vx.x.x.exe" file.
+   - Inside the unzipped folder, double click the file named "vx.x.x.exe"
    - Log in or create an account and start tracking your habits!
   
 #### Android
