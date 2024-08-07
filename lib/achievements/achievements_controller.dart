@@ -7,11 +7,7 @@ import 'package:spark/habits/habit_controller.dart';
 //achievements:    achievement_id, user_id, habit_id, achievement_title, timestamp, quantity
 class AchievementsController extends ChangeNotifier {
   AchievementsController({required HabitController habitController})
-      : _habitController = habitController {
-    if (_currentUserId.isNotEmpty) {
-      load();
-    }
-  }
+      : _habitController = habitController;
 
   final HabitController _habitController;
   String _currentUserId = '';
@@ -37,18 +33,6 @@ class AchievementsController extends ChangeNotifier {
   Future<void> checkForAchievements() async {
     final habits = _habitController.allHabits;
     debugPrint("Habits: ${habits.map((e) => e.title)}");
-
-    //Check for 'First Habit' achievement
-    final firstHabitAchievement = _achievements.any(
-      (achievement) => achievement.achievementTitle == 'First Habit!',
-    );
-    final hasAHabit = habits.isNotEmpty;
-    debugPrint('Has Habits: $hasAHabit');
-    debugPrint('First Habit Achievement Exists: $firstHabitAchievement');
-    if (hasAHabit && !firstHabitAchievement) {
-      debugPrint('Creating "First Habit!" Achievement');
-      await setAchievement(habits.first.habitId, 'First Habit!', null);
-    }
 
     //Check for Streak-based Achievements
     for (final habit in habits) {
@@ -104,7 +88,7 @@ class AchievementsController extends ChangeNotifier {
     final userAchievements =
         await _achievementsRepo.selectAchievements(userId ?? _currentUserId);
 
-    List<Achievement> mappedAchievements = userAchievements
+    final List<Achievement> mappedAchievements = userAchievements
         .map(
           (item) => Achievement(
             achievementId: item[0].toString(),

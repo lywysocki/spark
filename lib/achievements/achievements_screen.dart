@@ -38,17 +38,18 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
 
     achievementController = context.read<AchievementsController>();
 
-    if (widget.userId == null) {
-      checkAchievements();
-    }
     achievements.clear();
     getAchievements();
   }
 
   Future<void> getAchievements() async {
     loading = true;
-    await achievementController.load(userId: widget.userId);
-
+    if (widget.userId != null) {
+      await achievementController.load(userId: widget.userId);
+    }
+    if (widget.userId == null) {
+      await achievementController.checkForAchievements();
+    }
     achievements = achievementController.achievements;
 
     final tempNames = [];
@@ -67,15 +68,6 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
 
     achievements.clear();
     achievements.addAll(singleAchievements);
-
-    loading = false;
-    setState(() {});
-  }
-
-  Future<void> checkAchievements() async {
-    loading = true;
-
-    await achievementController.checkForAchievements();
 
     loading = false;
     setState(() {});
