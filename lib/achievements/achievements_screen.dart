@@ -19,11 +19,11 @@ class AchievementsScreen extends StatefulWidget {
 class _AchievementsScreenState extends State<AchievementsScreen> {
   String currentSearch = '';
   List<Achievement> achievements = [];
-  bool loading = false;
+  bool loading = true;
   late AchievementsController achievementController;
 
   String getMedalLevel(int? timesEarned) {
-    if (timesEarned == null || timesEarned >= 10) {
+    if (timesEarned == null || timesEarned >= 15) {
       return 'gold';
     } else if (timesEarned >= 5) {
       return 'silver';
@@ -38,19 +38,19 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
 
     achievementController = context.read<AchievementsController>();
 
-    checkAchievements();
-
     achievements.clear();
     getAchievements();
   }
 
   Future<void> getAchievements() async {
     loading = true;
-    await achievementController.load();
-
-    achievements = widget.userId != null
-        ? await achievementController.getAchievements(userId: widget.userId)
-        : achievementController.achievements;
+    if (widget.userId != null) {
+      await achievementController.load(userId: widget.userId);
+    }
+    if (widget.userId == null) {
+      await achievementController.checkForAchievements();
+    }
+    achievements = achievementController.achievements;
 
     final tempNames = [];
     final List<Achievement> singleAchievements = [];
@@ -68,15 +68,6 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
 
     achievements.clear();
     achievements.addAll(singleAchievements);
-
-    loading = false;
-    setState(() {});
-  }
-
-  Future<void> checkAchievements() async {
-    loading = true;
-
-    await achievementController.checkForAchievements();
 
     loading = false;
     setState(() {});

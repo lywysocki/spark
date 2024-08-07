@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:spark/achievements/achievements_controller.dart';
 import 'package:spark/common/common_dropdown.dart';
 import 'package:spark/common/common_duration.dart';
 import 'package:spark/common/common_habit_header.dart';
@@ -108,8 +109,11 @@ class _NewHabitFormState extends State<NewHabitForm> {
   }
 
   Future<void> _submitForm() async {
+    final controller = context.read<AchievementsController>();
+
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
+
       await _habitController.createNewHabit(
         _title,
         _notes,
@@ -122,6 +126,11 @@ class _NewHabitFormState extends State<NewHabitForm> {
         _category,
         _reminderTimes,
       );
+
+      if (_habitController.allHabits.length == 1) {
+        await controller.setAchievement(
+            _habitController.allHabits.first.habitId, 'First Habit!', null);
+      }
     }
   }
 
