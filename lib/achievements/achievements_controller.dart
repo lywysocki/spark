@@ -72,9 +72,6 @@ class AchievementsController extends ChangeNotifier {
 
           if (!alreadyAchieved) {
             await setAchievement(habit.habitId, achievementTitle, 1);
-          } else {
-            // TODO: Need to add in ability to update streak # for achievements
-            break;
           }
         }
       }
