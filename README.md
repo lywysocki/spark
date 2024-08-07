@@ -53,6 +53,20 @@ Required:
 
 ### Version Release
 
+#### Windows
+1. **Download the latest version zip file:**
+   - Go to the [Releases](https://github.com/lywysocki/spark/releases) page.
+   - Download the latest file named as "vx.x.x.zip"
+
+2. **Unzip the downloaded file:**
+   - Unzip the file.
+   - Inside the unzipped folder, find the file named "vx.x.x.exe"
+
+3. **Run the App:**
+   - Double click the "vx.x.x.exe" file.
+   - Log in or create an account and start tracking your habits!
+  
+#### Android
 1. **Download the release APK:**
    - Go to the [Releases](https://github.com/lywysocki/spark/releases) page.
    - Download the latest APK file.
