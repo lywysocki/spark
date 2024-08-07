@@ -20,6 +20,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
   String currentSearch = '';
   List<Achievement> achievements = [];
   bool loading = false;
+  late AchievementsController achievementController;
 
   String getMedalLevel(int? timesEarned) {
     if (timesEarned == null || timesEarned >= 10) {
@@ -32,8 +33,12 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
   }
 
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    achievementController = context.read<AchievementsController>();
+
+    checkAchievements();
 
     achievements.clear();
     getAchievements();
@@ -41,8 +46,8 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
 
   Future<void> getAchievements() async {
     loading = true;
-    final achievementController = context.read<AchievementsController>();
     await achievementController.load();
+
     achievements = widget.userId != null
         ? await achievementController.getAchievements(userId: widget.userId)
         : achievementController.achievements;
@@ -63,6 +68,15 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
 
     achievements.clear();
     achievements.addAll(singleAchievements);
+
+    loading = false;
+    setState(() {});
+  }
+
+  Future<void> checkAchievements() async {
+    loading = true;
+
+    await achievementController.checkForAchievements();
 
     loading = false;
     setState(() {});

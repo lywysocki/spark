@@ -2,14 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:spark/achievements/achievements_repository.dart';
 
 import 'package:spark/achievements/achievement.dart';
+import 'package:spark/habits/habit_controller.dart';
 
 //achievements:    achievement_id, user_id, habit_id, achievement_title, timestamp, quantity
 class AchievementsController extends ChangeNotifier {
-  AchievementsController() {
+  AchievementsController({required HabitController habitController})
+      : _habitController = habitController {
     if (_currentUserId.isNotEmpty) {
       load();
     }
   }
+
+  final HabitController _habitController;
   String _currentUserId = '';
 
   final AchievementsRepository _achievementsRepo = AchievementsRepository();
@@ -26,6 +30,53 @@ class AchievementsController extends ChangeNotifier {
 
   Future<void> updateUser(String newUserId) async {
     _currentUserId = newUserId;
+    await load();
+  }
+
+  Future<void> checkForAchievements() async {
+    final achievements = await getAchievements();
+    final habits = _habitController.allHabits;
+    debugPrint("Habits: $habits");
+
+    //Check for 'First Habit' achievement
+    final firstHabitAchievement = achievements.any(
+      (achievement) => achievement.achievementTitle == 'First Habit!',
+    );
+    final hasAHabit = habits.isNotEmpty;
+    debugPrint('Has Habits: $hasAHabit');
+    debugPrint('First Habit Achievement Exists: $firstHabitAchievement');
+    if (hasAHabit && !firstHabitAchievement) {
+      debugPrint('Creating "First Habit!" Achievement');
+      await setAchievement(habits.first.habitId, 'First Habit!', null);
+    }
+
+    //Check for Streak-based Achievements
+    for (final habit in habits) {
+      final currentStreak = habit.streak ?? 0;
+
+      final streakMilestones = {
+        7: '1-Week Streak!',
+        30: '1-Month Streak!',
+        180: '6-Month Streak!',
+        365: 'Year Long Streak!',
+      };
+
+      for (final milestone in streakMilestones.keys) {
+        if (currentStreak == milestone) {
+          final achievementTitle = streakMilestones[milestone]!;
+          final alreadyAchieved = (await getAchievements()).any(
+            (achievement) =>
+                achievement.achievementTitle == achievementTitle &&
+                achievement.habitId == habit.habitId,
+          );
+
+          if (!alreadyAchieved) {
+            await setAchievement(habit.habitId, achievementTitle, 1);
+          }
+        }
+      }
+    }
+
     await load();
   }
 
@@ -59,7 +110,7 @@ class AchievementsController extends ChangeNotifier {
             achievementId: item[0].toString(),
             userId: item[1].toString(),
             habitId: item[2].toString(),
-            achievementTitle: item[3],
+            achievementTitle: item[3].toString(),
             time: item[4],
             quantity: item[5],
           ),

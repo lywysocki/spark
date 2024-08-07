@@ -21,7 +21,9 @@ class Dependencies extends StatelessWidget {
           create: (context) => HabitController(),
         ),
         ChangeNotifierProvider(
-          create: (context) => AchievementsController(),
+          create: (context) => AchievementsController(
+            habitController: context.read(),
+          ),
         ),
         ChangeNotifierProvider(
           create: (context) => FriendshipController(),

@@ -42,6 +42,9 @@ class _HomeScreenState extends State<HomeScreen> {
     await controller.load();
 
     loading = false;
+    if (!mounted) {
+      return;
+    }
     setState(() {});
   }
 

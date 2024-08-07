@@ -25,12 +25,12 @@ class AchievementsRepository extends ChangeNotifier {
       DateTime now = DateTime.now(); //system date and timestamp
       await databaseConnection.execute(
         Sql.named(
-            '''INSERT INTO achievements (user_id, habit_id, achievement_type, achievement_description, timestamp, quantity)
+            '''INSERT INTO achievements (user_id, habit_id, achievement_title, timestamp, quantity)
         VALUES (@user_id, @habit_id, @achievement_title, @timestamp, @quantity)'''),
         parameters: {
           'user_id': userID,
           'habit_id': habitID,
-          'achievement_type': achievementTitle,
+          'achievement_title': achievementTitle,
           'timestamp': DateFormat('yyyy-MM-dd hh:mm:ss').format(now),
           'quantity': quantity,
         },

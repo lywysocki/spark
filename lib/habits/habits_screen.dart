@@ -28,7 +28,7 @@ class _HabitsScreenState extends State<HabitsScreen> {
   bool loading = true;
 
   @override
-  void didChangeDependencies() async {
+  void didChangeDependencies() {
     super.didChangeDependencies();
 
     loading = true;
