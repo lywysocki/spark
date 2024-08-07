@@ -22,9 +22,10 @@ class AchievementsController extends ChangeNotifier {
 
   List<Achievement> get achievements => _achievements;
 
-  Future<void> load() async {
+  Future<void> load({String? userId}) async {
     _achievements.clear();
-    _achievements.addAll(await getAchievements());
+    final getUserAchievements = await getAchievements(userId: userId);
+    _achievements.addAll(getUserAchievements);
     if (hasListeners) notifyListeners();
   }
 
@@ -34,12 +35,11 @@ class AchievementsController extends ChangeNotifier {
   }
 
   Future<void> checkForAchievements() async {
-    final achievements = await getAchievements();
     final habits = _habitController.allHabits;
-    debugPrint("Habits: $habits");
+    debugPrint("Habits: ${habits.map((e) => e.title)}");
 
     //Check for 'First Habit' achievement
-    final firstHabitAchievement = achievements.any(
+    final firstHabitAchievement = _achievements.any(
       (achievement) => achievement.achievementTitle == 'First Habit!',
     );
     final hasAHabit = habits.isNotEmpty;
@@ -64,7 +64,7 @@ class AchievementsController extends ChangeNotifier {
       for (final milestone in streakMilestones.keys) {
         if (currentStreak == milestone) {
           final achievementTitle = streakMilestones[milestone]!;
-          final alreadyAchieved = (await getAchievements()).any(
+          final alreadyAchieved = (_achievements).any(
             (achievement) =>
                 achievement.achievementTitle == achievementTitle &&
                 achievement.habitId == habit.habitId,
