@@ -43,7 +43,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   Future<void> getSharedHabits() async {
     final habitController = context.read<HabitController>();
     final controller = context.read<UserController>();
-
+    sharedHabits.clear();
     sharedHabits.addAll(
       await habitController.getSharedHabits(
         userId: controller.currentUserId!,
